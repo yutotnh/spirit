@@ -1,0 +1,12 @@
+BasedOnStyle: Google
+IndentWidth: 4
+AccessModifierOffset: -4
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+BreakBeforeBraces: WebKit
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+ColumnLimit: 120
+ReflowComments: false
+Standard: c++14
