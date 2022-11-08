@@ -1,0 +1,46 @@
+name: Build spirit
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build-cli-v1:
+    container:
+      image: ghcr.io/armmbed/mbed-os-env:master-latest
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target: [NUCLEO_F303K8, LPC1768]
+        profile: [release, debug, develop]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: build-mbed-cli
+        run: |
+          set -e
+          mbed new .
+          mbed deploy
+          echo "int main(){}">source/main.cpp
+          mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }} --source mbed-os --source source --source include
+  build-cli-v2:
+    container:
+      image: ghcr.io/armmbed/mbed-os-env:master-latest
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target: [NUCLEO_F303K8, LPC1768]
+        profile: [release, debug, develop]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: build-mbed-tools
+        run: |
+          set -e
+          mbed-tools new .
+          mbed-tools deploy
+          mbed-tools compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
