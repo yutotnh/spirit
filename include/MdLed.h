@@ -9,7 +9,7 @@ namespace spirit {
 /**
  * @brief モーターの状態をLEDに表示するクラス
  * @details
- * モーターの駆動状態をそのまま表示するNormalモードの加え、Errorの値を表示するErrorモードなどがある
+ * モーターの駆動状態をそのまま表示するNormalモードに加え、Errorの値を表示するErrorモードなどがある
  */
 class MdLed {
 public:
