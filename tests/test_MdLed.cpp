@@ -28,9 +28,10 @@ private:
  */
 TEST(MdLed, InitValueTest)
 {
-    MdLed    mdled(bus);
+    testLeds leds;
+    MdLed    mdled(leds);
     ASSERT_EQ(MdLed::Mode::Normal, mdled.mode());
-    ASSERT_EQ(State::Brake, mdled.state());
+    ASSERT_EQ(State::Free, mdled.state());
 }
 
 /**
