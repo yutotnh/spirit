@@ -1,0 +1,21 @@
+name: Testing With CMake and CTest
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build & Test
+      run: |
+        cmake -S . -B build
+        cmake --build build
+        cd build
+        ctest --output-on-failure --verbose
+
