@@ -31,7 +31,7 @@ TEST(MdLed, InitValueTest)
     testLeds leds;
     MdLed    mdled(leds);
     ASSERT_EQ(MdLed::Mode::Normal, mdled.mode());
-    ASSERT_EQ(State::Free, mdled.state());
+    ASSERT_EQ(State::Brake, mdled.state());
 }
 
 /**
