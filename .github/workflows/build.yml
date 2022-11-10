@@ -15,7 +15,7 @@ jobs:
         profile: [release, debug, develop]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: build-mbed-cli
         run: |
@@ -36,7 +36,7 @@ jobs:
         profile: [release, debug, develop]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: build-mbed-tools
         run: |
