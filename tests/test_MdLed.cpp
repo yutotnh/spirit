@@ -24,7 +24,7 @@ private:
 /**
  * @brief 初期表示のLEDが以下になることの確認
  * - Mode = Normal
- * - State = Free
+ * - State = Brake
  */
 TEST(MdLed, InitValueTest)
 {
