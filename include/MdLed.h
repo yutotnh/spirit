@@ -87,7 +87,9 @@ public:
 
     /**
      * @brief 時間を1単位進める
-     * @details Errorモードなど、時間経過によってLEDの数値が変えるので、
+     * @details Errorモードなどの場合、時間経過によってLEDの数値を変化させる
+     *
+     * 例えばblinking_rate(2)の時は、coordinate()を2回呼ぶごとにLEDの数値が変わる
      */
     void coordinate();
 
