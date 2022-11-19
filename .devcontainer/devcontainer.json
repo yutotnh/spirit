@@ -6,6 +6,16 @@
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:1": {},
 		"ghcr.io/dhoeric/features/act:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-vscode.cmake-tools",
+				"twxs.cmake",
+				"EditorConfig.EditorConfig"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
