@@ -20,6 +20,7 @@ target_include_directories(spirit
 target_sources(spirit
     PUBLIC
     source/MdLed.cpp
+    source/A3921.cpp
 )
 
 enable_testing()

@@ -4,12 +4,11 @@
 namespace spirit {
 
 enum class State {
-    Begin = 0,
-    Free  = Begin,
+    Free  = 0,
+    Coast = Free,
     CW,   // Clock Wise
     CCW,  // Counter Clock Wise
     Brake,
-    End = Brake,
 };
 
 /** A Motor is abstract base class for moving the motor
