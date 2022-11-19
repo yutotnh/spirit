@@ -4,7 +4,7 @@
 namespace spirit {
 
 enum class State {
-    Free = 0,
+    Free  = 0,
     Coast = Free,
     CW,   // Clock Wise
     CCW,  // Counter Clock Wise
