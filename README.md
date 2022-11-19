@@ -9,6 +9,5 @@ Linuxでのみ可能。
 ```console
 cmake -S . -B build
 cmake --build build
-cd build
-ctest
+ctest --test-dir build
 ```
