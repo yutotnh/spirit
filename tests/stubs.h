@@ -19,7 +19,7 @@ public:
     }
 
 private:
-    uint32_t _value;
+    uint32_t _value{0};
 };
 
 class StubPwmOut : public interfacePwmOut {
@@ -40,8 +40,8 @@ public:
     }
 
 private:
-    float _value;
-    float _period;
+    float _value{0.00F};
+    float _period{0.00F};
 };
 
 }  // namespace spirit
