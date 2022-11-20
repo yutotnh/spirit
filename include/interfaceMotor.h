@@ -32,7 +32,6 @@ public:
 
     static constexpr State default_state        = State::Brake;
     static constexpr float default_pulse_period = 0.000'02F;  // 5.0kHz
-    static constexpr float default_frequency    = 1.0F / default_pulse_period;
     static constexpr float min_pulse_period     = 1.0F / 60'000.0F;
     static constexpr float max_pulse_period     = 1.0F / 10.0F;
 };
