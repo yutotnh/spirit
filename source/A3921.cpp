@@ -7,6 +7,9 @@ A3921::A3921(interfaceDigitalOut& sr, interfacePwmOut& pwmh, interfacePwmOut& pw
     : _sr(sr), _pwmh(pwmh), _pwml(pwml), _phase(phase), _reset(reset)
 {
     sleep(false);
+    _pwmh.period(interfaceMotor::default_pulse_period);
+    _pwml.period(interfaceMotor::default_pulse_period);
+    _phase.period(interfaceMotor::default_pulse_period);
     run();
 }
 
@@ -162,6 +165,7 @@ void A3921::pulse_period(const float seconds)
     if ((interfaceMotor::min_pulse_period <= seconds) && (seconds <= interfaceMotor::max_pulse_period)) {
         _pwmh.period(seconds);
         _pwml.period(seconds);
+        _phase.period(seconds);
     }
 }
 

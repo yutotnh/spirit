@@ -39,6 +39,11 @@ public:
         _period = seconds;
     }
 
+    float read_period()
+    {
+        return _period;
+    }
+
 private:
     float _value{0.00F};
     float _period{0.00F};
