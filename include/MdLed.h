@@ -1,7 +1,7 @@
 #ifndef SPIRIT_MD_LED_H
 #define SPIRIT_MD_LED_H
 
-#include "interfaceLeds.h"
+#include "interfaceDigitalOut.h"
 #include "interfaceMotor.h"
 
 namespace spirit {
@@ -18,24 +18,20 @@ public:
      * @brief LEDに設定する値のソースを何にするかの値
      */
     enum class Mode {
-        //! このクラスの範囲を取得するためのメンバ
-        Begin = 0,
         //! Stateの値をそのままLEDに設定する
-        Normal = Begin,
+        Normal,
         //! LED 2つ交互に点滅   0b01 -> 0b10 -> 0b01
         Alternate,
         //! LED 2つが同じ点滅 0b11 -> 0b00 -> 0b11
         Concurrent,
         //! エラー
         Error,
-        //! このクラスの範囲を取得するためのメンバ
-        End = Error,
     };
 
     /**
      * @brief コンストラクタ
      */
-    MdLed(interfaceLeds &leds);
+    MdLed(interfaceDigitalOut &led0, interfaceDigitalOut &led1);
 
     /**
      * @brief Normalモード時のLEDの点灯を設定する
@@ -45,34 +41,10 @@ public:
     void state(const State type);
 
     /**
-     * @brief LEDに設定中の値を返す
-     * @return 設定中の値
-     */
-    State state() const;
-
-    /**
-     * @brief LEDの点滅を設定する
-     * @param type 2つのLEDを2bitに置き換えた場合の値
-     */
-    void write(const uint32_t type);
-
-    /**
-     * @brief LEDの点滅状態を返す
-     * @return LEDの点滅状態
-     */
-    uint32_t read() const;
-
-    /**
      * @brief LEDのモードを設定する
      * @param type 設定したいLEDのモード
      */
     void mode(const Mode type);
-
-    /**
-     * @brief LEDのモードを返す
-     * @return LEDのモード
-     */
-    Mode mode() const;
 
     /**
      * @brief LEDをError状態にする
@@ -100,23 +72,36 @@ public:
     void blinking_rate(const uint32_t unit);
 
     MdLed &operator=(const State type);
-           operator State() const;
     MdLed &operator=(const Mode type);
-           operator Mode() const;
     MdLed &operator=(const uint32_t value);
-           operator uint32_t() const;
 
 private:
-    interfaceLeds &_leds;
-    State          _state;
-    Mode           _mode;
-    // Mutex  _mutex;
-    uint32_t _interval;
-    uint32_t _counter;
-    uint32_t _error;
+    //! LEDの下位ビット
+    interfaceDigitalOut &_led0;
+    //! LEDの上位ビット
+    interfaceDigitalOut &_led1;
 
-    uint32_t _error_section;
-    uint32_t _error_bit_width;
+    State _state{interfaceMotor::default_state};
+    Mode  _mode{default_mode};
+    // Mutex  _mutex;
+    uint32_t _interval{default_interval};
+    uint32_t _counter{0};
+    uint32_t _error{0};
+
+    uint32_t _error_section{0};
+    uint32_t _error_bit_width{0};
+
+    /**
+     * @brief LEDの点滅を設定する
+     * @param type 2つのLEDを2bitに置き換えた場合の値
+     */
+    void write(uint32_t type);
+
+    /**
+     * @brief LEDの点滅状態を返す
+     * @return LEDの点滅状態
+     */
+    uint32_t read() const;
 
     // 交互に点滅
     void alternately_blink();

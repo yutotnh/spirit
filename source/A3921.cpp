@@ -4,14 +4,7 @@ namespace spirit {
 
 A3921::A3921(interfaceDigitalOut& sr, interfacePwmOut& pwmh, interfacePwmOut& pwml, interfacePwmOut& phase,
              interfaceDigitalOut& reset)
-    : _sr(sr),
-      _pwmh(pwmh),
-      _pwml(pwml),
-      _phase(phase),
-      _reset(reset),
-      _duty_cycle(0.00F),
-      _state(interfaceMotor::default_state),
-      _decay(default_decay)
+    : _sr(sr), _pwmh(pwmh), _pwml(pwml), _phase(phase), _reset(reset)
 {
     sleep(false);
     run();
@@ -164,7 +157,7 @@ void A3921::run_fast_decay()
     }
 }
 
-void A3921::pulse_period(float seconds)
+void A3921::pulse_period(const float seconds)
 {
     if ((interfaceMotor::min_pulse_period <= seconds) && (seconds <= interfaceMotor::max_pulse_period)) {
         _pwmh.period(seconds);

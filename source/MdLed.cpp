@@ -2,18 +2,14 @@
 
 #include <chrono>
 #include <climits>
+#include <cstdio>
 
 namespace spirit {
 
-MdLed::MdLed(interfaceLeds &leds)
-    : _leds(leds),
-      _state(interfaceMotor::default_state),
-      _mode(default_mode),
-      _interval(default_interval),
-      _counter(0),
-      _error(0),
-      _error_section(0)
+MdLed::MdLed(interfaceDigitalOut &led0, interfaceDigitalOut &led1) : _led0(led0), _led1(led1)
 {
+    mode(default_mode);
+    state(interfaceMotor::default_state);
 }
 
 void MdLed::state(const State type)
@@ -33,18 +29,14 @@ void MdLed::state(const State type)
 void MdLed::write(const uint32_t type)
 {
     lock();
-    _leds.write(type);
+    _led0.write(type & 1);
+    _led1.write((type & 2) >> 1);
     unlock();
-}
-
-State MdLed::state() const
-{
-    return _state;
 }
 
 uint32_t MdLed::read() const
 {
-    return _leds.read();
+    return (_led1.read() << 1) + _led0.read();
 }
 
 void MdLed::mode(const Mode mode)
@@ -53,8 +45,14 @@ void MdLed::mode(const Mode mode)
         return;
     }
 
-    if ((mode < Mode::Begin) && (Mode::End < mode)) {
-        return;
+    switch (mode) {
+        case Mode::Normal:
+        case Mode::Alternate:
+        case Mode::Concurrent:
+        case Mode::Error:
+            break;
+        default:
+            return;
     }
 
     lock();
@@ -74,11 +72,6 @@ void MdLed::mode(const Mode mode)
     }
 
     unlock();
-}
-
-MdLed::Mode MdLed::mode() const
-{
-    return _mode;
 }
 
 void MdLed::reset_error()
@@ -148,21 +141,6 @@ MdLed &MdLed::operator=(const uint32_t value)
     return *this;
 }
 
-MdLed::operator State() const
-{
-    return _state;
-}
-
-MdLed::operator Mode() const
-{
-    return _mode;
-}
-
-MdLed::operator uint32_t() const
-{
-    return read();
-}
-
 void MdLed::alternately_blink()
 {
     if (read() == 1) {
@@ -198,8 +176,7 @@ void MdLed::error_blink()
     if (_error_section == 0) {
         // _error のビット幅を計算する
         uint32_t type_bit_size = sizeof(_error) * CHAR_BIT;
-        // uint32_t type_bit_size = 32;
-        _error_bit_width = 1;
+        _error_bit_width       = 1;
         for (auto i = type_bit_size - 1; i > 0; i--) {
             if (((_error >> i) & 1) == 1) {
                 _error_bit_width = i + 1;
