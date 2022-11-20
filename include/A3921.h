@@ -45,7 +45,7 @@ public:
      *      - true : スリープモードを有効にする
      *      - false: スリープモードを解除する
      */
-    void sleep(const bool enabled);
+    void sleep(bool enabled);
 
     /**
      * @brief A3921 のリセット機能を実行する
@@ -60,21 +60,21 @@ public:
      * 設定したいデューティー比
      * - 範囲: 0.00f <= value <= 1.00F
      */
-    void duty_cycle(const float value);
+    void duty_cycle(float value);
 
     /**
      * @brief 回転方向を設定する
      * @remark run() が実行されるまで、 state() で設定した値はモーターに対して影響しない
      * @param type State::Coast, State::CW, State::CCW, State::Brake のいずれか
      */
-    void state(const State type);
+    void state(State type);
 
     /**
      * @brief Decayを設定する
      * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
      * @param type Decay::Slow, Decay::Fast のいずれか
      */
-    void decay(const Decay type);
+    void decay(Decay type);
 
     /**
      * @brief モーターを設定したデューティー比と回転方向で動かす
@@ -88,7 +88,7 @@ public:
      * 設定したいパルス周期(s)
      * - 範囲: 0.1s <= seconds <= 1.6666e-5s
      */
-    void pulse_period(const float seconds);
+    void pulse_period(float seconds);
 
 private:
     interfaceDigitalOut& _sr;
@@ -97,9 +97,9 @@ private:
     interfacePwmOut&     _phase;
     interfaceDigitalOut& _reset;
 
-    float _duty_cycle;
-    State _state;
-    Decay _decay;
+    float _duty_cycle{0.00F};
+    State _state{interfaceMotor::default_state};
+    Decay _decay{default_decay};
 
     /**
      * @brief Slow decayとしてモータを動かす
