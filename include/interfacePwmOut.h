@@ -7,11 +7,11 @@ namespace spirit {
 
 class interfacePwmOut {
 public:
-    virtual void write(const float value) = 0;
+    virtual void write(float value) = 0;
 
     virtual float read() const = 0;
 
-    virtual void period(const float seconds) = 0;
+    virtual void period(float seconds) = 0;
 };
 
 }  // namespace spirit

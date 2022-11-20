@@ -3,46 +3,9 @@
 #include <cmath>
 
 #include "A3921.h"
+#include "tests/stubs.h"
 
 using namespace spirit;
-
-class testDigitalOut : public interfaceDigitalOut {
-public:
-    void write(const uint32_t value) override
-    {
-        _value = value;
-    }
-
-    uint32_t read() const override
-    {
-        return _value;
-    }
-
-private:
-    uint32_t _value;
-};
-
-class testPwmOut : public interfacePwmOut {
-public:
-    void write(const float value) override
-    {
-        _value = value;
-    }
-
-    float read() const override
-    {
-        return _value;
-    }
-
-    void period(const float seconds) override
-    {
-        _period = seconds;
-    }
-
-private:
-    float _value;
-    float _period;
-};
 
 /**
  * @brief A3921 が Brake 状態であるかを返す
@@ -51,7 +14,7 @@ private:
  * @retval true Brake 状態
  * @retval false 非 Brake 状態
  */
-bool isBrake(testPwmOut& pwmh, testPwmOut& pwml)
+bool isBrake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
 {
     if (((fabsf(pwmh.read() - 1.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) ||
         ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 1.00F) < FLT_EPSILON))) {
@@ -68,7 +31,7 @@ bool isBrake(testPwmOut& pwmh, testPwmOut& pwml)
  * @retval true Coast 状態
  * @retval false 非 Coast 状態
  */
-bool isCoast(testPwmOut& pwmh, testPwmOut& pwml)
+bool isCoast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
 {
     if ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) {
         return true;
@@ -84,11 +47,11 @@ bool isCoast(testPwmOut& pwmh, testPwmOut& pwml)
  */
 TEST(A3921, InitValueTest)
 {
-    testDigitalOut sr;
-    testPwmOut     pwmh;
-    testPwmOut     pwml;
-    testPwmOut     phase;
-    testDigitalOut reset;
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     EXPECT_EQ(reset.read(), 1);
@@ -102,11 +65,11 @@ TEST(A3921, InitValueTest)
  */
 TEST(A3921, SleepTest)
 {
-    testDigitalOut sr;
-    testPwmOut     pwmh;
-    testPwmOut     pwml;
-    testPwmOut     phase;
-    testDigitalOut reset;
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     a3921.sleep(true);
@@ -121,11 +84,11 @@ TEST(A3921, SleepTest)
  */
 TEST(A3921, ResetTest)
 {
-    testDigitalOut sr;
-    testPwmOut     pwmh;
-    testPwmOut     pwml;
-    testPwmOut     phase;
-    testDigitalOut reset;
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     GTEST_SKIP_("Not implemented because the Reset function is not yet supported.");
@@ -143,11 +106,11 @@ TEST(A3921, ResetTest)
  */
 TEST(A3921, SlowDecayTest)
 {
-    testDigitalOut sr;
-    testPwmOut     pwmh;
-    testPwmOut     pwml;
-    testPwmOut     phase;
-    testDigitalOut reset;
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     // 共通の設定
@@ -192,11 +155,11 @@ TEST(A3921, SlowDecayTest)
  */
 TEST(A3921, FastDecayTest)
 {
-    testDigitalOut sr;
-    testPwmOut     pwmh;
-    testPwmOut     pwml;
-    testPwmOut     phase;
-    testDigitalOut reset;
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     // 共通の設定
