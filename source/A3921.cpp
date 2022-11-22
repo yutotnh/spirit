@@ -31,9 +31,7 @@ void A3921::reset()
 
 void A3921::duty_cycle(const float value)
 {
-    if ((0.00F < value) && (value < 1.00F)) {
-        _duty_cycle = value;
-    }
+    _duty_cycle = value;
 }
 
 void A3921::state(const State type)
