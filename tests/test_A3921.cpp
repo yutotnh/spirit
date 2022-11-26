@@ -44,7 +44,7 @@ bool isCoast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
  * @brief 初期値のテスト
  * - sleep モード: OFF
  * - モーター: Brake
- * - パルス周期: interfaceMotor::default_pulse_period
+ * - パルス周期: InterfaceMotor::default_pulse_period
  */
 TEST(A3921, InitValueTest)
 {
@@ -56,9 +56,9 @@ TEST(A3921, InitValueTest)
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     EXPECT_EQ(reset.read(), 1);
-    EXPECT_FLOAT_EQ(pwmh.read_period(), interfaceMotor::default_pulse_period);
-    EXPECT_FLOAT_EQ(pwml.read_period(), interfaceMotor::default_pulse_period);
-    EXPECT_FLOAT_EQ(phase.read_period(), interfaceMotor::default_pulse_period);
+    EXPECT_FLOAT_EQ(pwmh.read_period(), InterfaceMotor::default_pulse_period);
+    EXPECT_FLOAT_EQ(pwml.read_period(), InterfaceMotor::default_pulse_period);
+    EXPECT_FLOAT_EQ(phase.read_period(), InterfaceMotor::default_pulse_period);
 
     EXPECT_TRUE(isBrake(pwmh, pwml));
 }
@@ -213,8 +213,8 @@ TEST(A3921, PulsePeriodTest)
     StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
-    // interfaceMotor::default_pulse_period と異なる値を設定するため、 0.005Fを加える
-    float pulse_period = interfaceMotor::default_pulse_period + 0.005F;
+    // InterfaceMotor::default_pulse_period と異なる値を設定するため、 0.005Fを加える
+    float pulse_period = InterfaceMotor::default_pulse_period + 0.005F;
     a3921.pulse_period(pulse_period);
 
     EXPECT_FLOAT_EQ(pwmh.read_period(), pulse_period);

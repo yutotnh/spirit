@@ -1,12 +1,12 @@
 #ifndef SPIRIT_STUB_H
 #define SPIRIT_STUB_H
 
-#include "interfaceDigitalOut.h"
-#include "interfacePwmOut.h"
+#include "InterfaceDigitalOut.h"
+#include "InterfacePwmOut.h"
 
 namespace spirit {
 
-class StubDigitalOut : public interfaceDigitalOut {
+class StubDigitalOut : public InterfaceDigitalOut {
 public:
     void write(const uint32_t value) override
     {
@@ -22,7 +22,7 @@ private:
     uint32_t _value{0};
 };
 
-class StubPwmOut : public interfacePwmOut {
+class StubPwmOut : public InterfacePwmOut {
 public:
     void write(const float value) override
     {

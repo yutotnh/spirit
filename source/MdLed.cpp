@@ -4,10 +4,10 @@
 
 namespace spirit {
 
-MdLed::MdLed(interfaceDigitalOut &led0, interfaceDigitalOut &led1) : _led0(led0), _led1(led1)
+MdLed::MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1) : _led0(led0), _led1(led1)
 {
     mode(default_mode);
-    state(interfaceMotor::default_state);
+    state(InterfaceMotor::default_state);
 }
 
 void MdLed::state(const State type)

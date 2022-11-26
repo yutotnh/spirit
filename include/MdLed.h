@@ -1,8 +1,8 @@
 #ifndef SPIRIT_MD_LED_H
 #define SPIRIT_MD_LED_H
 
-#include "interfaceDigitalOut.h"
-#include "interfaceMotor.h"
+#include "InterfaceDigitalOut.h"
+#include "InterfaceMotor.h"
 
 namespace spirit {
 
@@ -31,7 +31,7 @@ public:
     /**
      * @brief コンストラクタ
      */
-    MdLed(interfaceDigitalOut &led0, interfaceDigitalOut &led1);
+    MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1);
 
     /**
      * @brief Normalモード時のLEDの点灯を設定する
@@ -77,11 +77,11 @@ public:
 
 private:
     //! LEDの下位ビット
-    interfaceDigitalOut &_led0;
+    InterfaceDigitalOut &_led0;
     //! LEDの上位ビット
-    interfaceDigitalOut &_led1;
+    InterfaceDigitalOut &_led1;
 
-    State _state{interfaceMotor::default_state};
+    State _state{InterfaceMotor::default_state};
     Mode  _mode{default_mode};
     // Mutex  _mutex;
     uint32_t _interval{default_interval};
