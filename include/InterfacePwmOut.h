@@ -26,7 +26,6 @@ public:
      */
     virtual float read() const = 0;
 
-
     /**
      * @brief PWM周期を秒単位で設定する
      * @param seconds PWM周期(s)
