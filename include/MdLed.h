@@ -18,13 +18,13 @@ public:
      * @brief LEDに設定する値のソースを何にするかの値
      */
     enum class Mode {
-        //! Stateの値をそのままLEDに設定する
+        /// Stateの値をそのままLEDに設定する
         Normal,
-        //! LED 2つ交互に点滅   0b01 -> 0b10 -> 0b01
+        /// LED 2つ交互に点滅   0b01 -> 0b10 -> 0b01
         Alternate,
-        //! LED 2つが同じ点滅 0b11 -> 0b00 -> 0b11
+        /// LED 2つが同じ点滅 0b11 -> 0b00 -> 0b11
         Concurrent,
-        //! エラー
+        /// エラー
         Error,
     };
 
@@ -38,19 +38,29 @@ public:
      * @param type 設定したい値
      * @details Error中は設定値が反映されない
      */
-    void state(const State type);
+    void state(State type);
 
     /**
      * @brief LEDのモードを設定する
      * @param type 設定したいLEDのモード
      */
-    void mode(const Mode type);
+    void mode(Mode type);
 
     /**
      * @brief LEDをError状態にする
      * @param status Error番号
+     * @details error code = 6(0b110) の場合の点滅の仕方
+     *          1. 11 ... エラー番号の出力開始
+     *          2. 01 ... 最下位ビットが0 -> 01
+     *          3. 00 ... LEDを全てOFF
+     *          4. 10 ... 下から2つ目のビットが1 -> 10
+     *          5. 00 ... LEDを全てOFF
+     *          6. 10 ... 最上位ビットが1 -> 10
+     *          1. 11 ... エラー番号の出力開始(再)
+     *          2. 01 ... 最下位ビットが0 -> 01
+     *          以降繰り返し
      */
-    void error(const uint32_t status);
+    void error(uint32_t status);
 
     /**
      * @brief LEDのErrorモードを解除する
@@ -69,16 +79,16 @@ public:
      * @brief 何単位進めるとErrorモードなどが次の状態になるかを設定する
      * @param unit 何単位で進めるかの値
      */
-    void blinking_rate(const uint32_t unit);
+    void blinking_rate(uint32_t unit);
 
-    MdLed &operator=(const State type);
-    MdLed &operator=(const Mode type);
-    MdLed &operator=(const uint32_t value);
+    MdLed &operator=(State type);
+    MdLed &operator=(Mode type);
+    MdLed &operator=(uint32_t value);
 
 private:
-    //! LEDの下位ビット
+    /// LEDの下位ビット
     InterfaceDigitalOut &_led0;
-    //! LEDの上位ビット
+    /// LEDの上位ビット
     InterfaceDigitalOut &_led1;
 
     State _state{InterfaceMotor::default_state};

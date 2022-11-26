@@ -30,13 +30,35 @@ uint32_t leds_value(const StubDigitalOut& led0, const StubDigitalOut& led1)
 uint32_t compare_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOut& led1, const uint32_t value,
                       uint32_t loop)
 {
-    for (auto i = 0; i < loop; i++) {
+    for (uint32_t i = 0; i < loop; i++) {
         if (value != leds_value(led0, led1)) {
             return false;
         }
         mdled.coordinate();
     }
     return true;
+}
+
+/**
+ * @brief State型からuint32_tに変換した値を返す
+ * @param state モーターの回転方向
+ * @return State型からuint32_tに変換した値
+ */
+uint32_t state2uint(State state)
+{
+    switch (state) {
+        case State::Coast:
+            return 0;
+        case State::CW:
+            return 1;
+        case State::CCW:
+            return 2;
+        case State::Brake:
+            return 3;
+        default:
+            // 未定義の値
+            return UINT32_MAX;
+    }
 }
 
 /**
@@ -53,7 +75,7 @@ TEST(MdLed, InitValueTest)
 
     // blinking_rate で設定した値より多くループさせる
     uint32_t loop = 5 * 5;
-    ASSERT_TRUE(compare_leds(mdled, led0, led1, static_cast<uint32_t>(State::Brake), loop));
+    ASSERT_TRUE(compare_leds(mdled, led0, led1, state2uint(State::Brake), loop));
 }
 
 /**
@@ -75,13 +97,13 @@ TEST(MdLed, SetGetValueTest)
     //  非operator
     for (State value : states) {
         mdled.state(value);
-        EXPECT_TRUE(compare_leds(mdled, led0, led1, static_cast<uint32_t>(value), rate * 5));
+        EXPECT_TRUE(compare_leds(mdled, led0, led1, state2uint(value), rate * 5));
     }
 
     //  operator
     for (State value : states) {
         mdled = value;
-        EXPECT_TRUE(compare_leds(mdled, led0, led1, static_cast<uint32_t>(value), rate * 5));
+        EXPECT_TRUE(compare_leds(mdled, led0, led1, state2uint(value), rate * 5));
     }
 }
 
@@ -99,7 +121,7 @@ uint32_t next_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOu
     // blinking_rate 期間中、値が変化していないことを確認する
     uint32_t value = leds_value(led0, led1);
 
-    for (auto i = 0; i < blinking_rate; i++) {
+    for (uint32_t i = 0; i < blinking_rate; i++) {
         EXPECT_EQ(leds_value(led0, led1), value);
         mdled.coordinate();
     }
@@ -109,6 +131,7 @@ uint32_t next_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOu
 
 /**
  * @brief Errorモードが意図した動作をしているかの確認
+ * @details ビット幅の異なるいくつかの値について確認する
  */
 TEST(MdLed, ErrorBlinkTest)
 {
@@ -122,7 +145,7 @@ TEST(MdLed, ErrorBlinkTest)
     // Error Code: 0
     mdled.error(0);
     EXPECT_EQ(leds_value(led0, led1), 3);
-    for (auto i = 1; i < loop_count; i++) {
+    for (uint32_t i = 1; i < loop_count; i++) {
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 1);
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 3);
     }
@@ -130,7 +153,7 @@ TEST(MdLed, ErrorBlinkTest)
     // Error Code: 1
     mdled.error(1);
     EXPECT_EQ(leds_value(led0, led1), 3);
-    for (auto i = 1; i < loop_count; i++) {
+    for (uint32_t i = 1; i < loop_count; i++) {
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 2);
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 3);
     }
@@ -138,7 +161,7 @@ TEST(MdLed, ErrorBlinkTest)
     // Error Code: 6
     mdled.error(6);
     EXPECT_EQ(leds_value(led0, led1), 3);
-    for (auto i = 1; i < loop_count; i++) {
+    for (uint32_t i = 1; i < loop_count; i++) {
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 1);
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 0);
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 2);
@@ -150,7 +173,7 @@ TEST(MdLed, ErrorBlinkTest)
     // Error Code: 41
     mdled.error(41);
     EXPECT_EQ(leds_value(led0, led1), 3);
-    for (auto i = 1; i < loop_count; i++) {
+    for (uint32_t i = 1; i < loop_count; i++) {
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 2);
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 0);
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 1);
@@ -189,7 +212,7 @@ TEST(MdLed, AlternateBlinkTest)
 
     EXPECT_EQ(leds_value(led0, led1), 1);
 
-    for (auto i = 1; i < loop_count; i++) {
+    for (uint32_t i = 1; i < loop_count; i++) {
         if (i % 2 == 0) {
             EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 1);
         } else {
@@ -221,7 +244,7 @@ TEST(MdLed, ConcurrentBlinkTest)
 
     EXPECT_EQ(leds_value(led0, led1), 3);
 
-    for (auto i = 1; i < loop_count; i++) {
+    for (uint32_t i = 1; i < loop_count; i++) {
         if (i % 2 == 0) {
             EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 3);
         } else {
@@ -239,12 +262,12 @@ TEST(MdLed, ResetErrorTest)
     StubDigitalOut led1;
     MdLed          mdled(led0, led1);
 
-    mdled.state(State::CCW);  // 2
-    EXPECT_EQ(leds_value(led0, led1), static_cast<uint32_t>(State::CCW));
+    mdled.state(State::CCW);
+    EXPECT_EQ(leds_value(led0, led1), state2uint(State::CCW));
 
     mdled.error(12);
-    EXPECT_NE(leds_value(led0, led1), static_cast<uint32_t>(State::CCW));
+    EXPECT_NE(leds_value(led0, led1), state2uint(State::CCW));
 
     mdled.reset_error();
-    EXPECT_EQ(leds_value(led0, led1), static_cast<uint32_t>(State::CCW));
+    EXPECT_EQ(leds_value(led0, led1), state2uint(State::CCW));
 }
