@@ -1,9 +1,9 @@
 #ifndef SPIRIT_A3921_H
 #define SPIRIT_A3921_H
 
-#include "interfaceDigitalOut.h"
-#include "interfaceMotor.h"
-#include "interfacePwmOut.h"
+#include "InterfaceDigitalOut.h"
+#include "InterfaceMotor.h"
+#include "InterfacePwmOut.h"
 
 namespace spirit {
 
@@ -36,8 +36,8 @@ public:
      * @param phase PHASE pin
      * @param reset RESET pin
      */
-    A3921(interfaceDigitalOut& sr, interfacePwmOut& pwmh, interfacePwmOut& pwml, interfacePwmOut& phase,
-          interfaceDigitalOut& reset);
+    A3921(InterfaceDigitalOut& sr, InterfacePwmOut& pwmh, InterfacePwmOut& pwml, InterfacePwmOut& phase,
+          InterfaceDigitalOut& reset);
 
     /**
      * @brief A3921 を Deep Sleep
@@ -91,14 +91,14 @@ public:
     void pulse_period(float seconds);
 
 private:
-    interfaceDigitalOut& _sr;
-    interfacePwmOut&     _pwmh;
-    interfacePwmOut&     _pwml;
-    interfacePwmOut&     _phase;
-    interfaceDigitalOut& _reset;
+    InterfaceDigitalOut& _sr;
+    InterfacePwmOut&     _pwmh;
+    InterfacePwmOut&     _pwml;
+    InterfacePwmOut&     _phase;
+    InterfaceDigitalOut& _reset;
 
     float _duty_cycle{0.00F};
-    State _state{interfaceMotor::default_state};
+    State _state{InterfaceMotor::default_state};
     Decay _decay{default_decay};
 
     /**

@@ -13,7 +13,7 @@ enum class State {
 
 /** A Motor is abstract base class for moving the motor
  */
-class interfaceMotor {
+class InterfaceMotor {
 public:
     virtual void  duty_cycle(float value)     = 0;
     virtual float duty_cycle() const          = 0;
@@ -23,11 +23,11 @@ public:
     virtual float pulse_period() const        = 0;
     virtual void  frequency(float hz)         = 0;
 
-    virtual interfaceMotor &operator=(float value)  = 0;
-    virtual interfaceMotor &operator+=(float value) = 0;
-    virtual interfaceMotor &operator-=(float value) = 0;
+    virtual InterfaceMotor &operator=(float value)  = 0;
+    virtual InterfaceMotor &operator+=(float value) = 0;
+    virtual InterfaceMotor &operator-=(float value) = 0;
     virtual                 operator float() const  = 0;
-    virtual interfaceMotor &operator=(State type)   = 0;
+    virtual InterfaceMotor &operator=(State type)   = 0;
     virtual                 operator State() const  = 0;
 
     static constexpr State default_state        = State::Brake;

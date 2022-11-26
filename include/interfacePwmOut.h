@@ -5,7 +5,7 @@
 
 namespace spirit {
 
-class interfacePwmOut {
+class InterfacePwmOut {
 public:
     virtual void write(float value) = 0;
 

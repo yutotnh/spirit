@@ -5,7 +5,7 @@
 
 namespace spirit {
 
-class interfaceDigitalOut {
+class InterfaceDigitalOut {
 public:
     virtual void write(uint32_t value) = 0;
 
