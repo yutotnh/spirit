@@ -20,11 +20,11 @@ public:
      * @brief モーターの制御方法を設定するための値
      */
     enum class Decay {
-        //! Slow decay
+        /// Slow decay
         Slow,
-        //! Mixed decay(未対応)
+        /// Mixed decay(未対応)
         Mixed,
-        //! Fast decay
+        /// Fast decay
         Fast,
     };
 

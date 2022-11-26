@@ -3,11 +3,18 @@
 
 namespace spirit {
 
+/**
+ * @enum State
+ * @brief モーターの回転方向
+ */
 enum class State {
-    Free  = 0,
-    Coast = Free,
-    CW,   // Clock Wise
-    CCW,  // Counter Clock Wise
+    /// 空転(緩やかに減速)
+    Coast,
+    /// 時計回り(Clock Wise)
+    CW,
+    /// 反時計回り(Counter Clock Wise)
+    CCW,
+    /// ブレーキ
     Brake,
 };
 

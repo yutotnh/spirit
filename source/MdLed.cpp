@@ -20,7 +20,23 @@ void MdLed::state(const State type)
 
     lock();
     _mode = Mode::Normal;
-    write(static_cast<uint32_t>(type));
+    switch (type) {
+        case State::Coast:
+            write(0);
+            break;
+        case State::CW:
+            write(1);
+            break;
+        case State::CCW:
+            write(2);
+            break;
+        case State::Brake:
+            write(3);
+            break;
+        default:
+            // 未定義の値
+            break;
+    }
     unlock();
 }
 
@@ -159,20 +175,12 @@ void MdLed::concurrently_blink()
 
 void MdLed::error_blink()
 {
-    // 点滅の流れ
-    // error code = 6(0b110) の場合
-    // 0. 11 ... エラー番号の出力開始
-    // 1. 01 ... 最下位ビットが0 -> 01
-    // 2. 00 ... LEDを全てOFF
-    // 3. 10 ... 下から2つ目のビットが1 -> 10
-    // 4. 00 ... LEDを全てOFF
-    // 5. 10 ... 最上位ビットが1 -> 10
-    // 0. 11 ... エラー番号の出力開始(再)
-    // 1. 01 ... 最下位ビットが0 -> 01
-    //    以降繰り返し
-
     if (_error_section == 0) {
-        // _error のビット幅を計算する
+        // _error を表現するために必要な最小ビット幅を計算する
+        // C++20では、std::bit_width() を使えばいい
+        // (現在はmbedがC++20に対応していないため自分で実装)
+        //   _error = 1 の場合は 1
+        //   _error = 5 の場合は 3
         uint32_t type_bit_size = sizeof(_error) * CHAR_BIT;
         _error_bit_width       = 1;
         for (auto i = type_bit_size - 1; i > 0; i--) {

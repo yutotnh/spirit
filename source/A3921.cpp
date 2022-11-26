@@ -37,7 +37,7 @@ void A3921::duty_cycle(const float value)
 void A3921::state(const State type)
 {
     switch (type) {
-        case State::Free:
+        case State::Coast:
         case State::CW:
         case State::CCW:
         case State::Brake:
@@ -85,7 +85,7 @@ void A3921::run()
 void A3921::run_slow_decay()
 {
     switch (_state) {
-        case State::Free:
+        case State::Coast:
             _sr.write(0);
             _pwmh.write(0.00F);
             _pwml.write(0.00F);
@@ -123,7 +123,7 @@ void A3921::run_slow_decay()
 void A3921::run_fast_decay()
 {
     switch (_state) {
-        case State::Free:
+        case State::Coast:
             _sr.write(0);
             _pwmh.write(0.00F);
             _pwml.write(0.00F);
