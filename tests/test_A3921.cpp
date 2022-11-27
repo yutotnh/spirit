@@ -132,8 +132,8 @@ TEST(A3921, SlowDecayTest)
     a3921.run();
 
     EXPECT_EQ(sr.read(), 1);
-    EXPECT_FLOAT_EQ(pwmh.read(), 0.50F);
-    EXPECT_FLOAT_EQ(pwml.read(), 1.00F);
+    EXPECT_FLOAT_EQ(pwmh.read(), 1.00F);
+    EXPECT_FLOAT_EQ(pwml.read(), 0.50F);
     EXPECT_FLOAT_EQ(phase.read(), 1.00F);
 
     // CCW
@@ -141,8 +141,8 @@ TEST(A3921, SlowDecayTest)
     a3921.run();
 
     EXPECT_EQ(sr.read(), 1);
-    EXPECT_FLOAT_EQ(pwmh.read(), 0.50F);
-    EXPECT_FLOAT_EQ(pwml.read(), 1.00F);
+    EXPECT_FLOAT_EQ(pwmh.read(), 1.00F);
+    EXPECT_FLOAT_EQ(pwml.read(), 0.50F);
     EXPECT_FLOAT_EQ(phase.read(), 0.00F);
 
     // Brake

@@ -95,16 +95,16 @@ void A3921::run_slow_decay()
         case State::CW:
             // a to b
             _sr.write(1);
-            _pwmh.write(_duty_cycle);
-            _pwml.write(1.00F);
+            _pwmh.write(1.00F);
+            _pwml.write(_duty_cycle);
             _phase.write(1.00F);
             break;
 
         case State::CCW:
             // b to a
             _sr.write(1);
-            _pwmh.write(_duty_cycle);
-            _pwml.write(1.00F);
+            _pwmh.write(1.00F);
+            _pwml.write(_duty_cycle);
             _phase.write(0.00F);
             break;
 
