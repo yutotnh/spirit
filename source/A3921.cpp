@@ -65,6 +65,19 @@ void A3921::decay(const Decay type)
     _decay = type;
 }
 
+void A3921::pwm_side(PwmSide type)
+{
+    switch (type) {
+        case PwmSide::Low:
+        case PwmSide::High:
+            break;
+        default:
+            return;
+    }
+
+    _pwm_side = type;
+}
+
 void A3921::run()
 {
     switch (_decay) {
@@ -84,6 +97,22 @@ void A3921::run()
 
 void A3921::run_slow_decay()
 {
+    float pwm_low_side;
+    float pwm_high_side;
+
+    switch (_pwm_side) {
+        case PwmSide::Low:
+            pwm_low_side  = _duty_cycle;
+            pwm_high_side = 1.00F;
+            break;
+        case PwmSide::High:
+            pwm_low_side  = 1.00F;
+            pwm_high_side = _duty_cycle;
+            break;
+        default:
+            return;
+    }
+
     switch (_state) {
         case State::Coast:
             _sr.write(0);
@@ -95,16 +124,16 @@ void A3921::run_slow_decay()
         case State::CW:
             // a to b
             _sr.write(1);
-            _pwmh.write(1.00F);
-            _pwml.write(_duty_cycle);
+            _pwmh.write(pwm_high_side);
+            _pwml.write(pwm_low_side);
             _phase.write(1.00F);
             break;
 
         case State::CCW:
             // b to a
             _sr.write(1);
-            _pwmh.write(1.00F);
-            _pwml.write(_duty_cycle);
+            _pwmh.write(pwm_high_side);
+            _pwml.write(pwm_low_side);
             _phase.write(0.00F);
             break;
 

@@ -29,6 +29,17 @@ public:
     };
 
     /**
+     * @enum PwmSide
+     * @brief Slow decayのPWM sideを設定するための値
+     */
+    enum class PwmSide : uint8_t {
+        /// Low side
+        Low,
+        /// High side
+        High,
+    };
+
+    /**
      * @brief コンストラクタ
      * @param sr SR pin
      * @param pwmh PWMH pin
@@ -77,6 +88,13 @@ public:
     void decay(Decay type);
 
     /**
+     * @brief Slow DecayのPWM sideを設定する
+     * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
+     * @param type PwmSide::Low, PwmSide::High のいずれか
+     */
+    void pwm_side(PwmSide type);
+
+    /**
      * @brief モーターを設定したデューティー比と回転方向で動かす
      * @remark run() が実行されるまで、 duty_cycle(), state(), decay() で設定した値はモーターに対して影響しない
      */
@@ -97,9 +115,10 @@ private:
     InterfacePwmOut&     _phase;
     InterfaceDigitalOut& _reset;
 
-    float _duty_cycle{0.00F};
-    State _state{InterfaceMotor::default_state};
-    Decay _decay{default_decay};
+    float   _duty_cycle{0.00F};
+    State   _state{InterfaceMotor::default_state};
+    Decay   _decay{default_decay};
+    PwmSide _pwm_side{default_pwm_side};
 
     /**
      * @brief Slow decayとしてモータを動かす
@@ -119,7 +138,8 @@ private:
      */
     void run_fast_decay();
 
-    static constexpr Decay default_decay = Decay::Slow;
+    static constexpr Decay   default_decay    = Decay::Slow;
+    static constexpr PwmSide default_pwm_side = PwmSide::Low;
 };
 
 }  // namespace spirit

@@ -104,11 +104,11 @@ TEST(A3921, ResetTest)
 }
 
 /**
- * @brief Slow decay でのモーター制御のテスト
+ * @brief Slow decay low side でのモーター制御のテスト
  * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、Coast/Brake 状態になったときに
  * pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
  */
-TEST(A3921, SlowDecayTest)
+TEST(A3921, SlowDecayLowSideTest)
 {
     StubDigitalOut sr;
     StubPwmOut     pwmh;
@@ -119,6 +119,7 @@ TEST(A3921, SlowDecayTest)
 
     // 共通の設定
     a3921.decay(A3921::Decay::Slow);
+    a3921.pwm_side(A3921::PwmSide::Low);
     a3921.duty_cycle(0.50F);
 
     // Coast
@@ -143,6 +144,56 @@ TEST(A3921, SlowDecayTest)
     EXPECT_EQ(sr.read(), 1);
     EXPECT_FLOAT_EQ(pwmh.read(), 1.00F);
     EXPECT_FLOAT_EQ(pwml.read(), 0.50F);
+    EXPECT_FLOAT_EQ(phase.read(), 0.00F);
+
+    // Brake
+    a3921.state(State::Brake);
+    a3921.run();
+
+    EXPECT_TRUE(isBrake(pwmh, pwml));
+}
+
+/**
+ * @brief Slow decay high side でのモーター制御のテスト
+ * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、Coast/Brake 状態になったときに
+ * pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
+ */
+TEST(A3921, SlowDecayHighSideTest)
+{
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
+    A3921          a3921(sr, pwmh, pwml, phase, reset);
+
+    // 共通の設定
+    a3921.decay(A3921::Decay::Slow);
+    a3921.pwm_side(A3921::PwmSide::High);
+    a3921.duty_cycle(0.50F);
+
+    // Coast
+    a3921.state(State::Coast);
+    a3921.run();
+
+    EXPECT_TRUE(isCoast(pwmh, pwml));
+
+    // CW
+    a3921.state(State::CW);
+    a3921.run();
+
+    EXPECT_EQ(sr.read(), 1);
+    EXPECT_FLOAT_EQ(pwmh.read(), 0.50F);
+    EXPECT_FLOAT_EQ(pwml.read(), 1.00F);
+    EXPECT_FLOAT_EQ(phase.read(), 1.00F);
+
+    // CCW
+    a3921.state(State::CCW);
+    a3921.run();
+
+    EXPECT_EQ(sr.read(), 1);
+    EXPECT_FLOAT_EQ(pwmh.read(), 0.50F);
+    EXPECT_FLOAT_EQ(pwml.read(), 1.00F);
     EXPECT_FLOAT_EQ(phase.read(), 0.00F);
 
     // Brake
