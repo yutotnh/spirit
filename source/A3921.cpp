@@ -67,7 +67,7 @@ void A3921::decay(const Decay type)
 
 void A3921::pwm_side(PwmSide type)
 {
-    switch(type){
+    switch (type) {
         case PwmSide::Low:
         case PwmSide::High:
             break;
@@ -100,7 +100,7 @@ void A3921::run_slow_decay()
     float pwm_low_side;
     float pwm_high_side;
 
-    switch(_pwm_side) {
+    switch (_pwm_side) {
         case PwmSide::Low:
             pwm_low_side  = _duty_cycle;
             pwm_high_side = 1.00F;

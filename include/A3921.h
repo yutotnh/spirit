@@ -32,7 +32,7 @@ public:
      * @enum PwmSide
      * @brief Slow decayのPWM sideを設定するための値
      */
-    enum class PwmSide:uint8_t {
+    enum class PwmSide : uint8_t {
         /// Low side
         Low,
         /// High side
