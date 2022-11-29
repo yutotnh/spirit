@@ -16,9 +16,9 @@ A3921::A3921(InterfaceDigitalOut& sr, InterfacePwmOut& pwmh, InterfacePwmOut& pw
 void A3921::sleep(const bool enabled)
 {
     if (enabled) {
-        _reset.write(0U);
+        _reset.write(0);
     } else {
-        _reset.write(1U);
+        _reset.write(1);
     }
 }
 
