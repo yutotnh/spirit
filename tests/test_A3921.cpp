@@ -14,7 +14,7 @@ using namespace spirit;
  * @retval true Brake 状態
  * @retval false 非 Brake 状態
  */
-bool isBrake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
+bool is_brake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
 {
     if (((fabsf(pwmh.read() - 1.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) ||
         ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 1.00F) < FLT_EPSILON))) {
@@ -31,7 +31,7 @@ bool isBrake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
  * @retval true Coast 状態
  * @retval false 非 Coast 状態
  */
-bool isCoast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
+bool is_coast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
 {
     if ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) {
         return true;
@@ -60,7 +60,7 @@ TEST(A3921, InitValueTest)
     EXPECT_FLOAT_EQ(pwml.read_period(), InterfaceMotor::default_pulse_period);
     EXPECT_FLOAT_EQ(phase.read_period(), InterfaceMotor::default_pulse_period);
 
-    EXPECT_TRUE(isBrake(pwmh, pwml));
+    EXPECT_TRUE(is_brake(pwmh, pwml));
 }
 
 /**
@@ -126,7 +126,7 @@ TEST(A3921, SlowDecayLowSideTest)
     a3921.state(State::Coast);
     a3921.run();
 
-    EXPECT_TRUE(isCoast(pwmh, pwml));
+    EXPECT_TRUE(is_coast(pwmh, pwml));
 
     // CW
     a3921.state(State::CW);
@@ -150,7 +150,7 @@ TEST(A3921, SlowDecayLowSideTest)
     a3921.state(State::Brake);
     a3921.run();
 
-    EXPECT_TRUE(isBrake(pwmh, pwml));
+    EXPECT_TRUE(is_brake(pwmh, pwml));
 }
 
 /**
@@ -176,7 +176,7 @@ TEST(A3921, SlowDecayHighSideTest)
     a3921.state(State::Coast);
     a3921.run();
 
-    EXPECT_TRUE(isCoast(pwmh, pwml));
+    EXPECT_TRUE(is_coast(pwmh, pwml));
 
     // CW
     a3921.state(State::CW);
@@ -200,7 +200,7 @@ TEST(A3921, SlowDecayHighSideTest)
     a3921.state(State::Brake);
     a3921.run();
 
-    EXPECT_TRUE(isBrake(pwmh, pwml));
+    EXPECT_TRUE(is_brake(pwmh, pwml));
 }
 
 /**
@@ -225,7 +225,7 @@ TEST(A3921, FastDecayTest)
     a3921.state(State::Coast);
     a3921.run();
 
-    EXPECT_TRUE(isCoast(pwmh, pwml));
+    EXPECT_TRUE(is_coast(pwmh, pwml));
 
     // CW
     a3921.state(State::CW);
@@ -249,7 +249,7 @@ TEST(A3921, FastDecayTest)
     a3921.state(State::Brake);
     a3921.run();
 
-    EXPECT_TRUE(isBrake(pwmh, pwml));
+    EXPECT_TRUE(is_brake(pwmh, pwml));
 }
 
 /**
