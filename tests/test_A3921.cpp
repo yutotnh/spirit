@@ -84,7 +84,11 @@ TEST(A3921, SleepTest)
 }
 
 /**
- * @brief リセット機能のテスト(未実装のため、テストはスキップする)
+ * @brief リセット機能のテスト
+ * @details テスト内容 @n
+ * - A3921::reset() 前後で、 RESETピンが High になっていること
+ * - A3921::reset() の実行時間が 3.5us 以上であること
+ * @note リセット機能は未実装のため、リセット機能実装後にテストを修正する
  */
 TEST(A3921, ResetTest)
 {
@@ -95,12 +99,15 @@ TEST(A3921, ResetTest)
     StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
-    GTEST_SKIP_("Not implemented because the Reset function is not yet supported.");
-    // TODO 未実装のため、実装時に行うであろうフローのイメージを記述
+    // TODO 未実装のため、実装時に行うであろうReset Pulse Time 測定フローのイメージを記述
+    // Timer timer;
+    EXPECT_EQ(reset.read(), 1);
     // timer.start();
-    // a3921.reset();
+    a3921.reset();
     // timer.stop();
-    // EXPECT_LE(0.35us, timer.read());
+    EXPECT_EQ(reset.read(), 1);
+    // EXPECT_LE(0.1us, timer.read());
+    // EXPECT_LE(timer.read(), 3.5us);
 }
 
 /**
