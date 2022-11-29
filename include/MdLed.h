@@ -17,10 +17,10 @@ public:
      * @enum MdLed
      * @brief LEDに設定する値のソースを何にするかの値
      */
-    enum class Mode {
+    enum class BlinkMode {
         /// Stateの値をそのままLEDに設定する
         Normal,
-        /// LED 2つ交互に点滅   0b01 -> 0b10 -> 0b01
+        /// LED 2つ交互に点滅 0b01 -> 0b10 -> 0b01
         Alternate,
         /// LED 2つが同じ点滅 0b11 -> 0b00 -> 0b11
         Concurrent,
@@ -44,7 +44,7 @@ public:
      * @brief LEDのモードを設定する
      * @param type 設定したいLEDのモード
      */
-    void mode(Mode type);
+    void mode(BlinkMode type);
 
     /**
      * @brief LEDをError状態にする
@@ -82,7 +82,7 @@ public:
     void blinking_rate(uint32_t unit);
 
     MdLed &operator=(State type);
-    MdLed &operator=(Mode type);
+    MdLed &operator=(BlinkMode type);
     MdLed &operator=(uint32_t value);
 
 private:
@@ -91,8 +91,8 @@ private:
     /// LEDの上位ビット
     InterfaceDigitalOut &_led1;
 
-    State _state{InterfaceMotor::default_state};
-    Mode  _mode{default_mode};
+    State     _state{InterfaceMotor::default_state};
+    BlinkMode _mode{default_blink_mode};
     // Mutex  _mutex;
     uint32_t _interval{default_interval};
     uint32_t _counter{0};
@@ -124,8 +124,8 @@ private:
     void lock();
     void unlock();
 
-    static constexpr uint32_t default_interval = 500;
-    static constexpr Mode     default_mode     = Mode::Normal;
+    static constexpr uint32_t  default_interval   = 500;
+    static constexpr BlinkMode default_blink_mode = BlinkMode::Normal;
 };
 
 }  // namespace spirit

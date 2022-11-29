@@ -25,7 +25,7 @@ uint32_t leds_value(const StubDigitalOut& led0, const StubDigitalOut& led1)
  * @param loop 繰り返し数える回数
  * @retval true 同じ
  * @retval false 異なる
- * @note Mode::Normal では、 MdLed::blinking_rate() で指定した回数より多く同じ値にならないので loop があることで Mode::Normal かそれ以外かの判別がつく
+ * @note BlinkMode::Normal では、 MdLed::blinking_rate() で指定した回数より多く同じ値にならないので loop があることで BlinkMode::Normal かそれ以外かの判別がつく
  */
 uint32_t compare_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOut& led1, const uint32_t value,
                       uint32_t loop)
@@ -63,7 +63,7 @@ uint32_t state2uint(State state)
 
 /**
  * @brief 初期表示のLEDが以下になることの確認
- * - Mode = Normal
+ * - BlinkMode = Normal
  * - State = Brake
  */
 TEST(MdLed, InitValueTest)
@@ -190,7 +190,7 @@ TEST(MdLed, ErrorBlinkTest)
 }
 
 /**
- * @brief MdLed::Mode::Alternate のテスト
+ * @brief MdLed::BlinkMode::Alternate のテスト
  */
 TEST(MdLed, AlternateBlinkTest)
 {
@@ -200,7 +200,7 @@ TEST(MdLed, AlternateBlinkTest)
 
     // 点滅の開始時の値を固定化するためにLEDの値を0にする必要があるので、
     // 一旦Normal & Coast にする
-    mdled.mode(MdLed::Mode::Normal);
+    mdled.mode(MdLed::BlinkMode::Normal);
     mdled.state(State::Coast);
     EXPECT_EQ(leds_value(led0, led1), 0);
 
@@ -208,7 +208,7 @@ TEST(MdLed, AlternateBlinkTest)
     uint32_t blinking_rate = 3;
     uint32_t loop_count    = 5;
     mdled.blinking_rate(blinking_rate);
-    mdled.mode(MdLed::Mode::Alternate);
+    mdled.mode(MdLed::BlinkMode::Alternate);
 
     EXPECT_EQ(leds_value(led0, led1), 1);
 
@@ -222,7 +222,7 @@ TEST(MdLed, AlternateBlinkTest)
 }
 
 /**
- * @brief MdLed::Mode::Concurrent のテスト
+ * @brief MdLed::BlinkMode::Concurrent のテスト
  */
 TEST(MdLed, ConcurrentBlinkTest)
 {
@@ -232,7 +232,7 @@ TEST(MdLed, ConcurrentBlinkTest)
 
     // 点滅の開始時の値を固定化するためにLEDの値を0にする必要があるので、
     // 一旦Normal & Coast にする
-    mdled.mode(MdLed::Mode::Normal);
+    mdled.mode(MdLed::BlinkMode::Normal);
     mdled.state(State::Coast);
     EXPECT_EQ(leds_value(led0, led1), 0);
 
@@ -240,7 +240,7 @@ TEST(MdLed, ConcurrentBlinkTest)
     uint32_t blinking_rate = 11;
     uint32_t loop_count    = 9;
     mdled.blinking_rate(blinking_rate);
-    mdled.mode(MdLed::Mode::Concurrent);
+    mdled.mode(MdLed::BlinkMode::Concurrent);
 
     EXPECT_EQ(leds_value(led0, led1), 3);
 

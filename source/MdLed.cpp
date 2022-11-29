@@ -6,7 +6,7 @@ namespace spirit {
 
 MdLed::MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1) : _led0(led0), _led1(led1)
 {
-    mode(default_mode);
+    mode(default_blink_mode);
     state(InterfaceMotor::default_state);
 }
 
@@ -14,12 +14,12 @@ void MdLed::state(const State type)
 {
     _state = type;
 
-    if (_mode == Mode::Error) {
+    if (_mode == BlinkMode::Error) {
         return;
     }
 
     lock();
-    _mode = Mode::Normal;
+    _mode = BlinkMode::Normal;
     switch (type) {
         case State::Coast:
             write(0);
@@ -53,17 +53,17 @@ uint32_t MdLed::read() const
     return (_led1.read() << 1) + _led0.read();
 }
 
-void MdLed::mode(const Mode mode)
+void MdLed::mode(const BlinkMode mode)
 {
     if (_mode == mode) {
         return;
     }
 
     switch (mode) {
-        case Mode::Normal:
-        case Mode::Alternate:
-        case Mode::Concurrent:
-        case Mode::Error:
+        case BlinkMode::Normal:
+        case BlinkMode::Alternate:
+        case BlinkMode::Concurrent:
+        case BlinkMode::Error:
             break;
         default:
             return;
@@ -75,10 +75,10 @@ void MdLed::mode(const Mode mode)
     _mode    = mode;
 
     switch (mode) {
-        case Mode::Alternate:
+        case BlinkMode::Alternate:
             alternately_blink();
             break;
-        case Mode::Concurrent:
+        case BlinkMode::Concurrent:
             concurrently_blink();
             break;
         default:
@@ -90,11 +90,11 @@ void MdLed::mode(const Mode mode)
 
 void MdLed::reset_error()
 {
-    if (_mode != Mode::Error) {
+    if (_mode != BlinkMode::Error) {
         return;
     }
 
-    _mode = Mode::Normal;
+    _mode = BlinkMode::Normal;
     state(_state);
 }
 
@@ -103,15 +103,15 @@ void MdLed::coordinate()
     if (++_counter >= _interval) {
         _counter = 0;
         switch (_mode) {
-            case Mode::Normal:
+            case BlinkMode::Normal:
                 break;
-            case Mode::Alternate:
+            case BlinkMode::Alternate:
                 alternately_blink();
                 break;
-            case Mode::Concurrent:
+            case BlinkMode::Concurrent:
                 concurrently_blink();
                 break;
-            case Mode::Error:
+            case BlinkMode::Error:
                 error_blink();
                 break;
             default:
@@ -127,11 +127,11 @@ void MdLed::blinking_rate(const uint32_t unit)
 
 void MdLed::error(const uint32_t status)
 {
-    if ((_mode == Mode::Error) && (_error == status)) {
+    if ((_mode == BlinkMode::Error) && (_error == status)) {
         return;
     }
 
-    _mode          = Mode::Error;
+    _mode          = BlinkMode::Error;
     _error         = status;
     _error_section = 0;
     error_blink();
@@ -143,7 +143,7 @@ MdLed &MdLed::operator=(const State type)
     return *this;
 }
 
-MdLed &MdLed::operator=(const Mode type)
+MdLed &MdLed::operator=(const BlinkMode type)
 {
     mode(type);
     return *this;
