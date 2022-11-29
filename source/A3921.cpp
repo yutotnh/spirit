@@ -24,9 +24,9 @@ void A3921::sleep(const bool enabled)
 
 void A3921::reset()
 {
-    _reset.write(1);
-    // TODO time時間待つ (0.1us < time < 3.5us)
     _reset.write(0);
+    // TODO time時間待つ (0.1us < time < 3.5us)
+    _reset.write(1);
 }
 
 void A3921::duty_cycle(const float value)
