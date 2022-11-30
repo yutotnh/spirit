@@ -1,6 +1,8 @@
 #ifndef SPIRIT_A3921_H
 #define SPIRIT_A3921_H
 
+#include <functional>
+
 #include "InterfaceDigitalOut.h"
 #include "InterfaceMotor.h"
 #include "InterfacePwmOut.h"
@@ -60,9 +62,16 @@ public:
 
     /**
      * @brief A3921 のリセット機能を実行する
-     * @attention 未実装のため、動作しない
+     * @param sleep 実行時にReset Pulse 時間分(最小: 0.1us, 最大3.5us)だけ待つ関数
+     * @code {.cpp}
+     * std::function<void(void)> sleep = []() { std::this_thread::sleep_for(std::chrono::microseconds(1)); }; // C++11
+     * std::function<void(void)> sleep = []() { wait_us(1); }; // Mbed OS 6
+     *
+     * a3921.reset(sleep);
+     * @endcode
+     *
      */
-    void reset();
+    void reset(std::function<void(void)>& sleep);
 
     /**
      * @brief デューティー比を設定する

@@ -22,10 +22,10 @@ void A3921::sleep(const bool enabled)
     }
 }
 
-void A3921::reset()
+void A3921::reset(std::function<void(void)>& sleep)
 {
     _reset.write(0);
-    // TODO time時間待つ (0.1us < time < 3.5us)
+    sleep();
     _reset.write(1);
 }
 
