@@ -114,7 +114,7 @@ TEST(A3921, ResetTest)
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     EXPECT_EQ(reset.read(), 1);
-    EXPECT_LE(100.0e-6F, elapsed_seconds.count());
+    EXPECT_LE(100.0e-6, elapsed_seconds.count());
 }
 
 /**
