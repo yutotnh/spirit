@@ -1,11 +1,12 @@
 {
-  "files.exclude": {
-    "build/": true
-},
-"cmake.configureOnOpen": true,
-"C_Cpp.clang_format_sortIncludes": true,
-"C_Cpp.clang_format_style": "file",
-"C_Cpp.default.cppStandard": "c++14",
-"C_Cpp.doxygen.generatedStyle": "/**",
-"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "files.exclude": {
+        "build/": true
+    },
+    "cmake.configureOnOpen": true,
+    "C_Cpp.clang_format_sortIncludes": true,
+    "C_Cpp.clang_format_style": "file",
+    "C_Cpp.default.cppStandard": "c++14",
+    "C_Cpp.doxygen.generatedStyle": "/**",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.encoding": "utf8"
 }
