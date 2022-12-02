@@ -15,14 +15,10 @@ using namespace spirit;
  * @retval true Brake 状態
  * @retval false 非 Brake 状態
  */
-bool is_brake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
+static bool is_brake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
 {
-    if (((fabsf(pwmh.read() - 1.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) ||
-        ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 1.00F) < FLT_EPSILON))) {
-        return true;
-    } else {
-        return false;
-    }
+    return ((fabsf(pwmh.read() - 1.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) ||
+           ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 1.00F) < FLT_EPSILON));
 }
 
 /**
@@ -32,13 +28,9 @@ bool is_brake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
  * @retval true Coast 状態
  * @retval false 非 Coast 状態
  */
-bool is_coast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
+static bool is_coast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
 {
-    if ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) {
-        return true;
-    }
-
-    return false;
+    return (fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON);
 }
 
 /**
