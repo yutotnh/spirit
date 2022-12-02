@@ -29,7 +29,7 @@ static uint32_t leds_value(const StubDigitalOut& led0, const StubDigitalOut& led
  * loop があることで BlinkMode::Normal かそれ以外かの判別がつく
  */
 static uint32_t compare_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOut& led1, const uint32_t value,
-                      uint32_t loop)
+                             uint32_t loop)
 {
     for (uint32_t i = 0; i < loop; i++) {
         if (value != leds_value(led0, led1)) {
@@ -117,7 +117,8 @@ TEST(MdLed, SetGetValueTest)
  * @param blinking_rate
  * @return 次の周期のLEDの値
  */
-static uint32_t next_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOut& led1, const uint32_t blinking_rate)
+static uint32_t next_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOut& led1,
+                          const uint32_t blinking_rate)
 {
     // blinking_rate 期間中、値が変化していないことを確認する
     uint32_t value = leds_value(led0, led1);
