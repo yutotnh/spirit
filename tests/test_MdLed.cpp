@@ -41,20 +41,20 @@ static uint32_t compare_leds(MdLed& mdled, const StubDigitalOut& led0, const Stu
 }
 
 /**
- * @brief State型からuint32_tに変換した値を返す
+ * @brief Motor::State型からuint32_tに変換した値を返す
  * @param state モーターの回転方向
- * @return State型からuint32_tに変換した値
+ * @return Motor::State型からuint32_tに変換した値
  */
-static uint32_t state2uint(State state)
+static uint32_t state2uint(Motor::State state)
 {
     switch (state) {
-        case State::Coast:
+        case Motor::State::Coast:
             return 0;
-        case State::CW:
+        case Motor::State::CW:
             return 1;
-        case State::CCW:
+        case Motor::State::CCW:
             return 2;
-        case State::Brake:
+        case Motor::State::Brake:
             return 3;
         default:
             // 未定義の値
@@ -65,7 +65,7 @@ static uint32_t state2uint(State state)
 /**
  * @brief 初期表示のLEDが以下になることの確認
  * - BlinkMode = Normal
- * - State = Brake
+ * - Motor::State = Brake
  */
 TEST(MdLed, InitValueTest)
 {
@@ -76,7 +76,7 @@ TEST(MdLed, InitValueTest)
 
     // blinking_rate で設定した値より多くループさせる
     uint32_t loop = 5 * 5;
-    ASSERT_TRUE(compare_leds(mdled, led0, led1, state2uint(State::Brake), loop));
+    ASSERT_TRUE(compare_leds(mdled, led0, led1, state2uint(Motor::State::Brake), loop));
 }
 
 /**
@@ -88,21 +88,21 @@ TEST(MdLed, SetGetValueTest)
     StubDigitalOut led1;
     MdLed          mdled(led0, led1);
 
-    State states[] = {State::Coast, State::Brake, State::CW,    State::CCW,
-                      State::CW,    State::Coast, State::Brake, State::Brake};
+    Motor::State states[] = {Motor::State::Coast, Motor::State::Brake, Motor::State::CW,    Motor::State::CCW,
+                             Motor::State::CW,    Motor::State::Coast, Motor::State::Brake, Motor::State::Brake};
 
     uint32_t rate = 80;
     mdled.blinking_rate(rate);
 
     // state()でSet, Get
     //  非operator
-    for (State value : states) {
+    for (Motor::State value : states) {
         mdled.state(value);
         EXPECT_TRUE(compare_leds(mdled, led0, led1, state2uint(value), rate * 5));
     }
 
     //  operator
-    for (State value : states) {
+    for (Motor::State value : states) {
         mdled = value;
         EXPECT_TRUE(compare_leds(mdled, led0, led1, state2uint(value), rate * 5));
     }
@@ -203,7 +203,7 @@ TEST(MdLed, AlternateBlinkTest)
     // 点滅の開始時の値を固定化するためにLEDの値を0にする必要があるので、
     // 一旦Normal & Coast にする
     mdled.mode(MdLed::BlinkMode::Normal);
-    mdled.state(State::Coast);
+    mdled.state(Motor::State::Coast);
     EXPECT_EQ(leds_value(led0, led1), 0);
 
     // loop回数などは適当
@@ -235,7 +235,7 @@ TEST(MdLed, ConcurrentBlinkTest)
     // 点滅の開始時の値を固定化するためにLEDの値を0にする必要があるので、
     // 一旦Normal & Coast にする
     mdled.mode(MdLed::BlinkMode::Normal);
-    mdled.state(State::Coast);
+    mdled.state(Motor::State::Coast);
     EXPECT_EQ(leds_value(led0, led1), 0);
 
     // loop回数などは適当
@@ -264,12 +264,12 @@ TEST(MdLed, ResetErrorTest)
     StubDigitalOut led1;
     MdLed          mdled(led0, led1);
 
-    mdled.state(State::CCW);
-    EXPECT_EQ(leds_value(led0, led1), state2uint(State::CCW));
+    mdled.state(Motor::State::CCW);
+    EXPECT_EQ(leds_value(led0, led1), state2uint(Motor::State::CCW));
 
     mdled.error(12);
-    EXPECT_NE(leds_value(led0, led1), state2uint(State::CCW));
+    EXPECT_NE(leds_value(led0, led1), state2uint(Motor::State::CCW));
 
     mdled.reset_error();
-    EXPECT_EQ(leds_value(led0, led1), state2uint(State::CCW));
+    EXPECT_EQ(leds_value(led0, led1), state2uint(Motor::State::CCW));
 }

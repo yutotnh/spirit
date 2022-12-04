@@ -2,7 +2,7 @@
 #define SPIRIT_MD_LED_H
 
 #include "InterfaceDigitalOut.h"
-#include "InterfaceMotor.h"
+#include "Motor.h"
 
 namespace spirit {
 
@@ -18,7 +18,7 @@ public:
      * @brief LEDに設定する値のソースを何にするかの値
      */
     enum class BlinkMode {
-        /// Stateの値をそのままLEDに設定する
+        /// Motor::Stateの値をそのままLEDに設定する
         Normal,
         /// LED 2つ交互に点滅 0b01 -> 0b10 -> 0b01
         Alternate,
@@ -38,7 +38,7 @@ public:
      * @param type 設定したい値
      * @details Error中は設定値が反映されない
      */
-    void state(State type);
+    void state(Motor::State type);
 
     /**
      * @brief LEDのモードを設定する
@@ -81,7 +81,7 @@ public:
      */
     void blinking_rate(uint32_t unit);
 
-    MdLed &operator=(State type);
+    MdLed &operator=(Motor::State type);
     MdLed &operator=(BlinkMode type);
     MdLed &operator=(uint32_t value);
 
@@ -91,8 +91,8 @@ private:
     /// LEDの上位ビット
     InterfaceDigitalOut &_led1;
 
-    State     _state{InterfaceMotor::default_state};
-    BlinkMode _mode{default_blink_mode};
+    Motor::State _state{Motor::default_state};
+    BlinkMode    _mode{default_blink_mode};
     // Mutex  _mutex;
     uint32_t _interval{default_interval};
     uint32_t _counter{0};

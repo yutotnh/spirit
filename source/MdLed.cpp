@@ -7,10 +7,10 @@ namespace spirit {
 MdLed::MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1) : _led0(led0), _led1(led1)
 {
     mode(default_blink_mode);
-    state(InterfaceMotor::default_state);
+    state(Motor::default_state);
 }
 
-void MdLed::state(const State type)
+void MdLed::state(const Motor::State type)
 {
     _state = type;
 
@@ -21,16 +21,16 @@ void MdLed::state(const State type)
     lock();
     _mode = BlinkMode::Normal;
     switch (type) {
-        case State::Coast:
+        case Motor::State::Coast:
             write(0);
             break;
-        case State::CW:
+        case Motor::State::CW:
             write(1);
             break;
-        case State::CCW:
+        case Motor::State::CCW:
             write(2);
             break;
-        case State::Brake:
+        case Motor::State::Brake:
             write(3);
             break;
         default:
@@ -137,7 +137,7 @@ void MdLed::error(const uint32_t status)
     error_blink();
 }
 
-MdLed &MdLed::operator=(const State type)
+MdLed &MdLed::operator=(const Motor::State type)
 {
     state(type);
     return *this;

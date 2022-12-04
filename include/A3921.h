@@ -4,8 +4,8 @@
 #include <functional>
 
 #include "InterfaceDigitalOut.h"
-#include "InterfaceMotor.h"
 #include "InterfacePwmOut.h"
+#include "Motor.h"
 
 namespace spirit {
 
@@ -85,23 +85,23 @@ public:
     /**
      * @brief 回転方向を設定する
      * @remark run() が実行されるまで、 state() で設定した値はモーターに対して影響しない
-     * @param type State::Coast, State::CW, State::CCW, State::Brake のいずれか
+     * @param type Motor::State::Coast, Motor::State::CW, Motor::State::CCW, Motor::State::Brake のいずれか
      */
-    void state(State type);
+    void state(Motor::State type);
 
     /**
      * @brief Decayを設定する
      * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
      * @param type Decay::Slow, Decay::Fast のいずれか
      */
-    void decay(Decay type);
+    void decay(Motor::Decay type);
 
     /**
      * @brief Slow DecayのPWM sideを設定する
      * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
      * @param type PwmSide::Low, PwmSide::High のいずれか
      */
-    void pwm_side(PwmSide type);
+    void pwm_side(Motor::PwmSide type);
 
     /**
      * @brief モーターを設定したデューティー比と回転方向で動かす
@@ -124,10 +124,10 @@ private:
     InterfacePwmOut&     _phase;
     InterfaceDigitalOut& _reset;
 
-    float   _duty_cycle{0.00F};
-    State   _state{InterfaceMotor::default_state};
-    Decay   _decay{default_decay};
-    PwmSide _pwm_side{default_pwm_side};
+    float          _duty_cycle{0.00F};
+    Motor::State   _state{Motor::default_state};
+    Motor::Decay   _decay{Motor::default_decay};
+    Motor::PwmSide _pwm_side{Motor::default_pwm_side};
 
     /**
      * @brief Slow decayとしてモータを動かす
@@ -146,9 +146,6 @@ private:
      *          - (B) Fast decay, SR active, full four-quadrant control
      */
     void run_fast_decay();
-
-    static constexpr Decay   default_decay    = Decay::Slow;
-    static constexpr PwmSide default_pwm_side = PwmSide::Low;
 };
 
 }  // namespace spirit
