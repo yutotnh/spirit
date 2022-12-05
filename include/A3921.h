@@ -85,7 +85,7 @@ public:
     /**
      * @brief 回転方向を設定する
      * @remark run() が実行されるまで、 state() で設定した値はモーターに対して影響しない
-     * @param type Motor::State::Coast, Motor::State::CW, Motor::State::CCW, Motor::State::Brake のいずれか
+     * @param type Motor::State::Coast, Motor::State::CW, Motor::State::CCW, Motor::State::Brake のいずれかの設定したい回転方向
      */
     void state(Motor::State type);
 
