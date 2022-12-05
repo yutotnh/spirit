@@ -37,7 +37,7 @@ static bool is_coast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
  * @brief 初期値のテスト
  * - sleep モード: OFF
  * - モーター: Brake
- * - パルス周期: InterfaceMotor::default_pulse_period
+ * - パルス周期: Motor::default_pulse_period
  */
 TEST(A3921, InitValueTest)
 {
@@ -49,9 +49,9 @@ TEST(A3921, InitValueTest)
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     EXPECT_EQ(reset.read(), 1);
-    EXPECT_FLOAT_EQ(pwmh.read_period(), InterfaceMotor::default_pulse_period);
-    EXPECT_FLOAT_EQ(pwml.read_period(), InterfaceMotor::default_pulse_period);
-    EXPECT_FLOAT_EQ(phase.read_period(), InterfaceMotor::default_pulse_period);
+    EXPECT_FLOAT_EQ(pwmh.read_period(), Motor::default_pulse_period);
+    EXPECT_FLOAT_EQ(pwml.read_period(), Motor::default_pulse_period);
+    EXPECT_FLOAT_EQ(phase.read_period(), Motor::default_pulse_period);
 
     EXPECT_TRUE(is_brake(pwmh, pwml));
 }
@@ -124,18 +124,18 @@ TEST(A3921, SlowDecayLowSideTest)
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     // 共通の設定
-    a3921.decay(A3921::Decay::Slow);
-    a3921.pwm_side(A3921::PwmSide::Low);
+    a3921.decay(Motor::Decay::Slow);
+    a3921.pwm_side(Motor::PwmSide::Low);
     a3921.duty_cycle(0.50F);
 
     // Coast
-    a3921.state(State::Coast);
+    a3921.state(Motor::State::Coast);
     a3921.run();
 
     EXPECT_TRUE(is_coast(pwmh, pwml));
 
     // CW
-    a3921.state(State::CW);
+    a3921.state(Motor::State::CW);
     a3921.run();
 
     EXPECT_EQ(sr.read(), 1);
@@ -144,7 +144,7 @@ TEST(A3921, SlowDecayLowSideTest)
     EXPECT_FLOAT_EQ(phase.read(), 1.00F);
 
     // CCW
-    a3921.state(State::CCW);
+    a3921.state(Motor::State::CCW);
     a3921.run();
 
     EXPECT_EQ(sr.read(), 1);
@@ -153,7 +153,7 @@ TEST(A3921, SlowDecayLowSideTest)
     EXPECT_FLOAT_EQ(phase.read(), 0.00F);
 
     // Brake
-    a3921.state(State::Brake);
+    a3921.state(Motor::State::Brake);
     a3921.run();
 
     EXPECT_TRUE(is_brake(pwmh, pwml));
@@ -174,18 +174,18 @@ TEST(A3921, SlowDecayHighSideTest)
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     // 共通の設定
-    a3921.decay(A3921::Decay::Slow);
-    a3921.pwm_side(A3921::PwmSide::High);
+    a3921.decay(Motor::Decay::Slow);
+    a3921.pwm_side(Motor::PwmSide::High);
     a3921.duty_cycle(0.50F);
 
     // Coast
-    a3921.state(State::Coast);
+    a3921.state(Motor::State::Coast);
     a3921.run();
 
     EXPECT_TRUE(is_coast(pwmh, pwml));
 
     // CW
-    a3921.state(State::CW);
+    a3921.state(Motor::State::CW);
     a3921.run();
 
     EXPECT_EQ(sr.read(), 1);
@@ -194,7 +194,7 @@ TEST(A3921, SlowDecayHighSideTest)
     EXPECT_FLOAT_EQ(phase.read(), 1.00F);
 
     // CCW
-    a3921.state(State::CCW);
+    a3921.state(Motor::State::CCW);
     a3921.run();
 
     EXPECT_EQ(sr.read(), 1);
@@ -203,7 +203,7 @@ TEST(A3921, SlowDecayHighSideTest)
     EXPECT_FLOAT_EQ(phase.read(), 0.00F);
 
     // Brake
-    a3921.state(State::Brake);
+    a3921.state(Motor::State::Brake);
     a3921.run();
 
     EXPECT_TRUE(is_brake(pwmh, pwml));
@@ -224,17 +224,17 @@ TEST(A3921, FastDecayTest)
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
     // 共通の設定
-    a3921.decay(A3921::Decay::Fast);
+    a3921.decay(Motor::Decay::Fast);
     a3921.duty_cycle(0.50F);
 
     // Coast
-    a3921.state(State::Coast);
+    a3921.state(Motor::State::Coast);
     a3921.run();
 
     EXPECT_TRUE(is_coast(pwmh, pwml));
 
     // CW
-    a3921.state(State::CW);
+    a3921.state(Motor::State::CW);
     a3921.run();
 
     EXPECT_EQ(sr.read(), 0);
@@ -243,7 +243,7 @@ TEST(A3921, FastDecayTest)
     EXPECT_FLOAT_EQ(phase.read(), 0.75F);
 
     // CCW
-    a3921.state(State::CCW);
+    a3921.state(Motor::State::CCW);
     a3921.run();
 
     EXPECT_EQ(sr.read(), 0);
@@ -252,7 +252,7 @@ TEST(A3921, FastDecayTest)
     EXPECT_FLOAT_EQ(phase.read(), 0.25F);
 
     // Brake
-    a3921.state(State::Brake);
+    a3921.state(Motor::State::Brake);
     a3921.run();
 
     EXPECT_TRUE(is_brake(pwmh, pwml));
@@ -270,8 +270,8 @@ TEST(A3921, PulsePeriodTest)
     StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
-    // InterfaceMotor::default_pulse_period と異なる値を設定するため、 0.005Fを加える
-    float pulse_period = InterfaceMotor::default_pulse_period + 0.005F;
+    // Motor::default_pulse_period と異なる値を設定するため、 0.005Fを加える
+    float pulse_period = Motor::default_pulse_period + 0.005F;
     a3921.pulse_period(pulse_period);
 
     EXPECT_FLOAT_EQ(pwmh.read_period(), pulse_period);

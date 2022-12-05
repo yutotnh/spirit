@@ -19,6 +19,7 @@ target_include_directories(spirit
 
 target_sources(spirit
     PUBLIC
+    source/Motor.cpp
     source/MdLed.cpp
     source/A3921.cpp
 )
