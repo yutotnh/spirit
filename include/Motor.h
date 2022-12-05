@@ -82,8 +82,7 @@ public:
      * 設定したいデューティー比
      * - 0.00F = 0%, 1.00F = 100%
      * - 範囲: 0.00F <= value <= 1.00F
-     * - value < 0.00F の場合は 0.00F に設定される
-     * - 1.00F < value の場合は 1.00F に設定される
+     * - 範囲を超えた場合は、範囲の端に設定される
      */
     void duty_cycle(float value);
 
@@ -138,6 +137,7 @@ public:
      * @param seconds
      * 設定したいパルス周期(s)
      * - 範囲: 0.1s <= seconds <= 1.6666e-5s
+     * - 範囲を超えると、その範囲の端に設定される
      */
     void pulse_period(float seconds);
 
@@ -150,6 +150,7 @@ public:
     /**
      * @brief 最後にデータが来て何秒でモータを停止するかを設定する
      * @param seconds 停止までの秒数
+     *      - 0.0s より小さい場合は、停止しない
      */
     void release_time(float seconds);
 
@@ -181,7 +182,7 @@ public:
      * @brief Slow decayのPWM sideを返す
      * @return 設定したPwmSide
      */
-    PwmSide pwm_side() const;
+    PwmSide get_pwm_side() const;
 
     /**
      * @brief リセット機能を実行する
@@ -221,19 +222,20 @@ public:
     static constexpr float       default_pulse_period      = 1.0F / 5'000.0F;
     static constexpr float       min_pulse_period          = 1.0F / 60'000.0F;
     static constexpr float       max_pulse_period          = 1.0F / 10.0F;
+    static constexpr float       default_release_time      = 0.500F;
     static constexpr Decay       default_decay             = Decay::Slow;
     static constexpr PwmSide     default_pwm_side          = PwmSide::Low;
     static constexpr bool        default_reset             = false;
     static constexpr bool        default_sleep             = false;
 
 private:
-    float       _duty_cycle{0.0F};
+    float       _duty_cycle{0.00F};
     float       _velocity{0.0F};
     State       _state{default_state};
     ChangeLevel _rise_change_level{default_rise_change_level};
     ChangeLevel _fall_change_level{default_fall_change_level};
     float       _pulse_period{default_pulse_period};
-    float       _release_time{0.0F};
+    float       _release_time{default_release_time};
     Decay       _decay{default_decay};
     PwmSide     _pwm_side{default_pwm_side};
     bool        _reset{default_reset};

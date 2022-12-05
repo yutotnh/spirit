@@ -8,8 +8,9 @@ void Motor::duty_cycle(const float value)
         _duty_cycle = 1.00F;
     } else if (value < 0.00F) {
         _duty_cycle = 0.00F;
+    } else {
+        _duty_cycle = value;
     }
-    _duty_cycle = value;
 }
 
 float Motor::get_duty_cycle() const
@@ -77,8 +78,9 @@ void Motor::pulse_period(const float seconds)
         _pulse_period = max_pulse_period;
     } else if (seconds < min_pulse_period) {
         _pulse_period = min_pulse_period;
+    } else {
+        _pulse_period = seconds;
     }
-    _pulse_period = seconds;
 }
 
 float Motor::get_pulse_period() const
@@ -130,7 +132,7 @@ void Motor::pwm_side(const PwmSide type)
     _pwm_side = type;
 }
 
-Motor::PwmSide Motor::pwm_side() const
+Motor::PwmSide Motor::get_pwm_side() const
 {
     return _pwm_side;
 }
