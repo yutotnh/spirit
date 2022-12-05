@@ -135,9 +135,9 @@ Motor::PwmSide Motor::pwm_side() const
     return _pwm_side;
 }
 
-void Motor::reset(const bool enable)
+void Motor::reset(const bool enabled)
 {
-    _reset = enable;
+    _reset = enabled;
 }
 
 bool Motor::get_reset() const
@@ -145,9 +145,9 @@ bool Motor::get_reset() const
     return _reset;
 }
 
-void Motor::sleep(const bool enable)
+void Motor::sleep(const bool enabled)
 {
-    _sleep = enable;
+    _sleep = enabled;
 }
 
 bool Motor::get_sleep() const
