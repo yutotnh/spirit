@@ -11,7 +11,11 @@ project(spirit
 
 add_library(spirit STATIC)
 
-target_compile_options(spirit PUBLIC -O2 -Wall -Wextra)
+if(MSVC)
+    target_compile_options(spirit PUBLIC /W4 /WX)
+else()
+    target_compile_options(spirit PUBLIC -O2 -Wall -Wextra)
+endif()
 
 target_include_directories(spirit
     PUBLIC
