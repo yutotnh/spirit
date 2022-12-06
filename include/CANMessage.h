@@ -9,9 +9,11 @@ class CANMessage {
 public:
     /**
      * @brief CANメッセージを作成する
-     * @param id メッセージID
+     * @param id メッセージID (範囲: 0x000 - 0x7FF)
      * @param data メッセージデータ
-     * @param len メッセージデータの長さ
+     * @param len メッセージデータの長さ (範囲: 0 - 8)
+     * @details メッセージIDが範囲外の場合は、0x7FFに設定される @n
+     *          メッセージデータの長さが範囲外の場合は、8に設定される
      */
     CANMessage(uint16_t id, const uint8_t* data, uint8_t len);
 
