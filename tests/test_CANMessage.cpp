@@ -6,33 +6,14 @@ using namespace spirit;
 
 /**
  * @brief コンストラクタのテスト
- * @details メッセージIDが0x123で、データが0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07で、長さが8のメッセージを作成する
+ * @details メッセージIDが0x123で、データが0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07で、長さが8のメッセージを作成する @n
+ * 各データに細かく着目したテストは他で実施する
  */
 TEST(CANMessage, ConstructorTest1)
 {
     uint16_t id     = 0x123;
     uint8_t  data[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
     uint8_t  length = 8;
-
-    CANMessage msg(id, data, length);
-
-    EXPECT_EQ(msg.get_id(), id);
-    EXPECT_EQ(msg.get_length(), length);
-
-    uint8_t return_data[length];
-    msg.get_data(return_data);
-    EXPECT_EQ(memcmp(data, return_data, length), 0);
-}
-
-/**
- * @brief コンストラクタのテスト
- * @details メッセージIDが0x456で、データが0x0F, 0x0E, 0x0D, 0x0C, 0x0Bで、長さが5のメッセージを作成する
- */
-TEST(CANMessage, ConstructorTest2)
-{
-    uint16_t id     = 0x456;
-    uint8_t  data[] = {0x0F, 0x0E, 0x0D, 0x0C, 0x0B};
-    uint8_t  length = 5;
 
     CANMessage msg(id, data, length);
 
@@ -88,6 +69,46 @@ TEST(CANMessage, IdTest)
     // 入力:   最大値 + 1
     // 期待値: 最大値
     compare_can_massage_id(CANMessage::max_id + 1, CANMessage::max_id);
+}
+
+/**
+ * @brief データのテスト
+ */
+TEST(CANMessage, DataTest)
+{
+    // CANMessage の データ を比較する
+    // 期待値は、入力されたデータの長さに合わせて、入力されたデータの先頭から、長さ分だけをコピーしたもの
+    auto test_can_massage_data = [](uint8_t value) {
+        uint16_t id     = 0x123;
+        uint8_t  length = CANMessage::max_data_length;
+        uint8_t  data[length]{};
+
+        for (auto& data : data) {
+            data = value;
+        }
+
+        CANMessage msg(id, data, length);
+
+        uint8_t return_data[length];
+        msg.get_data(return_data);
+        EXPECT_EQ(memcmp(data, return_data, length), 0);
+
+        // いろんな値のデータが来てもIDとデータ長は変わらないことのテスト
+        EXPECT_EQ(msg.get_id(), id);
+        EXPECT_EQ(msg.get_length(), length);
+    };
+
+    // 型が uint8_t なので、データの最小値は0で、-1はない
+    // 同様に最大値は0xFFで、0x100はない
+    // そのため最小値 - 1と最大値 + 1 は行わない
+
+    uint8_t min_value = 0x00;
+    uint8_t max_value = 0xFF;
+
+    test_can_massage_data(min_value);
+    test_can_massage_data(min_value + 1);
+    test_can_massage_data(max_value - 1);
+    test_can_massage_data(max_value);
 }
 
 /**
