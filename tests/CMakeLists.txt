@@ -15,21 +15,26 @@ endif()
 # googletestをターゲットとして使えるようにする
 FetchContent_MakeAvailable(googletest)
 
+function(add_gtest target_source)
+    string(REPLACE ".cpp" "" target ${target_source})
+    add_executable(${target} ${ARGV})
+
+    if(MSVC)
+        target_compile_options(${target} PUBLIC /W4 /WX)
+    else()
+        target_compile_options(${target} PUBLIC -O2 -Wall -Wextra)
+    endif()
+
+    target_include_directories(${target} PUBLIC ../include)
+    target_link_libraries(${target} PRIVATE gtest_main spirit)
+    gtest_discover_tests(${target})
+endfunction()
+
 # 単体テストの定義
-add_executable(test_motor test_Motor.cpp)
-target_include_directories(test_motor PUBLIC ../include)
-target_link_libraries(test_motor PRIVATE gtest_main spirit)
-
-add_executable(test_mdled test_MdLed.cpp)
-target_include_directories(test_mdled PUBLIC ../include)
-target_link_libraries(test_mdled PRIVATE gtest_main spirit)
-
-add_executable(test_a3921 test_A3921.cpp)
-target_include_directories(test_mdled PUBLIC ../include)
-target_link_libraries(test_a3921 PRIVATE gtest_main spirit)
+include(GoogleTest)
 
 # CTestへ単体テストを登録
-include(GoogleTest)
-gtest_discover_tests(test_motor)
-gtest_discover_tests(test_mdled)
-gtest_discover_tests(test_a3921)
+add_gtest(test_Motor.cpp)
+add_gtest(test_CANMessage.cpp)
+add_gtest(test_MdLed.cpp)
+add_gtest(test_A3921.cpp)
