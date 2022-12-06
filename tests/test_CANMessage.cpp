@@ -83,8 +83,8 @@ TEST(CANMessage, DataTest)
         constexpr uint8_t  length = CANMessage::max_data_length;
         uint8_t            data[length]{};
 
-        for (auto& data : data) {
-            data = value;
+        for (auto& data_value : data) {
+            data_value = value;
         }
 
         CANMessage msg(id, data, length);
@@ -128,7 +128,7 @@ TEST(CANMessage, LengthTest)
         // 境界値前後のデータ長が来ても、IDとデータは変わらないことのテスト
         EXPECT_EQ(msg.get_id(), id);
 
-        uint8_t return_data[expected_length];
+        uint8_t return_data[CANMessage::max_data_length];
         msg.get_data(return_data);
         EXPECT_EQ(memcmp(data, return_data, expected_length), 0);
     };
