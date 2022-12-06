@@ -11,6 +11,8 @@ project(spirit
 
 add_library(spirit STATIC)
 
+target_compile_options(spirit PUBLIC -O2 -Wall -Wextra)
+
 target_include_directories(spirit
     PUBLIC
     .
@@ -20,6 +22,7 @@ target_include_directories(spirit
 target_sources(spirit
     PUBLIC
     source/Motor.cpp
+    source/CANMessage.cpp
     source/MdLed.cpp
     source/A3921.cpp
 )
