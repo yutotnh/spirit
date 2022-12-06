@@ -11,9 +11,9 @@ using namespace spirit;
  */
 TEST(CANMessage, ConstructorTest1)
 {
-    uint16_t id     = 0x123;
-    uint8_t  data[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
-    uint8_t  length = 8;
+    constexpr uint16_t id     = 0x123;
+    constexpr uint8_t  data[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
+    constexpr uint8_t  length = 8;
 
     CANMessage msg(id, data, length);
 
@@ -32,8 +32,8 @@ TEST(CANMessage, IdTest)
 {
     // CANMessage の id を比較する
     auto compare_can_massage_id = [](uint16_t id, uint16_t expected_id) {
-        uint8_t data[] = {0x0F, 0x0E, 0x0D, 0x0C, 0x0B};
-        uint8_t length = 5;
+        constexpr uint8_t data[] = {0x0F, 0x0E, 0x0D, 0x0C, 0x0B};
+        constexpr uint8_t length = 5;
 
         CANMessage msg(id, data, length);
 
@@ -79,9 +79,9 @@ TEST(CANMessage, DataTest)
     // CANMessage の データ を比較する
     // 期待値は、入力されたデータの長さに合わせて、入力されたデータの先頭から、長さ分だけをコピーしたもの
     auto test_can_massage_data = [](uint8_t value) {
-        uint16_t id     = 0x123;
-        uint8_t  length = CANMessage::max_data_length;
-        uint8_t  data[length]{};
+        constexpr uint16_t id     = 0x123;
+        constexpr uint8_t  length = CANMessage::max_data_length;
+        uint8_t            data[length]{};
 
         for (auto& data : data) {
             data = value;
@@ -102,8 +102,8 @@ TEST(CANMessage, DataTest)
     // 同様に最大値は0xFFで、0x100はない
     // そのため最小値 - 1と最大値 + 1 は行わない
 
-    uint8_t min_value = 0x00;
-    uint8_t max_value = 0xFF;
+    constexpr uint8_t min_value = 0x00;
+    constexpr uint8_t max_value = 0xFF;
 
     test_can_massage_data(min_value);
     test_can_massage_data(min_value + 1);
@@ -118,8 +118,8 @@ TEST(CANMessage, LengthTest)
 {
     // CANMessage の データ長 を比較する
     auto compare_can_massage_length = [](uint8_t length, uint8_t expected_length) {
-        uint16_t id     = 0x123;
-        uint8_t  data[] = {0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07};
+        constexpr uint16_t id     = 0x123;
+        constexpr uint8_t  data[] = {0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07};
 
         CANMessage msg(id, data, length);
 
