@@ -37,12 +37,16 @@ jobs:
       - name: Run doxygen
         uses: mattnotmitt/doxygen-action@v1.9.4
         with:
-          doxyfile-path: 'Doxyfile'
+          doxyfile-path: "doxygen/Doxyfile"
+      - name: Run doxygen
+        uses: mattnotmitt/doxygen-action@v1.9.4
+        with:
+          doxyfile-path: "doxygen/Doxyfile4GeneralUsers"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload entire repository
-          path: 'html'
+          path: "html"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
