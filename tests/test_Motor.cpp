@@ -15,31 +15,31 @@ TEST(Motor, InitValueTest)
     EXPECT_FLOAT_EQ(motor.get_velocity(), 0.0F);
 
     // enum class や bool で定義した型を使うと、以下のようなエラーになるので、一旦変数に保存させる
-    //      undefined reference to `spirit::Motor::default_rise_change_level'
+    //      undefined reference to `spirit::Motor::Default::rise_change_level'
 
-    auto state = Motor::default_state;
+    auto state = Motor::Default::state;
     EXPECT_EQ(motor.get_state(), state);
 
-    auto rise = Motor::default_rise_change_level;
+    auto rise = Motor::Default::rise_change_level;
     EXPECT_EQ(motor.get_change_level(Motor::ChangeLevelTarget::Rise), rise);
 
-    auto fall = Motor::default_fall_change_level;
+    auto fall = Motor::Default::fall_change_level;
     EXPECT_EQ(motor.get_change_level(Motor::ChangeLevelTarget::Fall), fall);
 
-    EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::default_pulse_period);
+    EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::Default::pulse_period);
 
-    EXPECT_FLOAT_EQ(motor.get_release_time(), Motor::default_release_time);
+    EXPECT_FLOAT_EQ(motor.get_release_time(), Motor::Default::release_time);
 
-    auto decay = Motor::default_decay;
+    auto decay = Motor::Default::decay;
     EXPECT_EQ(motor.get_decay(), decay);
 
-    auto pwm_side = Motor::default_pwm_side;
+    auto pwm_side = Motor::Default::pwm_side;
     EXPECT_EQ(motor.get_pwm_side(), pwm_side);
 
-    auto reset = Motor::default_reset;
+    auto reset = Motor::Default::reset;
     EXPECT_EQ(motor.get_reset(), reset);
 
-    auto sleep = Motor::default_sleep;
+    auto sleep = Motor::Default::sleep;
     EXPECT_EQ(motor.get_sleep(), sleep);
 }
 

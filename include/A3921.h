@@ -125,9 +125,9 @@ private:
     InterfaceDigitalOut& _reset;
 
     float          _duty_cycle{0.00F};
-    Motor::State   _state{Motor::default_state};
-    Motor::Decay   _decay{Motor::default_decay};
-    Motor::PwmSide _pwm_side{Motor::default_pwm_side};
+    Motor::State   _state{Motor::Default::state};
+    Motor::Decay   _decay{Motor::Default::decay};
+    Motor::PwmSide _pwm_side{Motor::Default::pwm_side};
 
     /**
      * @brief Slow decayとしてモータを動かす

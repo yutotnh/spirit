@@ -6,8 +6,8 @@ namespace spirit {
 
 MdLed::MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1) : _led0(led0), _led1(led1)
 {
-    mode(default_blink_mode);
-    state(Motor::default_state);
+    mode(Default::blink_mode);
+    state(Motor::Default::state);
 }
 
 void MdLed::state(const Motor::State type)
@@ -18,7 +18,6 @@ void MdLed::state(const Motor::State type)
         return;
     }
 
-    lock();
     _mode = BlinkMode::Normal;
     switch (type) {
         case Motor::State::Coast:
@@ -37,15 +36,12 @@ void MdLed::state(const Motor::State type)
             // 未定義の値
             break;
     }
-    unlock();
 }
 
 void MdLed::write(const uint32_t type)
 {
-    lock();
     _led0.write(type & 1);
     _led1.write((type & 2) >> 1);
-    unlock();
 }
 
 uint32_t MdLed::read() const
@@ -69,8 +65,6 @@ void MdLed::mode(const BlinkMode mode)
             return;
     }
 
-    lock();
-
     _counter = 0;
     _mode    = mode;
 
@@ -84,8 +78,6 @@ void MdLed::mode(const BlinkMode mode)
         default:
             break;
     }
-
-    unlock();
 }
 
 void MdLed::reset_error()
@@ -206,16 +198,6 @@ void MdLed::error_blink()
     if (_error_section == _error_bit_width * 2) {
         _error_section = 0;
     }
-}
-
-void MdLed::lock()
-{
-    // _mutex.lock();
-}
-
-void MdLed::unlock()
-{
-    // _mutex.unlock();
 }
 
 }  // namespace spirit
