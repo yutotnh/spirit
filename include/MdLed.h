@@ -91,10 +91,10 @@ private:
     /// LEDの上位ビット
     InterfaceDigitalOut &_led1;
 
-    Motor::State _state{Motor::default_state};
-    BlinkMode    _mode{default_blink_mode};
+    Motor::State _state{Motor::Default::state};
+    BlinkMode    _mode{Default::blink_mode};
     // Mutex  _mutex;
-    uint32_t _interval{default_interval};
+    uint32_t _interval{Default::interval};
     uint32_t _counter{0};
     uint32_t _error{0};
 
@@ -113,19 +113,28 @@ private:
      */
     uint32_t read() const;
 
-    // 交互に点滅
+    /**
+     * @brief 交互に点滅 (0b10 -> 0b01 -> 0b10)
+     */
     void alternately_blink();
 
-    // ２つが同時に点滅
+    /**
+     * @brief 同時に点滅 (0b11 -> 0b00 -> 0b11)
+     */
     void concurrently_blink();
 
+    /**
+     * @brief エラーの値を表現する点滅
+     */
     void error_blink();
 
-    void lock();
-    void unlock();
-
-    static constexpr uint32_t  default_interval   = 500;
-    static constexpr BlinkMode default_blink_mode = BlinkMode::Normal;
+    /**
+     * @brief デフォルト値を格納している構造体
+     */
+    struct Default {
+        static constexpr uint32_t  interval   = 500;
+        static constexpr BlinkMode blink_mode = BlinkMode::Normal;
+    };
 };
 
 }  // namespace spirit

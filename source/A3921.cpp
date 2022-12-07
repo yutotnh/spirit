@@ -7,9 +7,9 @@ A3921::A3921(InterfaceDigitalOut& sr, InterfacePwmOut& pwmh, InterfacePwmOut& pw
     : _sr(sr), _pwmh(pwmh), _pwml(pwml), _phase(phase), _reset(reset)
 {
     sleep(false);
-    _pwmh.period(Motor::default_pulse_period);
-    _pwml.period(Motor::default_pulse_period);
-    _phase.period(Motor::default_pulse_period);
+    _pwmh.period(Motor::Default::pulse_period);
+    _pwml.period(Motor::Default::pulse_period);
+    _phase.period(Motor::Default::pulse_period);
     run();
 }
 

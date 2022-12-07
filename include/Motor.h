@@ -216,30 +216,36 @@ public:
      */
     bool get_sleep() const;
 
-    static constexpr State       default_state             = State::Brake;
-    static constexpr ChangeLevel default_rise_change_level = ChangeLevel::OFF;
-    static constexpr ChangeLevel default_fall_change_level = ChangeLevel::OFF;
-    static constexpr float       default_pulse_period      = 1.0F / 5'000.0F;
-    static constexpr float       min_pulse_period          = 1.0F / 60'000.0F;
-    static constexpr float       max_pulse_period          = 1.0F / 10.0F;
-    static constexpr float       default_release_time      = 0.500F;
-    static constexpr Decay       default_decay             = Decay::Slow;
-    static constexpr PwmSide     default_pwm_side          = PwmSide::Low;
-    static constexpr bool        default_reset             = false;
-    static constexpr bool        default_sleep             = false;
+    /**
+     * @brief デフォルト値を格納している構造体
+     */
+    struct Default {
+        static constexpr State       state             = State::Brake;
+        static constexpr ChangeLevel rise_change_level = ChangeLevel::OFF;
+        static constexpr ChangeLevel fall_change_level = ChangeLevel::OFF;
+        static constexpr float       pulse_period      = 1.0F / 5'000.0F;
+        static constexpr float       release_time      = 0.500F;
+        static constexpr Decay       decay             = Decay::Slow;
+        static constexpr PwmSide     pwm_side          = PwmSide::Low;
+        static constexpr bool        reset             = false;
+        static constexpr bool        sleep             = false;
+    };
+
+    static constexpr float min_pulse_period = 1.0F / 60'000.0F;
+    static constexpr float max_pulse_period = 1.0F / 10.0F;
 
 private:
     float       _duty_cycle{0.00F};
     float       _velocity{0.0F};
-    State       _state{default_state};
-    ChangeLevel _rise_change_level{default_rise_change_level};
-    ChangeLevel _fall_change_level{default_fall_change_level};
-    float       _pulse_period{default_pulse_period};
-    float       _release_time{default_release_time};
-    Decay       _decay{default_decay};
-    PwmSide     _pwm_side{default_pwm_side};
-    bool        _reset{default_reset};
-    bool        _sleep{default_sleep};
+    State       _state{Default::state};
+    ChangeLevel _rise_change_level{Default::rise_change_level};
+    ChangeLevel _fall_change_level{Default::fall_change_level};
+    float       _pulse_period{Default::pulse_period};
+    float       _release_time{Default::release_time};
+    Decay       _decay{Default::decay};
+    PwmSide     _pwm_side{Default::pwm_side};
+    bool        _reset{Default::reset};
+    bool        _sleep{Default::sleep};
 };
 
 }  // namespace spirit
