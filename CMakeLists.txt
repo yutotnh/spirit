@@ -27,6 +27,7 @@ target_sources(spirit
     PUBLIC
     source/Motor.cpp
     source/CANMessage.cpp
+    source/MotorProtocolCoder.cpp
     source/MdLed.cpp
     source/A3921.cpp
 )

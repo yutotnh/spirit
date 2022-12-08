@@ -36,5 +36,6 @@ include(GoogleTest)
 # CTestへ単体テストを登録
 add_gtest(test_Motor.cpp)
 add_gtest(test_CANMessage.cpp)
+add_gtest(test_MotorProtocolCoder.cpp)
 add_gtest(test_MdLed.cpp)
 add_gtest(test_A3921.cpp)
