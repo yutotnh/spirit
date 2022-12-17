@@ -64,7 +64,9 @@ TEST(PwmDataConverter, MaxBufferSizeTest)
         PwmDataConverter pwm_data_converter;
         Motor            motor;
 
-        uint8_t     buffer[max_buffer_size]{};
+        // 今のところバッファサイズは8以上を想定していないので8にする
+        uint8_t buffer[8]{};
+
         std::size_t buffer_size = 0;
 
         bool is_succeeded = pwm_data_converter.encode(motor, max_buffer_size, buffer, buffer_size);
