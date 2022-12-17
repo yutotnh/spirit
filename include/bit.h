@@ -1,6 +1,7 @@
 #ifndef SPIRIT_BIT_H
 #define SPIRIT_BIT_H
 
+#include <cstddef>
 #include <cstdint>
 
 namespace spirit {

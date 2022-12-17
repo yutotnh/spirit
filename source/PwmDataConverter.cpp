@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "bit.h"
+
 namespace spirit {
 
 bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,

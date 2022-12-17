@@ -1,6 +1,8 @@
 #ifndef SPIRIT_PWM_DATA_CONVERTER_H
 #define SPIRIT_PWM_DATA_CONVERTER_H
 
+#include <cstddef>
+
 #include "Motor.h"
 
 namespace spirit {
@@ -18,7 +20,7 @@ public:
      * @param buffer_size エンコードしたデータのサイズ
      * @return
      */
-    bool encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer, std::size_t& buffer_size);
+    bool encode(const Motor& motor, std::size_t max_buffer_size, uint8_t* buffer, std::size_t& buffer_size);
 
     /**
      * @brief モーターの情報をデコードする
