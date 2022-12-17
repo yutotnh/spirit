@@ -12,7 +12,7 @@ project(spirit
 add_library(spirit STATIC)
 
 if(MSVC)
-    target_compile_options(spirit PUBLIC /W4 /WX)
+    target_compile_options(spirit PUBLIC /W4)
 else()
     target_compile_options(spirit PUBLIC -O2 -Wall -Wextra)
 endif()
@@ -25,8 +25,10 @@ target_include_directories(spirit
 
 target_sources(spirit
     PUBLIC
+    source/bit.cpp
     source/Motor.cpp
     source/CANMessage.cpp
+    source/PwmDataConverter.cpp
     source/MdLed.cpp
     source/A3921.cpp
 )
