@@ -8,7 +8,7 @@ uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, c
                          const std::size_t value_size)
 {
     auto end = start + value_size - 1;
-    if ((buffer_size * __CHAR_BIT__) < end) {
+    if ((buffer_size * CHAR_BIT) < end) {
         return UINT32_MAX;
     }
 
@@ -29,7 +29,7 @@ bool set_range_value(const uint32_t value, const std::size_t start, const std::s
                      const std::size_t buffer_size, uint8_t* buffer)
 {
     auto end = start + value_size - 1;
-    if ((buffer_size * __CHAR_BIT__) < end) {
+    if ((buffer_size * CHAR_BIT) < end) {
         return false;
     }
 
