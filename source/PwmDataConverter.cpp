@@ -52,9 +52,9 @@ void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer)
 
 Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
 {
-    uint8_t state_uint8_t = get_range_value(buffer, 8, 18, 2);
+    const uint32_t state_uint32_t = get_range_value(buffer, 8, 18, 2);
 
-    switch (state_uint8_t) {
+    switch (state_uint32_t) {
         case 0x00U:
             return Motor::State::Coast;
         case 0x01U:

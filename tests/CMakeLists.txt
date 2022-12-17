@@ -20,7 +20,7 @@ function(add_gtest target_source)
     add_executable(${target} ${ARGV})
 
     if(MSVC)
-        target_compile_options(${target} PUBLIC /W4 /WX)
+        target_compile_options(${target} PUBLIC /W4)
     else()
         target_compile_options(${target} PUBLIC -O2 -Wall -Wextra)
     endif()

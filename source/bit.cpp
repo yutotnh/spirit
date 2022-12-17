@@ -1,5 +1,7 @@
 #include "bit.h"
 
+#include <climits>
+
 namespace spirit {
 
 uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const std::size_t start,

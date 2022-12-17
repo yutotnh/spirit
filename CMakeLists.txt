@@ -12,7 +12,7 @@ project(spirit
 add_library(spirit STATIC)
 
 if(MSVC)
-    target_compile_options(spirit PUBLIC /W4 /WX)
+    target_compile_options(spirit PUBLIC /W4)
 else()
     target_compile_options(spirit PUBLIC -O2 -Wall -Wextra)
 endif()
