@@ -37,7 +37,7 @@ Google Testを使っています
 
 下の手順でビルドからテストの実行までできます
 
-```console
+```shell
 cd $(git rev-parse --show-superproject-working-tree --show-toplevel | head -1) # リポジトリのルートディレクトリに移動
 cmake -S . -B build # Configurate & Generate
 cmake --build build # Build
@@ -58,8 +58,8 @@ Doxygenを使って、ソースコードからドキュメントを生成して�
 
 生成したドキュメントへのリンクは以下です。
 
-- [一般ユーザ用](yutotnh.github.io/spirit/general)
-- [spirit開発者用(全部入り)](yutotnh.github.io/spirit/general)
+- [一般ユーザ用](https://yutotnh.github.io/spirit/general)
+- [spirit開発者用(全部入り)](https://yutotnh.github.io/spirit/general)
 
 ## Contributing
 
