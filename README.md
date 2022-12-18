@@ -59,7 +59,7 @@ Doxygenを使って、ソースコードからドキュメントを生成して�
 生成したドキュメントへのリンクは以下です。
 
 - [一般ユーザ用](https://yutotnh.github.io/spirit/general)
-- [spirit開発者用(全部入り)](https://yutotnh.github.io/spirit/general)
+- [spirit開発者用(全部入り)](https://yutotnh.github.io/spirit)
 
 ## Contributing
 
