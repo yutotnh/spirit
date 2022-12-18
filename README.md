@@ -1,6 +1,6 @@
-<img src="./images/icon.svg" width="200" style="display: block; margin: auto;">
-
 <div align="center">
+
+<img src="./images/icon.svg" width="200">
 
 [![Build spirit](https://github.com/yutotnh/spirit/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/yutotnh/spirit/actions/workflows/build.yml)
 [![Testing With CMake and CTest](https://github.com/yutotnh/spirit/actions/workflows/cmake-test.yml/badge.svg?branch=main)](https://github.com/yutotnh/spirit/actions/workflows/cmake-test.yml)
