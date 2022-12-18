@@ -7,9 +7,10 @@ namespace can {
 namespace {
 
 /**
- * @brief
- * @param dip_switch_size
- * @return
+ * @brief DIPスイッチの値がビット幅を超えていないかチェックする
+ * @param dip_switch_size DIPスイッチの値
+ * @return true  : ビット幅を超えていない (正常) @n
+ *         false : ビット幅を超えている (異常)
  */
 bool dip_switch_is_valid(uint32_t dip_switch, std::size_t dip_switch_size)
 {
@@ -18,6 +19,13 @@ bool dip_switch_is_valid(uint32_t dip_switch, std::size_t dip_switch_size)
     return (dip_switch >> dip_switch_size) == 0;
 }
 
+/**
+ * @brief モーター番号がモーターの数を超えていないかチェックする
+ * @param motor モーター番号
+ * @param motor_count モーターの数
+ * @return true  : モーターの数を超えていない (正常) @n
+ *         false : モーターの数を超えている (異常)
+ */
 bool motor_is_valid(uint32_t motor, uint32_t motor_count)
 {
     // モーター番号がモーターの数を超えていないかチェックする
@@ -48,6 +56,10 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     // - motor_count = 3: 0b10 // 3つの場合、表現に必要なビットは2bitであるため、4つの場合と同じになる
     // - motor_count = 4: 0b10
     uint32_t type = 0;
+
+    if ((motor_count == 0) || (4 < motor_count)) {
+        return 0;
+    }
 
     if (motor_count == 1) {
         type = 0;

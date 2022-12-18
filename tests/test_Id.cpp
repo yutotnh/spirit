@@ -4,6 +4,9 @@
 
 using namespace spirit;
 
+/**
+ * @brief can::get_motor_id() のテスト
+ */
 TEST(Id, IdCanMotorTest)
 {
     // 正常系のテスト
