@@ -59,9 +59,9 @@ Doxygenを使って、ソースコードからドキュメントを生成して�
 生成したドキュメントへのリンクは以下です。
 
 - [一般ユーザ用](https://yutotnh.github.io/spirit/general)
-  - Controller側で利用するクラス等のみをまとめたページ
+  - Controller側で利用するAPIのみをまとめたページ
 - [開発者用](https://yutotnh.github.io/spirit)
-  - Controller/Peripheral全て入ったページ(=全部入り)
+  - Controller/Peripheral側の全てのAPIをまとめたページ(=全部入り)
 
 ## 🤝 Contributing
 
