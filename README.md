@@ -36,12 +36,11 @@ Google Testを使っています
 
 ### Build & Test
 
-下の手順でビルドからテストの実行までできます
+リポジトリのルートディレクトリで下の手順を行うことで、ビルドからテストの実行ができます
 
 ```shell
-cd $(git rev-parse --show-superproject-working-tree --show-toplevel | head -1) # リポジトリのルートディレクトリに移動
-cmake -S . -B build # Configurate & Generate
-cmake --build build # Build
+cmake -S . -B build    # Configurate & Generate
+cmake --build build    # Build
 ctest --test-dir build # Test
 ```
 
