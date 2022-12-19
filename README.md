@@ -19,10 +19,11 @@
 
 ```mermaid
 flowchart TB
-    A[Controller] -- CAN --> B[Peripheral]
-    A -- CAN --> C[Peripheral]
-    A -- CAN --> D[Peripheral]
-    A -- CAN --> E[Peripheral]
+    A[Controller]
+    A -- CAN --> B["Peripheral\n(Motor Driver)"] --> B2[Motor]
+    A -- CAN --> C["Peripheral\n(Motor Driver)"] --> C2[Motor]
+    A -- CAN --> D["Peripheral\n(Motor Driver)"] --> D2[Motor]
+    A -- CAN --> E["Peripheral\n(Motor Driver)"] --> E2[Motor]
 ```
 
 最終的にはMbed/Arduino等での利用を想定していますが、自動テストを非マイコンで行う都合上、可能な限り特定の環境への依存を減らしています
