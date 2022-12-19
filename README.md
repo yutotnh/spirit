@@ -28,7 +28,7 @@ flowchart TB
 
 最終的にはMbed/Arduino等での利用を想定していますが、自動テストを非マイコンで行う都合上、可能な限り特定の環境への依存を減らしています
 
-## Development
+## ⌨️ Development
 
 ### Test
 
@@ -48,19 +48,25 @@ ctest --test-dir build # Test
 
 このリポジトリは、Visual Studio Code Dev Containers/GitHub Codespaces を含んでいます
 
-Development Containers を利用することで、本プロジェクトでの開発に必要な最低限の環境を自動的に構築し、直ちに開発に取り組むことができます。
+Development Containers を利用することで、本プロジェクトでの開発に必要な最低限の環境を自動的に構築し、直ちに開発に取り組むことができます
 
 使い方等の詳細は、 [Developing inside a Container](https://code.visualstudio.com/docs/devcontainers/containers) をご覧ください
 
-## Document
+## 📖 Document
 
 Doxygenを使って、ソースコードからドキュメントを生成しています
 
 生成したドキュメントへのリンクは以下です。
 
 - [一般ユーザ用](https://yutotnh.github.io/spirit/general)
-- [spirit開発者用(全部入り)](https://yutotnh.github.io/spirit)
+  - Controller側で利用するAPIのみをまとめたページ
+- [開発者用](https://yutotnh.github.io/spirit)
+  - Controller/Peripheral側の全てのAPIをまとめたページ(=全部入り)
 
-## Contributing
+## 🤝 Contributing
 
 PullRequestやissueを送る際は、 [CONTRIBUTING.md](./CONTRIBUTING.md) をご覧ください
+
+## 🏃 利用例
+
+準備中:construction:
