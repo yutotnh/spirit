@@ -36,4 +36,4 @@
 - `if` , `for` , `while` 中の処理が1行でも `{ ... }` を利用する
 - private なメンバ変数は先頭に `_` をつける
 - public な関数には Doxygen 形式のコメントを付ける
-- ClangFormat を使って自動成形する
+- ClangFormat を使って自動整形する
