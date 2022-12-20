@@ -1,6 +1,19 @@
 name: Build spirit
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "CMakeLists.txt"
+      - "**.h"
+      - "**.cpp"
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "**.h"
+      - "**.cpp"
+  workflow_dispatch:
 
 jobs:
   build-cli-v1:
