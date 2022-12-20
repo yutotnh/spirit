@@ -1,6 +1,19 @@
 name: Testing With CMake and CTest
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "CMakeLists.txt"
+      - "**.h"
+      - "**.cpp"
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "**.h"
+      - "**.cpp"
+  workflow_dispatch:
 
 jobs:
   build-and-test:
@@ -10,12 +23,11 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Build & Test
-      run: |
-        cmake -S . -B build
-        cmake --build build
-        cd build
-        ctest --output-on-failure --verbose
-
+      - name: Build & Test
+        run: |
+          cmake -S . -B build
+          cmake --build build
+          cd build
+          ctest --output-on-failure --verbose
