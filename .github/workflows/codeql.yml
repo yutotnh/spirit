@@ -13,6 +13,12 @@ name: "CodeQL"
 
 on:
   push:
+    branches:
+      - "main"
+    paths:
+      - "CMakeLists.txt"
+      - "**.h"
+      - "**.cpp"
   pull_request:
     # The branches below must be a subset of the branches above
     branches:
@@ -23,6 +29,7 @@ on:
       - "**.cpp"
   schedule:
     - cron: "36 3 * * 1"
+  workflow_dispatch:
 
 jobs:
   analyze:
