@@ -5,6 +5,9 @@
 
 namespace spirit {
 
+/**
+ * @brief MbedのCanMessageクラスを模した基底クラス
+ */
 class CANMessage {
 public:
     /**
