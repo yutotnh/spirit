@@ -11,7 +11,7 @@ using namespace spirit;
  * @param led1 上位ビットのLED
  * @return led0, led1 の値を2bitとしてまとめた値
  */
-static uint32_t leds_value(const StubDigitalOut& led0, const StubDigitalOut& led1)
+static uint32_t leds_value(StubDigitalOut& led0, StubDigitalOut& led1)
 {
     return (led1.read() << 1) + led0.read();
 }
@@ -28,7 +28,7 @@ static uint32_t leds_value(const StubDigitalOut& led0, const StubDigitalOut& led
  * @note BlinkMode::Normal では MdLed::blinking_rate() で指定した回数より多く同じ値にならないので @n
  * loop があることで BlinkMode::Normal かそれ以外かの判別がつく
  */
-static uint32_t compare_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOut& led1, const uint32_t value,
+static uint32_t compare_leds(MdLed& mdled, StubDigitalOut& led0, StubDigitalOut& led1, const uint32_t value,
                              uint32_t loop)
 {
     for (uint32_t i = 0; i < loop; i++) {
@@ -117,8 +117,7 @@ TEST(MdLed, SetGetValueTest)
  * @param blinking_rate
  * @return 次の周期のLEDの値
  */
-static uint32_t next_leds(MdLed& mdled, const StubDigitalOut& led0, const StubDigitalOut& led1,
-                          const uint32_t blinking_rate)
+static uint32_t next_leds(MdLed& mdled, StubDigitalOut& led0, StubDigitalOut& led1, const uint32_t blinking_rate)
 {
     // blinking_rate 期間中、値が変化していないことを確認する
     uint32_t value = leds_value(led0, led1);

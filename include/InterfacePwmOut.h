@@ -24,7 +24,7 @@ public:
      *         - 0.00F = 0%, 1.00F = 100%
      *         - 範囲: 0.00F <= value <= 1.00F
      */
-    virtual float read() const = 0;
+    virtual float read() = 0;
 
     /**
      * @brief PWM周期を秒単位で設定する
