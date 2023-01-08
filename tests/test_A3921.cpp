@@ -15,7 +15,7 @@ using namespace spirit;
  * @retval true Brake 状態
  * @retval false 非 Brake 状態
  */
-static bool is_brake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
+static bool is_brake(StubPwmOut& pwmh, StubPwmOut& pwml)
 {
     return ((fabsf(pwmh.read() - 1.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) ||
            ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 1.00F) < FLT_EPSILON));
@@ -28,7 +28,7 @@ static bool is_brake(const StubPwmOut& pwmh, const StubPwmOut& pwml)
  * @retval true Coast 状態
  * @retval false 非 Coast 状態
  */
-static bool is_coast(const StubPwmOut& pwmh, const StubPwmOut& pwml)
+static bool is_coast(StubPwmOut& pwmh, StubPwmOut& pwml)
 {
     return (fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON);
 }

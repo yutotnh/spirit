@@ -23,7 +23,7 @@ public:
      * @retval 0 Low
      * @retval 1 High
      */
-    virtual uint32_t read();
+    virtual uint32_t read() = 0;
 };
 
 }  // namespace spirit

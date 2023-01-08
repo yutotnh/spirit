@@ -24,7 +24,7 @@ public:
      * @retval 0 Low
      * @retval 1 High
      */
-    uint32_t read() const override
+    uint32_t read() override
     {
         return _value;
     }
@@ -53,7 +53,7 @@ public:
      *         - 0.00F = 0%, 1.00F = 100%
      *         - 範囲: 0.00F <= value <= 1.00F
      */
-    float read() const override
+    float read() override
     {
         return _value;
     }
