@@ -34,7 +34,7 @@ flowchart TB
 
 リポジトリのルートディレクトリで下の手順を行うことで、ビルドからテストの実行ができます
 
-テストフレームワークとして Google Test を利用しています。
+テストフレームワークとして Google Test を利用しています
 
 テスト
 
@@ -56,7 +56,7 @@ Development Containers を利用することで、本プロジェクトでの開
 
 Doxygenを使って、ソースコードからドキュメントを生成しています
 
-生成したドキュメントへのリンクは以下です。
+生成したドキュメントへのリンクは以下です
 
 - [一般ユーザ用](https://yutotnh.github.io/spirit/general)
   - Controller側で利用するAPIのみをまとめたページ
