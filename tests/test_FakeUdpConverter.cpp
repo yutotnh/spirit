@@ -132,7 +132,7 @@ TEST(FakeUdpConverter, DecodeTest)
     {
         FakeUdpConverter fake_udp_converter;
 
-        constexpr std::size_t max_payload_size = 8;
+        constexpr std::size_t max_payload_size = 7;
         std::size_t           payload_size;
         uint8_t               payload[1] = {};
 
@@ -169,9 +169,9 @@ TEST(FakeUdpConverter, DecodeTest)
     {
         FakeUdpConverter fake_udp_converter;
 
-        constexpr std::size_t max_payload_size = 16;
+        constexpr std::size_t max_payload_size = 6;
         std::size_t           payload_size;
-        uint8_t               payload[2] = {};
+        uint8_t               payload[1] = {};
 
         uint8_t               buffer[1]   = {0x7E};
         constexpr std::size_t buffer_size = 7;
@@ -187,7 +187,7 @@ TEST(FakeUdpConverter, DecodeTest)
     {
         FakeUdpConverter fake_udp_converter;
 
-        constexpr std::size_t max_payload_size = 16;
+        constexpr std::size_t max_payload_size = 8;
         std::size_t           payload_size;
         uint8_t               payload[1] = {};
 
