@@ -5,14 +5,16 @@ on:
     branches:
       - "main"
     paths:
-      - "CMakeLists.txt"
+      - "**/CMakeLists.txt"
       - "**.h"
       - "**.cpp"
+      - "**/style-check.yml"
   pull_request:
     paths:
-      - "CMakeLists.txt"
+      - "**/CMakeLists.txt"
       - "**.h"
       - "**.cpp"
+      - "**/style-check.yml"
   workflow_dispatch:
 
 jobs:

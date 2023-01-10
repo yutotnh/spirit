@@ -5,14 +5,16 @@ on:
     branches:
       - "main"
     paths:
-      - "CMakeLists.txt"
+      - "**/CMakeLists.txt"
       - "**.h"
       - "**.cpp"
+      - "**/cmake-test.yml"
   pull_request:
     paths:
-      - "CMakeLists.txt"
+      - "**/CMakeLists.txt"
       - "**.h"
       - "**.cpp"
+      - "**/cmake-test.yml"
   workflow_dispatch:
 
 jobs:
@@ -25,9 +27,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build & Test
+      - name: Build
         run: |
           cmake -S . -B build
           cmake --build build
+      - name: Test
+        run: |
           cd build
           ctest --output-on-failure --verbose
