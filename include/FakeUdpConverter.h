@@ -1,6 +1,7 @@
 #ifndef SPIRIT_FAKE_UDP_CONVERTER_H
 #define SPIRIT_FAKE_UDP_CONVERTER_H
 
+#include <cstddef>
 #include <cstdint>
 
 namespace spirit {

@@ -55,7 +55,10 @@ bool FakeUdpConverter::decode(const uint8_t* buffer, const std::size_t buffer_si
     for (std::size_t i = 0; i < buffer_byte_size - 1; i++) {
         payload[i] = ((buffer[i] & 0x7F) << 1) + (buffer[i + 1] >> 7);
     }
-    payload[buffer_byte_size - 1] = ((buffer[buffer_byte_size - 1] & 0x7F) << 1);
+
+    if (buffer_size % 8 != 1) {
+        payload[buffer_byte_size - 1] = ((buffer[buffer_byte_size - 1] & 0x7F) << 1);
+    }
 
     payload_size = buffer_size - 1;
 
