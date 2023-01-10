@@ -16,12 +16,15 @@ TEST(PwmDataConverter, EncodeDecodePwmTest)
         motor.duty_cycle(duty_cycle);
         motor.state(state);
 
-        constexpr std::size_t max_buffer_size = 8;
-        uint8_t               buffer[max_buffer_size]{};
+        constexpr std::size_t max_buffer_size = 24;
+        uint8_t               buffer[max_buffer_size / 8]{};
         std::size_t           buffer_size = 0;
 
         pwm_data_converter.encode(motor, max_buffer_size, buffer, buffer_size);
-        EXPECT_EQ(3, buffer_size);
+
+        // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
+        constexpr std::size_t expected_buffer_size = 20;
+        EXPECT_EQ(expected_buffer_size, buffer_size);
 
         Motor decoded_motor;
         pwm_data_converter.decode(buffer, max_buffer_size, decoded_motor);
@@ -75,9 +78,9 @@ TEST(PwmDataConverter, MaxBufferSizeTest)
 
     // バッファサイズが0、境界値の場合のテストを行う
     max_buffer_size_test(0, false);
-    max_buffer_size_test(2, false);
-    max_buffer_size_test(3, true);
-    max_buffer_size_test(4, true);
+    max_buffer_size_test(16, false);
+    max_buffer_size_test(24, true);
+    max_buffer_size_test(32, true);
 }
 
 /**
@@ -100,7 +103,7 @@ TEST(PwmDataConverter, EncodeBufferSizeTest)
 
     // バッファサイズが0、境界値の場合のテストを行う
     buffer_size_test(0, false);
-    buffer_size_test(2, false);
-    buffer_size_test(3, true);
-    buffer_size_test(4, true);
+    buffer_size_test(6, false);
+    buffer_size_test(24, true);
+    buffer_size_test(32, true);
 }

@@ -15,9 +15,9 @@ public:
     /**
      * @brief モーターの情報をエンコードする
      * @param motor モーター
-     * @param max_buffer_size エンコードしたデータの最大サイズ
+     * @param max_buffer_size エンコードしたデータの最大ビット幅
      * @param buffer エンコードしたデータを格納するバッファ
-     * @param buffer_size エンコードしたデータのサイズ
+     * @param buffer_size エンコードしたデータのビット幅
      * @return
      */
     bool encode(const Motor& motor, std::size_t max_buffer_size, uint8_t* buffer, std::size_t& buffer_size);
@@ -25,7 +25,7 @@ public:
     /**
      * @brief モーターの情報をデコードする
      * @param buffer デコードするデータ
-     * @param buffer_size デコードするデータのサイズ
+     * @param buffer_size デコードするデータのビット幅
      * @param motor デコードした情報を格納するモーター
      * @return
      */

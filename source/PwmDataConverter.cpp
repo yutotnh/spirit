@@ -9,14 +9,15 @@ namespace spirit {
 bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,
                               std::size_t& buffer_size)
 {
-    // PWM制御を示すヘッダをセット(既に0で初期化されているので不要)
-    // buffer[0] = 0x00;
-
-    buffer_size = 3;
+    // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
+    buffer_size = 20;
 
     if (max_buffer_size < buffer_size) {
         return false;
     }
+
+    // PWM制御を示すヘッダをセット
+    buffer[0] = 0x00;
 
     set_duty_cycle(motor.get_duty_cycle(), buffer);
 
@@ -27,7 +28,8 @@ bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_s
 
 bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor)
 {
-    const std::size_t required_size = 3;
+    // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
+    constexpr std::size_t required_size = 20;
     if (buffer_size < required_size) {
         return false;
     }
