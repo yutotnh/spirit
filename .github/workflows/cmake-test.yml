@@ -5,16 +5,16 @@ on:
     branches:
       - "main"
     paths:
-      - "CMakeLists.txt"
+      - "**/CMakeLists.txt"
       - "**.h"
       - "**.cpp"
-      - "cmake-test.yml"
+      - "**/cmake-test.yml"
   pull_request:
     paths:
-      - "CMakeLists.txt"
+      - "**/CMakeLists.txt"
       - "**.h"
       - "**.cpp"
-      - "cmake-test.yml"
+      - "**/cmake-test.yml"
   workflow_dispatch:
 
 jobs:
