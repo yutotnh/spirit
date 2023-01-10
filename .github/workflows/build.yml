@@ -8,11 +8,13 @@ on:
       - "CMakeLists.txt"
       - "**.h"
       - "**.cpp"
+      - "build.yml"
   pull_request:
     paths:
       - "CMakeLists.txt"
       - "**.h"
       - "**.cpp"
+      - "build.yml"
   workflow_dispatch:
 
 jobs:
