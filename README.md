@@ -34,15 +34,13 @@ flowchart TB
 
 リポジトリのルートディレクトリで下の手順を行うことで、ビルドからテストの実行ができます
 
-テストフレームワークとして Google Test を利用しています
-
-テスト
-
 ```shell
 cmake -S . -B build    # Configurate & Generate
 cmake --build build    # Build
 ctest --test-dir build # Test
 ```
+
+テストフレームワークとして Google Test を利用しています
 
 ### 🐋 Development Containers
 
