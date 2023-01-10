@@ -28,6 +28,7 @@ target_sources(spirit
     source/A3921.cpp
     source/bit.cpp
     source/CANMessage.cpp
+    source/FakeUdpConverter.cpp
     source/Id.cpp
     source/MdLed.cpp
     source/Motor.cpp
