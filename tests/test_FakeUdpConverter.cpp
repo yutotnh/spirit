@@ -20,8 +20,8 @@ TEST(FakeUdpConverter, EncodeTest)
         constexpr std::size_t payload_size = 8;
         uint8_t               payload[1]   = {0xFF};
 
-        constexpr std::size_t max_buffer_size = 64;
-        uint8_t               buffer[8]       = {};
+        constexpr std::size_t max_buffer_size = 9;
+        uint8_t               buffer[2]       = {};
 
         std::size_t buffer_size = 0;
 
@@ -40,8 +40,8 @@ TEST(FakeUdpConverter, EncodeTest)
         constexpr std::size_t payload_size = 16;
         uint8_t               payload[2]   = {0xFF, 0xFF};
 
-        constexpr std::size_t max_buffer_size = 64;
-        uint8_t               buffer[8]       = {};
+        constexpr std::size_t max_buffer_size = 17;
+        uint8_t               buffer[3]       = {};
 
         std::size_t buffer_size = 0;
 
@@ -61,8 +61,8 @@ TEST(FakeUdpConverter, EncodeTest)
         constexpr std::size_t payload_size = 7;
         uint8_t               payload[1]   = {0xFE};
 
-        constexpr std::size_t max_buffer_size = 64;
-        uint8_t               buffer[8]       = {};
+        constexpr std::size_t max_buffer_size = 8;
+        uint8_t               buffer[1]       = {};
 
         std::size_t buffer_size = 0;
 
@@ -81,9 +81,9 @@ TEST(FakeUdpConverter, EncodeTest)
     {
         FakeUdpConverter fake_udp_converter;
 
-        uint8_t     payload[1]  = {};
-        uint8_t     buffer[8]   = {};
-        std::size_t buffer_size = 0;
+        uint8_t     payload[0] = {};
+        uint8_t     buffer[0]  = {};
+        std::size_t buffer_size;
 
         bool result = fake_udp_converter.encode(payload, 0, 1, buffer, buffer_size);
 
@@ -94,9 +94,9 @@ TEST(FakeUdpConverter, EncodeTest)
     {
         FakeUdpConverter fake_udp_converter;
 
-        uint8_t     payload[1]  = {};
-        uint8_t     buffer[8]   = {};
-        std::size_t buffer_size = 0;
+        uint8_t     payload[0] = {};
+        uint8_t     buffer[0]  = {};
+        std::size_t buffer_size;
 
         bool result = fake_udp_converter.encode(payload, 2, 1, buffer, buffer_size);
 
@@ -109,9 +109,9 @@ TEST(FakeUdpConverter, EncodeTest)
     {
         FakeUdpConverter fake_udp_converter;
 
-        uint8_t     payload[1]  = {};
-        uint8_t     buffer[8]   = {};
-        std::size_t buffer_size = 0;
+        uint8_t     payload[0] = {};
+        uint8_t     buffer[0]  = {};
+        std::size_t buffer_size;
 
         bool result = fake_udp_converter.encode(payload, 1, 1, buffer, buffer_size);
 
@@ -210,9 +210,9 @@ TEST(FakeUdpConverter, DecodeTest)
         FakeUdpConverter fake_udp_converter;
 
         std::size_t payload_size;
-        uint8_t     payload[1] = {};
+        uint8_t     payload[0] = {};
 
-        uint8_t buffer[1] = {};
+        uint8_t buffer[0] = {};
 
         bool result = fake_udp_converter.decode(buffer, 3, 1, payload, payload_size);
 
@@ -224,9 +224,9 @@ TEST(FakeUdpConverter, DecodeTest)
         FakeUdpConverter fake_udp_converter;
 
         std::size_t payload_size;
-        uint8_t     payload[1] = {};
+        uint8_t     payload[0] = {};
 
-        uint8_t buffer[1] = {};
+        uint8_t buffer[0] = {};
 
         bool result = fake_udp_converter.decode(buffer, 0, 8, payload, payload_size);
 
