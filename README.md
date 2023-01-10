@@ -11,7 +11,7 @@
 
 </div>
 
-# Spirit
+# spirit
 
 モータードライバーを駆動するためのライブラリ
 
@@ -30,13 +30,13 @@ flowchart TB
 
 ## ⌨️ Development
 
-### Test
-
-Google Testを使っています
-
-### Build & Test
+### 🛠️ Build & Test
 
 リポジトリのルートディレクトリで下の手順を行うことで、ビルドからテストの実行ができます
+
+テストフレームワークとして Google Test を利用しています。
+
+テスト
 
 ```shell
 cmake -S . -B build    # Configurate & Generate
@@ -44,7 +44,7 @@ cmake --build build    # Build
 ctest --test-dir build # Test
 ```
 
-### Development Containers
+### 🐋 Development Containers
 
 このリポジトリは、Visual Studio Code Dev Containers/GitHub Codespaces を含んでいます
 
