@@ -275,4 +275,4 @@ TEST(MdLed, ResetErrorTest)
     EXPECT_EQ(leds_value(led0, led1), state2uint(Motor::State::CCW));
 }
 
-}
+}  // namespace
