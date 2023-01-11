@@ -6,6 +6,9 @@
 
 #include "A3921.h"
 #include "tests/stubs.h"
+
+namespace {
+
 using namespace spirit;
 
 /**
@@ -15,7 +18,7 @@ using namespace spirit;
  * @retval true Brake 状態
  * @retval false 非 Brake 状態
  */
-static bool is_brake(StubPwmOut& pwmh, StubPwmOut& pwml)
+bool is_brake(StubPwmOut& pwmh, StubPwmOut& pwml)
 {
     return ((fabsf(pwmh.read() - 1.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON)) ||
            ((fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 1.00F) < FLT_EPSILON));
@@ -28,7 +31,7 @@ static bool is_brake(StubPwmOut& pwmh, StubPwmOut& pwml)
  * @retval true Coast 状態
  * @retval false 非 Coast 状態
  */
-static bool is_coast(StubPwmOut& pwmh, StubPwmOut& pwml)
+bool is_coast(StubPwmOut& pwmh, StubPwmOut& pwml)
 {
     return (fabsf(pwmh.read() - 0.00F) < FLT_EPSILON) && (fabsf(pwml.read() - 0.00F) < FLT_EPSILON);
 }
@@ -278,3 +281,5 @@ TEST(A3921, PulsePeriodTest)
     EXPECT_FLOAT_EQ(pwml.read_period(), pulse_period);
     EXPECT_FLOAT_EQ(phase.read_period(), pulse_period);
 }
+
+}  // namespace
