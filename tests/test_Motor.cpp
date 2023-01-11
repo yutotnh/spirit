@@ -242,4 +242,4 @@ TEST(Motor, SleepTest)
     EXPECT_EQ(motor.get_sleep(), false);
 }
 
-}
+}  // namespace
