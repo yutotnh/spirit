@@ -50,4 +50,4 @@ TEST(Id, IdCanMotorTest)
     EXPECT_EQ(0, can::get_motor_id(8, 0, 0x0));
 }
 
-}
+}  // namespace
