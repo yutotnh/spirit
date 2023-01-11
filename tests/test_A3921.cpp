@@ -282,4 +282,4 @@ TEST(A3921, PulsePeriodTest)
     EXPECT_FLOAT_EQ(phase.read_period(), pulse_period);
 }
 
-}
+}  // namespace
