@@ -1,23 +1,25 @@
-#ifndef SPIRIT_MBED_MYPWMOUT_H
-#define SPIRIT_MBED_MYPWMOUT_H
+#ifndef SPIRIT_MBED_PWMOUT_H
+#define SPIRIT_MBED_PWMOUT_H
 
-#include "InterfacePwmOut.h"
+#include "include/InterfacePwmOut.h"
 #include "mbed.h"
 
 namespace spirit {
 
-class MyPwmOut : public InterfacePwmOut {
+namespace mbed {
+
+class PwmOut : public InterfacePwmOut {
 public:
     /**
      * @brief Constructor
-     * @param pin MyPwmOut pin to connect to
+     * @param pin PwmOut pin to connect to
      */
-    MyPwmOut(PinName pin);
+    PwmOut(PinName pin);
 
     /**
      * @brief Destructor
      */
-    ~MyPwmOut();
+    ~PwmOut();
 
     /**
      * @brief 出力するデューティー比を設定する(%)
@@ -41,22 +43,12 @@ public:
      */
     void period(const float seconds) override;
 
-    /**
-     * @brief PWM周期(秒単位)を返す
-     * @return PWM周期(s)
-     */
-    float read_period();
-
 private:
-    /// デューティー比
-    float _value{0.00F};
-
-    /// PWM周期(s)
-    float _period{0.00F};
-
-    mbed::PwmOut _pwm_out;
+    ::mbed::PwmOut _pwm_out;
 };
+
+}  // namespace mbed
 
 }  // namespace spirit
 
-#endif  // SPIRIT_MBED_MYPWMOUT_H
+#endif  // SPIRIT_MBED_PWMOUT_H

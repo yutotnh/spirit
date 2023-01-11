@@ -38,7 +38,8 @@ jobs:
           mbed new .
           mbed deploy
           echo "int main(){}">source/main.cpp
-          mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }} --source mbed-os --source source --source include --source platform/mbed/include --source platform/mbed/source
+          mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
+
   build-cli-v2:
     container:
       image: ghcr.io/armmbed/mbed-os-env:master-latest

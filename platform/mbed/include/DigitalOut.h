@@ -1,23 +1,25 @@
-#ifndef SPIRIT_MBED_MYDIGITALOUT_H
-#define SPIRIT_MBED_MYDIGITALOUT_H
+#ifndef SPIRIT_MBED_DIGITALOUT_H
+#define SPIRIT_MBED_DIGITALOUT_H
 
-#include "InterfaceDigitalOut.h"
+#include "include/InterfaceDigitalOut.h"
 #include "mbed.h"
 
 namespace spirit {
 
-class MyDigitalOut : public InterfaceDigitalOut {
+namespace mbed {
+
+class DigitalOut : public InterfaceDigitalOut {
 public:
     /**
      * @brief Constructor
-     * @param pin MyDigitalOut pin to connect to
+     * @param pin DigitalOut pin to connect to
      */
-    MyDigitalOut(PinName pin);
+    DigitalOut(PinName pin);
 
     /**
      * @brief Destructor
      */
-    ~MyDigitalOut();
+    ~DigitalOut();
 
     /**
      * @brief 出力ピンの出力値を設定する
@@ -35,9 +37,11 @@ public:
     uint32_t read() override;
 
 private:
-    mbed::DigitalOut _digital_out;
+    ::mbed::DigitalOut _digital_out;
 };
+
+}  // namespace mbed
 
 }  // namespace spirit
 
-#endif  // SPIRIT_MBED_MYDIGITALOUT_H
+#endif  // SPIRIT_MBED_DIGITALOUT_H
