@@ -9,12 +9,14 @@ on:
       - "**.h"
       - "**.cpp"
       - "**/build.yml"
+      - "!tests/**"
   pull_request:
     paths:
       - "**/CMakeLists.txt"
       - "**.h"
       - "**.cpp"
       - "**/build.yml"
+      - "!tests/**"
   workflow_dispatch:
 
 jobs:
