@@ -113,15 +113,16 @@
         {
             "label": "Development Containers: build image",
             "type": "shell",
-            "command":[
-                "cd .devcontainer && docker build --no-cache . --file Dockerfile --tag my-image-name:$(date +%s)"
-            ],
+            "command": "docker build --no-cache . --file Dockerfile --tag my-image-name:$(date +%s)",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": false
             },
-            "detail": "イメージをビルドする"
+            "options": {
+                "cwd": "${workspaceFolder}/.devcontainer"
+            },
+            "detail": "Develop Containers用のイメージをビルドする"
         },
     ]
 }
