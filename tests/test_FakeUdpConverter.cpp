@@ -236,4 +236,4 @@ TEST(FakeUdpConverter, DecodeTest)
     }
 }
 
-}
+}  // namespace
