@@ -110,4 +110,4 @@ TEST(PwmDataConverter, EncodeBufferSizeTest)
     buffer_size_test(32, true);
 }
 
-}
+}  // namespace
