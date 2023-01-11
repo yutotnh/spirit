@@ -30,8 +30,7 @@ uint32_t leds_value(StubDigitalOut& led0, StubDigitalOut& led1)
  * @note BlinkMode::Normal では MdLed::blinking_rate() で指定した回数より多く同じ値にならないので @n
  * loop があることで BlinkMode::Normal かそれ以外かの判別がつく
  */
-uint32_t compare_leds(MdLed& mdled, StubDigitalOut& led0, StubDigitalOut& led1, const uint32_t value,
-                             uint32_t loop)
+uint32_t compare_leds(MdLed& mdled, StubDigitalOut& led0, StubDigitalOut& led1, const uint32_t value, uint32_t loop)
 {
     for (uint32_t i = 0; i < loop; i++) {
         if (value != leds_value(led0, led1)) {
