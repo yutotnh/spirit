@@ -2,6 +2,8 @@
 
 #include "Motor.h"
 
+namespace {
+
 using namespace spirit;
 
 /**
@@ -239,3 +241,5 @@ TEST(Motor, SleepTest)
     motor.sleep(false);
     EXPECT_EQ(motor.get_sleep(), false);
 }
+
+}  // namespace

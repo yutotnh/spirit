@@ -2,6 +2,8 @@
 
 #include "CANMessage.h"
 
+namespace {
+
 using namespace spirit;
 
 /**
@@ -156,3 +158,5 @@ TEST(CANMessage, LengthTest)
     // 期待値: 最大値
     compare_can_massage_length(CANMessage::max_data_length + 1, CANMessage::max_data_length);
 }
+
+}  // namespace

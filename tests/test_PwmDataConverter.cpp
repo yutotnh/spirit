@@ -3,6 +3,8 @@
 #include "Motor.h"
 #include "PwmDataConverter.h"
 
+namespace {
+
 using namespace spirit;
 
 /**
@@ -107,3 +109,5 @@ TEST(PwmDataConverter, EncodeBufferSizeTest)
     buffer_size_test(24, true);
     buffer_size_test(32, true);
 }
+
+}  // namespace

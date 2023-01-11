@@ -2,6 +2,8 @@
 
 #include "Id.h"
 
+namespace {
+
 using namespace spirit;
 
 /**
@@ -47,3 +49,5 @@ TEST(Id, IdCanMotorTest)
     EXPECT_EQ(0, can::get_motor_id(5, 0, 0x0));
     EXPECT_EQ(0, can::get_motor_id(8, 0, 0x0));
 }
+
+}  // namespace
