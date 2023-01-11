@@ -2,6 +2,8 @@
 
 #include "FakeUdpConverter.h"
 
+namespace {
+
 using namespace spirit;
 
 /**
@@ -232,4 +234,6 @@ TEST(FakeUdpConverter, DecodeTest)
 
         EXPECT_FALSE(result);
     }
+}
+
 }
