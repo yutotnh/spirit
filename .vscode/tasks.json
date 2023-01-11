@@ -1,0 +1,127 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "dependsOn": [
+                "Doxygen",
+                "CMake",
+                "Development Containers"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "全てのビルドタスクを実行する"
+        },
+        {
+            "label": "Doxygen",
+            "type": "shell",
+            "dependsOn": [
+                "Doxygen: Developper build",
+                "Doxygen: Genaral users build"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "全てのDoxygen関連のタスクを実行する"
+        },
+        {
+            "label": "Doxygen: Developper build",
+            "type": "shell",
+            "command": "doxygen ${workspaceFolder}/doxygen/Doxyfile",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "開発者用の全部入りドキュメントを生成する"
+        },
+        {
+            "label": "Doxygen: Genaral users build",
+            "type": "shell",
+            "command": "doxygen ${workspaceFolder}/doxygen/Doxyfile4GeneralUsers",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "一般ユーザ用のドキュメントを生成する"
+        },
+        {
+            "label": "CMake",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "CMake: configure",
+                "CMake: clean rebuild",
+                "CMake: test"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "detail": "プラットフォームに依存しない部分のビルド&テスト"
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: configure",
+            "command": "configure",
+            "problemMatcher": [],
+            "detail": "CMake template configure task"
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: clean rebuild",
+            "command": "cleanRebuild",
+            "targets": [
+                "all"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "detail": "CMake template clean rebuild task"
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: test",
+            "command": "test",
+            "problemMatcher": [],
+            "detail": "CMake template test task"
+        },
+        {
+            "label": "Development Containers",
+            "type": "shell",
+            "dependsOn": [
+                "Development Containers: build image"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "全てのDevelopment Containers関連のタスクを実行する"
+        },
+        {
+            "label": "Development Containers: build image",
+            "type": "shell",
+            "command":[
+                "cd .devcontainer && docker build --no-cache . --file Dockerfile --tag my-image-name:$(date +%s)"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "イメージをビルドする"
+        },
+    ]
+}
