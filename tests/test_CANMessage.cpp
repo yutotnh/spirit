@@ -159,4 +159,4 @@ TEST(CANMessage, LengthTest)
     compare_can_massage_length(CANMessage::max_data_length + 1, CANMessage::max_data_length);
 }
 
-}
+}  // namespace
