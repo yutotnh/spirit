@@ -25,16 +25,43 @@ target_include_directories(spirit
 
 target_sources(spirit
     PUBLIC
-    source/A3921.cpp
-    source/bit.cpp
-    source/CANMessage.cpp
-    source/FakeUdpConverter.cpp
-    source/Id.cpp
-    source/MdLed.cpp
-    source/Motor.cpp
-    source/PwmDataConverter.cpp
+    ./source/A3921.cpp
+    ./source/bit.cpp
+    ./source/CANMessage.cpp
+    ./source/FakeUdpConverter.cpp
+    ./source/Id.cpp
+    ./source/MdLed.cpp
+    ./source/Motor.cpp
+    ./source/PwmDataConverter.cpp
 )
 
 enable_testing()
 
-add_subdirectory(tests)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    add_subdirectory(tests)
+endif()
+
+if(DEFINED MBED_PATH)
+    add_library(spirit-platform-mbed STATIC)
+
+    if(MSVC)
+        target_compile_options(spirit-platform-mbed PUBLIC /W4)
+    else()
+        target_compile_options(spirit-platform-mbed PUBLIC -O2 -Wall -Wextra)
+    endif()
+
+    target_include_directories(spirit-platform-mbed
+        PUBLIC
+        .
+        ./include
+        ./platform/mbed/include
+    )
+
+    target_sources(spirit-platform-mbed
+        PUBLIC
+        ./platform/mbed/source/DigitalOut.cpp
+        ./platform/mbed/source/PwmOut.cpp
+    )
+
+    target_link_libraries(spirit-platform-mbed spirit mbed-os)
+endif()
