@@ -67,4 +67,5 @@ PullRequestやissueを送る際は、 [CONTRIBUTING.md](./CONTRIBUTING.md) を�
 
 ## 🏃 利用例
 
-準備中:construction:
+- [yutotnh/mbed-can-motor-driver-for-spirit](https://github.com/yutotnh/mbed-can-motor-driver-for-spirit.git)
+    - spirit と CAN を用いた Mbed の モータードライバ制御プログラム
