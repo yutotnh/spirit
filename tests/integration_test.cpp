@@ -21,7 +21,7 @@ TEST(IntegrationTest, 1)
     constexpr uint32_t dip_sw = 0x00;
 
     /// 送信側
-    auto controller = [](spirit::Motor &motor) {
+    auto controller = [&dip_sw](spirit::Motor &motor) {
         spirit::FakeUdpConverter fake_udp;
         spirit::PwmDataConverter pwm_data;
         const uint32_t           can_id = spirit::can::get_motor_id(1, 0, dip_sw);
@@ -53,7 +53,7 @@ TEST(IntegrationTest, 1)
     };
 
     /// 受信側
-    auto peripheral = [](const ::CANMessage &msg) {
+    auto peripheral = [&dip_sw](const ::CANMessage &msg) {
         spirit::FakeUdpConverter fake_udp;
         spirit::PwmDataConverter pwm_data;
 
