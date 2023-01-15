@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./images/icon.svg" width="200">
+![Icon](./images/icon.svg)
 
 [![Build spirit](https://github.com/yutotnh/spirit/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/yutotnh/spirit/actions/workflows/build.yml)
 [![Testing With CMake and CTest](https://github.com/yutotnh/spirit/actions/workflows/cmake-test.yml/badge.svg?branch=main)](https://github.com/yutotnh/spirit/actions/workflows/cmake-test.yml)
@@ -68,4 +68,4 @@ PullRequestやissueを送る際は、 [CONTRIBUTING.md](./CONTRIBUTING.md) を�
 ## 🏃 利用例
 
 - [yutotnh/mbed-can-motor-driver-for-spirit](https://github.com/yutotnh/mbed-can-motor-driver-for-spirit.git)
-    - spirit と CAN を用いた Mbed の モータードライバ制御プログラム
+  - spirit と CAN を用いた Mbed の モータードライバ制御プログラム
