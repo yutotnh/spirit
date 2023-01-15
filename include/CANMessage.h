@@ -28,7 +28,7 @@ public:
 
     /**
      * @brief メッセージデータを返す
-     * @return メッセージデータ
+     * @param [out] data メッセージデータを格納するバッファ
      */
     void get_data(uint8_t* data) const;
 

@@ -14,19 +14,19 @@ class PwmDataConverter {
 public:
     /**
      * @brief モーターの情報をエンコードする
-     * @param motor モーター
-     * @param max_buffer_size エンコードしたデータの最大ビット幅
-     * @param buffer エンコードしたデータを格納するバッファ
-     * @param buffer_size エンコードしたデータのビット幅
+     * @param [in] motor モーター
+     * @param [in] max_buffer_size エンコードしたデータの最大ビット幅
+     * @param [out] buffer エンコードしたデータを格納するバッファ
+     * @param [out] buffer_size エンコードしたデータのビット幅
      * @return
      */
     bool encode(const Motor& motor, std::size_t max_buffer_size, uint8_t* buffer, std::size_t& buffer_size);
 
     /**
      * @brief モーターの情報をデコードする
-     * @param buffer デコードするデータ
-     * @param buffer_size デコードするデータのビット幅
-     * @param motor デコードした情報を格納するモーター
+     * @param [in] buffer デコードするデータ
+     * @param [in] buffer_size デコードするデータのビット幅
+     * @param [out] motor デコードした情報を格納するモーター
      * @return
      */
     bool decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor);
@@ -41,8 +41,8 @@ private:
 
     /**
      * @brief バッファにデューティ比を設定する
-     * @param duty_cycle デューティ比
-     * @param buffer     バッファ
+     * @param [in] duty_cycle デューティ比
+     * @param [out] buffer     バッファ
      */
     void set_duty_cycle(float duty_cycle, uint8_t* buffer);
 
@@ -55,8 +55,8 @@ private:
 
     /**
      * @brief バッファに回転方向を設定する
-     * @param state  回転方向
-     * @param buffer バッファ
+     * @param [in] state  回転方向
+     * @param [out] buffer バッファ
      */
     void set_state(Motor::State state, uint8_t* buffer);
 };
