@@ -10,11 +10,11 @@ class FakeUdpConverter {
 public:
     /**
      * @brief FakeUdpをエンコードする
-     * @param payload ペイロード
-     * @param payload_size ペイロードのビット幅
-     * @param max_buffer_size エンコードしたデータの最大ビット幅
-     * @param buffer エンコードしたデータを格納するバッファ
-     * @param buffer_size エンコードしたデータのビット幅
+     * @param [in] payload ペイロード
+     * @param [in] payload_size ペイロードのビット幅
+     * @param [in] max_buffer_size エンコードしたデータの最大ビット幅
+     * @param [out] buffer エンコードしたデータを格納するバッファ
+     * @param [out] buffer_size エンコードしたデータのビット幅
      * @return
      */
     bool encode(const uint8_t* payload, std::size_t payload_size, const std::size_t max_buffer_size, uint8_t* buffer,
@@ -22,11 +22,11 @@ public:
 
     /**
      * @brief FakeUdpをデコードする
-     * @param buffer デコードするデータ
-     * @param buffer_size デコードするデータのビット幅
-     * @param max_payload_size デコードしたペイロードの最大ビット幅
-     * @param payload デコードしたペイロードを格納するバッファ
-     * @param payload_size デコードしたペイロードのビット幅
+     * @param [in] buffer デコードするデータ
+     * @param [in] buffer_size デコードするデータのビット幅
+     * @param [in] max_payload_size デコードしたペイロードの最大ビット幅
+     * @param [out] payload デコードしたペイロードを格納するバッファ
+     * @param [out] payload_size デコードしたペイロードのビット幅
      * @return
      */
     bool decode(const uint8_t* buffer, std::size_t buffer_size, std::size_t max_payload_size, uint8_t* payload,
