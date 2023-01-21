@@ -15,7 +15,7 @@ TEST(BFloat16, Bfloat16ToFloat32)
         } else {
             // bfloat16は仮数部が7bitなので、float32に変換したときに誤差が出る
             // そのため、数値が許容範囲内かどうかをチェックする
-            float allowable_error_margin = value * 0.01F;
+            float allowable_error_margin = value / 127.0F;
             EXPECT_NEAR(result, value, allowable_error_margin) << "bfloat16: " << result << ", value: " << value;
         }
     };
@@ -59,7 +59,16 @@ TEST(BFloat16, BFloat16ToFloat32AndFloat32ToBFloat16)
         uint16_t bfloat16 = spirit::float32_to_bfloat16(value);
 
         float result = spirit::bfloat16_to_float32(bfloat16);
-        EXPECT_FLOAT_EQ(result, value);
+        if (std::isnan(value)) {
+            EXPECT_TRUE(std::isnan(result));
+        } else if (std::isinf(value)) {
+            EXPECT_TRUE(std::isinf(result));
+        } else {
+            // bfloat16は仮数部が7bitなので、float32に変換したときに誤差が出る
+            // そのため、数値が許容範囲内かどうかをチェックする
+            float allowable_error_margin = value / 127.0F;
+            EXPECT_NEAR(result, value, allowable_error_margin) << "bfloat16: " << result << ", value: " << value;
+        }
     };
 
     /// @test Zero
