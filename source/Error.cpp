@@ -8,25 +8,6 @@
 
 namespace spirit {
 
-// namespace {
-
-// void print(const char* error_msg, const char* filename, const char* funcname, const uint32_t line_number)
-// {
-// #ifdef __MBED__
-//     printf("Error: %s, %s, %s, %d\n", error_msg, filename, funcname, line_number);
-// #else
-//     std::cout << "Error: " << error_msg << ", " << filename << ", " << funcname << ", " << line_number << std::endl;
-// #endif
-// }
-
-// }  // namespace
-
-// void error(uint32_t type, uint32_t code, const char* msg, const char* filename, const char* funcname,
-//            uint32_t line_number)
-// {
-//     print(error_msg, filename, funcname, line_number);
-// }
-
 Error& Error::get_instance()
 {
     static Error instance;
@@ -62,23 +43,40 @@ void Error::print(Type type, uint32_t code, const char* msg, const char* filenam
                   uint32_t line_number)
 {
     uint8_t status_string[10]{};
-    if (_status == Status::Normal) {
-        sprintf((char*)status_string, "Normal");
-    } else if (_status == Status::Warning) {
-        sprintf((char*)status_string, "Warning");
-    } else if (_status == Status::Error) {
-        sprintf((char*)status_string, "Error");
+    switch (_status) {
+        case Status::Normal:
+            sprintf((char*)status_string, "Normal");
+            break;
+        case Status::Warning:
+            sprintf((char*)status_string, "Warning");
+            break;
+        case Status::Error:
+            sprintf((char*)status_string, "Error");
+            break;
+        default:
+            Error& error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unkown error status", __FILE__, __func__, __LINE__);
+            break;
     }
 
     uint8_t type_string[20]{};
-    if (type == Type::Normal) {
-        sprintf((char*)type_string, "Normal");
-    } else if (type == Type::UnknownValue) {
-        sprintf((char*)type_string, "UnknownValue");
-    } else if (type == Type::IllegalCombination) {
-        sprintf((char*)type_string, "IllegalCombination");
-    } else if (type == Type::InvalidValue) {
-        sprintf((char*)type_string, "InvalidValue");
+    switch (type) {
+        case Type::Normal:
+            sprintf((char*)type_string, "Normal");
+            break;
+        case Type::UnknownValue:
+            sprintf((char*)type_string, "UnknownValue");
+            break;
+        case Type::IllegalCombination:
+            sprintf((char*)type_string, "IllegalCombination");
+            break;
+        case Type::InvalidValue:
+            sprintf((char*)type_string, "InvalidValue");
+            break;
+        default:
+            Error& error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unkown error type", __FILE__, __func__, __LINE__);
+            break;
     }
 
 #ifdef __MBED__

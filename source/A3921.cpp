@@ -1,5 +1,7 @@
 #include "A3921.h"
 
+#include "Error.h"
+
 namespace spirit {
 
 A3921::A3921(InterfaceDigitalOut& sr, InterfacePwmOut& pwmh, InterfacePwmOut& pwml, InterfacePwmOut& phase,
@@ -43,6 +45,8 @@ void A3921::state(const Motor::State type)
         case Motor::State::Brake:
             break;
         default:
+            Error& error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -51,6 +55,7 @@ void A3921::state(const Motor::State type)
 
 void A3921::decay(const Motor::Decay type)
 {
+    Error& error = Error::get_instance();
     switch (type) {
         case Motor::Decay::Slow:
         case Motor::Decay::Fast:
@@ -58,7 +63,10 @@ void A3921::decay(const Motor::Decay type)
 
         // 非対応
         case Motor::Decay::Mixed:
+            error.error(Error::Type::InvalidValue, 0, "Invalid motor state", __FILE__, __func__, __LINE__);
+            return;
         default:
+            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -72,6 +80,8 @@ void A3921::pwm_side(const Motor::PwmSide type)
         case Motor::PwmSide::High:
             break;
         default:
+            Error& error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -80,6 +90,7 @@ void A3921::pwm_side(const Motor::PwmSide type)
 
 void A3921::run()
 {
+    Error& error = Error::get_instance();
     switch (_decay) {
         case Motor::Decay::Slow:
             run_slow_decay();
@@ -90,7 +101,10 @@ void A3921::run()
             break;
 
         case Motor::Decay::Mixed:
+            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay", __FILE__, __func__, __LINE__);
+            return;
         default:
+            error.error(Error::Type::UnknownValue, 0, "Unknown motor decay", __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -110,6 +124,8 @@ void A3921::run_slow_decay()
             pwm_high_side = _duty_cycle;
             break;
         default:
+            Error& error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unknown motor pwm side", __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -145,7 +161,9 @@ void A3921::run_slow_decay()
             break;
 
         default:
-            break;
+            Error& error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
+            return;
     }
 }
 
@@ -183,7 +201,9 @@ void A3921::run_fast_decay()
             break;
 
         default:
-            break;
+            Error& error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
+            return;
     }
 }
 

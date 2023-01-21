@@ -1,5 +1,7 @@
 #include "Id.h"
 
+#include "Error.h"
+
 namespace spirit {
 
 namespace can {
@@ -59,6 +61,9 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
 
     if ((motor_count == 0) || (4 < motor_count)) {
         return 0;
+    } else {
+        Error& error = Error::get_instance();
+        error.warning(Error::Type::UnknownValue, 0, "Unkown motor count type", __FILE__, __func__, __LINE__);
     }
 
     if (motor_count == 1) {
@@ -68,6 +73,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     } else if (motor_count <= 4) {
         type = 2;
     } else {
+        Error& error = Error::get_instance();
+        error.warning(Error::Type::UnknownValue, 0, "Unkown motor count type", __FILE__, __func__, __LINE__);
         return 0;
     }
 
@@ -106,6 +113,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             // 8個のモーターは未対応
             // 将来の拡張を考えて、0b11を残している
             // 例えば0b1100の場合8、0b1101の場合16をモーターに割り当てるなどする
+            Error& error = Error::get_instance();
+            error.warning(Error::Type::UnknownValue, 0, "Unkown motor count type", __FILE__, __func__, __LINE__);
             return 0;
     }
 }

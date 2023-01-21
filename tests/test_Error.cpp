@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "include/Error.h"
+#include "Error.h"
 
 namespace {
 

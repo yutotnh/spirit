@@ -2,6 +2,8 @@
 
 #include <climits>
 
+#include "Error.h"
+
 namespace spirit {
 
 MdLed::MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1) : _led0(led0), _led1(led1)
@@ -34,6 +36,8 @@ void MdLed::state(const Motor::State type)
             break;
         default:
             // 未定義の値
+            Error &error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
             break;
     }
 }
@@ -62,6 +66,8 @@ void MdLed::mode(const BlinkMode mode)
         case BlinkMode::Error:
             break;
         default:
+            Error &error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -76,7 +82,10 @@ void MdLed::mode(const BlinkMode mode)
             concurrently_blink();
             break;
         default:
-            break;
+
+            Error &error = Error::get_instance();
+            error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
+            return;
     }
 }
 
@@ -107,7 +116,9 @@ void MdLed::coordinate()
                 error_blink();
                 break;
             default:
-                break;
+                Error &error = Error::get_instance();
+                error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
+                return;
         }
     }
 }
