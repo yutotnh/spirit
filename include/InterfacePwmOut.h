@@ -11,6 +11,11 @@ namespace spirit {
 class InterfacePwmOut {
 public:
     /**
+     * @brief デストラクタ
+     */
+    virtual ~InterfacePwmOut() = default;
+
+    /**
      * @brief 出力するデューティー比を設定する(%)
      * @param value 出力するデューティー比
      *              - 0.00F = 0%, 1.00F = 100%
