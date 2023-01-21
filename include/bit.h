@@ -18,11 +18,11 @@ uint32_t get_range_value(const uint8_t* buffer, std::size_t buffer_size, std::si
 
 /**
  * @brief バッファの指定した範囲のビットを設定する
- * @param value 値
- * @param start 開始位置(0から始まる)
- * @param value_size 値のビット幅
- * @param buffer_size バッファのバイト幅
- * @param buffer バッファ
+ * @param [in] value 値
+ * @param [in] start 開始位置(0から始まる)
+ * @param [in] value_size 値のビット幅
+ * @param [in] buffer_size バッファのバイト幅
+ * @param [out] buffer バッファ
  * @return 成功したかどうか
  */
 bool set_range_value(uint32_t value, std::size_t start, std::size_t value_size, std::size_t buffer_size,
