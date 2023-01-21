@@ -7,6 +7,9 @@
 
 namespace spirit {
 
+/**
+ * @brief 速度データ変換クラス
+ */
 class SpeedDataConverter {
 public:
     /**
