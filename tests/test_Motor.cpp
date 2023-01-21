@@ -14,7 +14,7 @@ TEST(Motor, InitValueTest)
     Motor motor;
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
 
-    EXPECT_FLOAT_EQ(motor.get_velocity(), 0.0F);
+    EXPECT_FLOAT_EQ(motor.get_speed(), 0.0F);
 
     // enum class や bool で定義した型を使うと、以下のようなエラーになるので、一旦変数に保存させる
     //      undefined reference to `spirit::Motor::Default::rise_change_level'
@@ -76,23 +76,43 @@ TEST(Motor, DutyCycleTest)
 }
 
 /**
- * @brief Motor::velocity(), Motor::get_velocity() のテスト
+ * @brief Motor::speed(), Motor::get_speed() のテスト
  */
-TEST(Motor, VelocityTest)
+TEST(Motor, speedTest)
 {
     Motor motor;
 
-    motor.velocity(0.00F);
-    EXPECT_FLOAT_EQ(motor.get_velocity(), 0.00F);
+    motor.speed(0.00F);
+    EXPECT_FLOAT_EQ(motor.get_speed(), 0.00F);
 
-    motor.velocity(0.50F);
-    EXPECT_FLOAT_EQ(motor.get_velocity(), 0.50F);
+    motor.speed(0.50F);
+    EXPECT_FLOAT_EQ(motor.get_speed(), 0.50F);
 
-    motor.velocity(1.00F);
-    EXPECT_FLOAT_EQ(motor.get_velocity(), 1.00F);
+    motor.speed(1.00F);
+    EXPECT_FLOAT_EQ(motor.get_speed(), 1.00F);
 
-    motor.velocity(-0.50F);
-    EXPECT_FLOAT_EQ(motor.get_velocity(), -0.50F);
+    motor.speed(-0.50F);
+    EXPECT_FLOAT_EQ(motor.get_speed(), -0.50F);
+}
+
+/**
+ * @brief Motor::pid_gein_factor(), Motor::get_pid_gain_factor() のテスト
+ */
+TEST(Motor, PidGainFactorTest)
+{
+    auto test = [](float Kp, float Ki, float Kd) {
+        Motor motor;
+        motor.pid_gain_factor(Kp, Ki, Kd);
+        motor.get_pid_gain_factor(Kp, Ki, Kd);
+        EXPECT_FLOAT_EQ(Kp, Kp);
+        EXPECT_FLOAT_EQ(Ki, Ki);
+        EXPECT_FLOAT_EQ(Ki, Ki);
+    };
+
+    // とりあえず、Kp, Ki, Kdが異なる適当な値を入れてテスト
+    test(0.00F, 0.01F, 0.02F);
+    test(0.50F, 0.51F, 0.52F);
+    test(1000.00F, 100.00F, 10.00F);
 }
 
 /**

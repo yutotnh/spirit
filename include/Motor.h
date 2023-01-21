@@ -98,13 +98,29 @@ public:
      * @brief 速度(rps)を設定する
      * @param rps 設定したい速度(rps)
      */
-    void velocity(float rps);
+    void speed(float rps);
 
     /**
      * @brief 速度を返す
      * @return 設定した速度(rps)
      */
-    float get_velocity() const;
+    float get_speed() const;
+
+    /**
+     * @brief PID制御のゲイン係数を設定する
+     * @param Kp 比例ゲイン係数
+     * @param Ki 積分ゲイン係数
+     * @param Kd 微分ゲイン係数
+     */
+    void pid_gain_factor(float Kp, float Ki, float Kd);
+
+    /**
+     * @brief PID制御のゲイン係数を返す
+     * @param Kp 比例ゲイン係数
+     * @param Ki 積分ゲイン係数
+     * @param Kd 微分ゲイン係数
+     */
+    void get_pid_gain_factor(float& Kp, float& Ki, float& Kd) const;
 
     /**
      * @brief 回転方向を設定する
@@ -223,6 +239,9 @@ public:
         static constexpr State       state             = State::Brake;
         static constexpr ChangeLevel rise_change_level = ChangeLevel::OFF;
         static constexpr ChangeLevel fall_change_level = ChangeLevel::OFF;
+        static constexpr float       Kp                = 1.0;   // 暫定
+        static constexpr float       Ki                = 0.1;   // 暫定
+        static constexpr float       Kd                = 0.01;  // 暫定
         static constexpr float       pulse_period      = 1.0F / 5'000.0F;
         static constexpr float       release_time      = 0.500F;
         static constexpr Decay       decay             = Decay::Slow;
@@ -236,7 +255,10 @@ public:
 
 private:
     float       _duty_cycle{0.00F};
-    float       _velocity{0.0F};
+    float       _speed{0.0F};
+    float       _Kp{Default::Kp};
+    float       _Ki{Default::Ki};
+    float       _Kd{Default::Kd};
     State       _state{Default::state};
     ChangeLevel _rise_change_level{Default::rise_change_level};
     ChangeLevel _fall_change_level{Default::fall_change_level};
