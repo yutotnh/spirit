@@ -81,6 +81,7 @@ TEST(IntegrationTest, 1)
         ::CANMessage  msg            = controller(motor);
         spirit::Motor received_motor = peripheral(msg);
 
+        // デューティー比は16bitで表現しているため、1/65535の誤差を許容する
         constexpr float allowable_error_margin = 1.0F / 65535.0F;
         EXPECT_EQ(state, received_motor.get_state());
         EXPECT_NEAR(duty_cycle, received_motor.get_duty_cycle(), allowable_error_margin);
