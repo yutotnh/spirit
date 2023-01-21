@@ -14,7 +14,7 @@ namespace spirit {
 class MdLed {
 public:
     /**
-     * @enum MdLed
+     * @enum BlinkMode
      * @brief LEDに設定する値のソースを何にするかの値
      */
     enum class BlinkMode {
