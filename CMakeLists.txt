@@ -26,6 +26,7 @@ target_include_directories(spirit
 target_sources(spirit
     PUBLIC
     ./source/A3921.cpp
+    ./source/bfloat16.cpp
     ./source/bit.cpp
     ./source/CANMessage.cpp
     ./source/FakeUdpConverter.cpp
@@ -33,6 +34,7 @@ target_sources(spirit
     ./source/MdLed.cpp
     ./source/Motor.cpp
     ./source/PwmDataConverter.cpp
+    ./source/SpeedDataConverter.cpp
 )
 
 enable_testing()
