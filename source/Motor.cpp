@@ -2,6 +2,24 @@
 
 namespace spirit {
 
+void Motor::control_system(const ControlSystem type)
+{
+    switch (type) {
+        case ControlSystem::PWM:
+        case ControlSystem::Speed:
+            break;
+        default:
+            return;
+    }
+
+    _control_system = type;
+}
+
+Motor::ControlSystem Motor::get_control_system() const
+{
+    return _control_system;
+}
+
 void Motor::duty_cycle(const float value)
 {
     if (1.00F < value) {
