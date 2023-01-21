@@ -10,6 +10,16 @@ namespace spirit {
 class Motor {
 public:
     /**
+     * @brief 制御方式を設定するための値
+     */
+    enum class ControlSystem {
+        /// PWM制御
+        PWM,
+        /// 速度制御
+        Speed,
+    };
+
+    /**
      * @enum State
      * @brief モーターの回転方向を設定すための値
      */
@@ -75,6 +85,18 @@ public:
         /// High side
         High,
     };
+
+    /**
+     * @brief 制御方式を設定する
+     * @param type ControlSystem::PWM, ControlSystem::Speed のいずれかの設定したい制御
+     */
+    void control_system(ControlSystem type);
+
+    /**
+     * @brief 制御方式を返す
+     * @return ControlSystem::PWM, ControlSystem::Speed のいずれかの設定した制御
+     */
+    ControlSystem get_control_system() const;
 
     /**
      * @brief デューティー比を設定する
@@ -236,38 +258,40 @@ public:
      * @brief デフォルト値を格納している構造体
      */
     struct Default {
-        static constexpr State       state             = State::Brake;
-        static constexpr ChangeLevel rise_change_level = ChangeLevel::OFF;
-        static constexpr ChangeLevel fall_change_level = ChangeLevel::OFF;
-        static constexpr float       Kp                = 1.0;   // 暫定
-        static constexpr float       Ki                = 0.1;   // 暫定
-        static constexpr float       Kd                = 0.01;  // 暫定
-        static constexpr float       pulse_period      = 1.0F / 5'000.0F;
-        static constexpr float       release_time      = 0.500F;
-        static constexpr Decay       decay             = Decay::Slow;
-        static constexpr PwmSide     pwm_side          = PwmSide::Low;
-        static constexpr bool        reset             = false;
-        static constexpr bool        sleep             = false;
+        static constexpr ControlSystem control_system    = ControlSystem::PWM;
+        static constexpr State         state             = State::Brake;
+        static constexpr ChangeLevel   rise_change_level = ChangeLevel::OFF;
+        static constexpr ChangeLevel   fall_change_level = ChangeLevel::OFF;
+        static constexpr float         Kp                = 1.0;   // 暫定
+        static constexpr float         Ki                = 0.1;   // 暫定
+        static constexpr float         Kd                = 0.01;  // 暫定
+        static constexpr float         pulse_period      = 1.0F / 5'000.0F;
+        static constexpr float         release_time      = 0.500F;
+        static constexpr Decay         decay             = Decay::Slow;
+        static constexpr PwmSide       pwm_side          = PwmSide::Low;
+        static constexpr bool          reset             = false;
+        static constexpr bool          sleep             = false;
     };
 
     static constexpr float min_pulse_period = 1.0F / 60'000.0F;
     static constexpr float max_pulse_period = 1.0F / 10.0F;
 
 private:
-    float       _duty_cycle{0.00F};
-    float       _speed{0.0F};
-    float       _Kp{Default::Kp};
-    float       _Ki{Default::Ki};
-    float       _Kd{Default::Kd};
-    State       _state{Default::state};
-    ChangeLevel _rise_change_level{Default::rise_change_level};
-    ChangeLevel _fall_change_level{Default::fall_change_level};
-    float       _pulse_period{Default::pulse_period};
-    float       _release_time{Default::release_time};
-    Decay       _decay{Default::decay};
-    PwmSide     _pwm_side{Default::pwm_side};
-    bool        _reset{Default::reset};
-    bool        _sleep{Default::sleep};
+    ControlSystem _control_system{Default::control_system};
+    float         _duty_cycle{0.00F};
+    float         _speed{0.00F};
+    float         _Kp{Default::Kp};
+    float         _Ki{Default::Ki};
+    float         _Kd{Default::Kd};
+    State         _state{Default::state};
+    ChangeLevel   _rise_change_level{Default::rise_change_level};
+    ChangeLevel   _fall_change_level{Default::fall_change_level};
+    float         _pulse_period{Default::pulse_period};
+    float         _release_time{Default::release_time};
+    Decay         _decay{Default::decay};
+    PwmSide       _pwm_side{Default::pwm_side};
+    bool          _reset{Default::reset};
+    bool          _sleep{Default::sleep};
 };
 
 }  // namespace spirit

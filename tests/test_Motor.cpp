@@ -12,9 +12,19 @@ using namespace spirit;
 TEST(Motor, InitValueTest)
 {
     Motor motor;
+
+    auto control_system = Motor::Default::control_system;
+    EXPECT_EQ(motor.get_control_system(), control_system);
+
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
 
-    EXPECT_FLOAT_EQ(motor.get_speed(), 0.0F);
+    EXPECT_FLOAT_EQ(motor.get_speed(), 0.00F);
+
+    float Kp, Ki, Kd;
+    motor.get_pid_gain_factor(Kp, Ki, Kd);
+    EXPECT_FLOAT_EQ(Kp, Motor::Default::Kp);
+    EXPECT_FLOAT_EQ(Ki, Motor::Default::Ki);
+    EXPECT_FLOAT_EQ(Kd, Motor::Default::Kd);
 
     // enum class や bool で定義した型を使うと、以下のようなエラーになるので、一旦変数に保存させる
     //      undefined reference to `spirit::Motor::Default::rise_change_level'
@@ -43,6 +53,24 @@ TEST(Motor, InitValueTest)
 
     auto sleep = Motor::Default::sleep;
     EXPECT_EQ(motor.get_sleep(), sleep);
+}
+
+/**
+ * @brief Motor::control_system(), Motor::get_control_system() のテスト
+ */
+TEST(Motor, ControlSystemTest)
+{
+    Motor motor;
+
+    motor.control_system(Motor::ControlSystem::PWM);
+    EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::PWM);
+
+    motor.control_system(Motor::ControlSystem::Speed);
+    EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::Speed);
+
+    // 初期値が Motor::ControlSystem::PWM なので、Motor::ControlSystem::PWM 以外を指定しても Motor::ControlSystem::PWM になる
+    motor.control_system(Motor::ControlSystem::PWM);
+    EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::PWM);
 }
 
 /**
@@ -133,6 +161,9 @@ TEST(Motor, StateTest)
 
     motor.state(Motor::State::Brake);
     EXPECT_EQ(motor.get_state(), Motor::State::Brake);
+
+    // 初期値が Motor::State::Coast なので、Motor::State::Coast 以外を指定しても Motor::State::Coast になる
+    motor.state(Motor::State::Coast);
 }
 
 /**
@@ -143,8 +174,8 @@ TEST(Motor, StateTest)
 TEST(Motor, ChangeLevelTest)
 {
     Motor              motor;
-    Motor::ChangeLevel levels[] = {Motor::ChangeLevel::OFF, Motor::ChangeLevel::Low, Motor::ChangeLevel::Middle,
-                                   Motor::ChangeLevel::High, Motor::ChangeLevel::Max};
+    Motor::ChangeLevel levels[] = {Motor::ChangeLevel::OFF,  Motor::ChangeLevel::Low, Motor::ChangeLevel::Middle,
+                                   Motor::ChangeLevel::High, Motor::ChangeLevel::Max, Motor::ChangeLevel::OFF};
 
     // Fallに設定しても、Riseには反映されないことを確認
     for (const auto &rise : levels) {
