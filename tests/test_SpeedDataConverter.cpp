@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <iostream>
-
 #include "SpeedDataConverter.h"
 
 namespace {
+
 using namespace spirit;
 
 /**
@@ -46,12 +45,6 @@ TEST(SpeedDataConverter, EncodeDecodeSpeedTest)
         EXPECT_NEAR(Ki, return_Ki, allowable_error_margin(Ki));
 
         EXPECT_EQ(state, decoded_motor.get_state());
-
-        // buffer の中身を確認する
-        for (std::size_t i = 0; i < max_buffer_size / 8; ++i) {
-            std::cout << std::hex << static_cast<int>(buffer[i]) << " ";
-        }
-        std::cout << std::endl;
     };
 
     // スピードが0未満や1より大きい場合のテストはMotorクラスのテストで行う

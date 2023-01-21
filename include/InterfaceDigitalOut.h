@@ -11,6 +11,11 @@ namespace spirit {
 class InterfaceDigitalOut {
 public:
     /**
+     * @brief デストラクタ
+     */
+    virtual ~InterfaceDigitalOut() = default;
+
+    /**
      * @brief 出力ピンの出力値を設定する
      * @param value 出力ピンの出力値
      *              - 0: Low
