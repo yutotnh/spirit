@@ -18,14 +18,28 @@ float Motor::get_duty_cycle() const
     return _duty_cycle;
 }
 
-void Motor::velocity(const float rps)
+void Motor::speed(const float rps)
 {
-    _velocity = rps;
+    _speed = rps;
 }
 
-float Motor::get_velocity() const
+float Motor::get_speed() const
 {
-    return _velocity;
+    return _speed;
+}
+
+void Motor::pid(const float Kp, const float Ki, const float Kd)
+{
+    _Kp = Kp;
+    _Ki = Ki;
+    _Kd = Kd;
+}
+
+void Motor::get_pid(float& Kp, float& Ki, float& Kd) const
+{
+    Kp = _Kp;
+    Ki = _Ki;
+    Kd = _Kd;
 }
 
 void Motor::state(const State type)
