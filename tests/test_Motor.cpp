@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "Error.h"
 #include "Motor.h"
 
 namespace {
@@ -71,6 +72,12 @@ TEST(Motor, ControlSystemTest)
     // 初期値が Motor::ControlSystem::PWM なので、Motor::ControlSystem::PWM 以外を指定しても Motor::ControlSystem::PWM になる
     motor.control_system(Motor::ControlSystem::PWM);
     EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::PWM);
+
+    // 異常系のテスト
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.control_system(static_cast<Motor::ControlSystem>(3));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
 }
 
 /**
