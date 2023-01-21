@@ -107,20 +107,20 @@ public:
     float get_speed() const;
 
     /**
-     * @brief PID制御のパラメータを設定する
-     * @param Kp 比例ゲイン
-     * @param Ki 積分ゲイン
-     * @param Kd 微分ゲイン
+     * @brief PID制御のゲイン係数を設定する
+     * @param Kp 比例ゲイン係数
+     * @param Ki 積分ゲイン係数
+     * @param Kd 微分ゲイン係数
      */
-    void pid(float Kp, float Ki, float Kd);
+    void pid_gain_factor(float Kp, float Ki, float Kd);
 
     /**
-     * @brief PID制御のパラメータを返す
-     * @param Kp 比例ゲイン
-     * @param Ki 積分ゲイン
-     * @param Kd 微分ゲイン
+     * @brief PID制御のゲイン係数を返す
+     * @param Kp 比例ゲイン係数
+     * @param Ki 積分ゲイン係数
+     * @param Kd 微分ゲイン係数
      */
-    void get_pid(float& Kp, float& Ki, float& Kd) const;
+    void get_pid_gain_factor(float& Kp, float& Ki, float& Kd) const;
 
     /**
      * @brief 回転方向を設定する

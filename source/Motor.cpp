@@ -28,14 +28,14 @@ float Motor::get_speed() const
     return _speed;
 }
 
-void Motor::pid(const float Kp, const float Ki, const float Kd)
+void Motor::pid_gain_factor(const float Kp, const float Ki, const float Kd)
 {
     _Kp = Kp;
     _Ki = Ki;
     _Kd = Kd;
 }
 
-void Motor::get_pid(float& Kp, float& Ki, float& Kd) const
+void Motor::get_pid_gain_factor(float& Kp, float& Ki, float& Kd) const
 {
     Kp = _Kp;
     Ki = _Ki;
