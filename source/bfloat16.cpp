@@ -55,7 +55,7 @@ uint16_t float32_to_bfloat16(const float value)
         mantissa = 1;
     } else {
         int32_t     exponent_int32_t = 0;
-        const float mantissa_float   = std::frexp(value, static_cast<int *>(&exponent_int32_t)) - 0.50F;
+        const float mantissa_float   = std::frexp(value, reinterpret_cast<int *>(&exponent_int32_t)) - 0.50F;
         exponent                     = exponent_int32_t + 126;
         mantissa                     = static_cast<uint32_t>(std::ldexp(mantissa_float, 8));
     }
