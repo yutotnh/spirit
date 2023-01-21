@@ -9,8 +9,8 @@ namespace spirit {
 /**
  * @brief バッファの指定した範囲のビットを取得する
  * @param buffer バッファ
- * @param buffer_size バッファサイズ
- * @param start 開始位置
+ * @param buffer_size バッファのバイト幅
+ * @param start 開始位置(0から始まる)
  * @param value_size 値のビット幅
  * @return 値
  */
@@ -19,9 +19,9 @@ uint32_t get_range_value(const uint8_t* buffer, std::size_t buffer_size, std::si
 /**
  * @brief バッファの指定した範囲のビットを設定する
  * @param value 値
- * @param start 開始位置
+ * @param start 開始位置(0から始まる)
  * @param value_size 値のビット幅
- * @param buffer_size バッファサイズ
+ * @param buffer_size バッファのバイト幅
  * @param buffer バッファ
  * @return 成功したかどうか
  */
