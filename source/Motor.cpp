@@ -12,7 +12,7 @@ void Motor::control_system(const ControlSystem type)
             break;
         default:
             Error&      error   = Error::get_instance();
-            std::string message = "Unkown motor type (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            const std::string message = "Unkown motor type (" + std::to_string(static_cast<uint32_t>(type)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
@@ -75,7 +75,7 @@ void Motor::state(const State type)
             break;
         default:
             Error&      error   = Error::get_instance();
-            std::string message = "Unkown motor state: " + std::to_string(static_cast<uint32_t>(type));
+            const std::string message = "Unkown motor state: " + std::to_string(static_cast<uint32_t>(type));
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
@@ -99,7 +99,7 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             break;
         default:
             Error&      error = Error::get_instance();
-            std::string message =
+            const std::string message =
                 "Unkown motor change level target (" + std::to_string(static_cast<uint32_t>(target)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
@@ -156,7 +156,7 @@ void Motor::decay(const Decay type)
                         __LINE__);
             return;
         default:
-            std::string message = "Unkown motor decay (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            const std::string message = "Unkown motor decay (" + std::to_string(static_cast<uint32_t>(type)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
@@ -177,7 +177,7 @@ void Motor::pwm_side(const PwmSide type)
             break;
         default:
             Error&      error   = Error::get_instance();
-            std::string message = "Unkown motor PWM side (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            const std::string message = "Unkown motor PWM side (" + std::to_string(static_cast<uint32_t>(type)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
