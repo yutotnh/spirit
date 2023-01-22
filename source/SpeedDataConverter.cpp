@@ -95,7 +95,7 @@ Motor::State SpeedDataConverter::get_state(const uint8_t* buffer)
             return Motor::State::Brake;
         default:
             Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor state: " + std::to_string(static_cast<uint32_t>(state));
+            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(state)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return Motor::State::Coast;
     }
@@ -121,7 +121,7 @@ void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer)
             break;
         default:
             Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor state: " + std::to_string(static_cast<uint32_t>(state));
+            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(state)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             break;
     }
