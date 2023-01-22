@@ -1,8 +1,8 @@
 #ifndef SPIRIT_ERROR_H
 #define SPIRIT_ERROR_H
 
-#include <atomic>
 #include <cstdint>
+#include <string>
 
 #include "include/mutex.h"
 
