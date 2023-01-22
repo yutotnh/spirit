@@ -45,9 +45,11 @@ void A3921::state(const Motor::State type)
         case Motor::State::Brake:
             break;
         default:
-            Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(type)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            Error&         error          = Error::get_instance();
+            constexpr char message_base[] = "Unknown motor state (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(type));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -61,15 +63,15 @@ void A3921::decay(const Motor::Decay type)
         case Motor::Decay::Slow:
         case Motor::Decay::Fast:
             break;
-
-        // 非対応
         case Motor::Decay::Mixed:
             error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)", __FILE__, __func__,
                         __LINE__);
             return;
         default:
-            const std::string message = "Unknown motor decay (" + std::to_string(static_cast<uint32_t>(type)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            constexpr char message_base[] = "Unknown motor decay (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(type));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -83,9 +85,11 @@ void A3921::pwm_side(const Motor::PwmSide type)
         case Motor::PwmSide::High:
             break;
         default:
-            Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor pwm side (" + std::to_string(static_cast<uint32_t>(type)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            Error&         error          = Error::get_instance();
+            constexpr char message_base[] = "Unknown motor pwm side (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(type));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -109,8 +113,10 @@ void A3921::run()
                         __LINE__);
             return;
         default:
-            const std::string message = "Unknown motor decay (" + std::to_string(static_cast<uint32_t>(_decay)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            constexpr char message_base[] = "Unknown motor decay (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(_decay));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -130,10 +136,11 @@ void A3921::run_slow_decay()
             pwm_high_side = _duty_cycle;
             break;
         default:
-            Error&            error = Error::get_instance();
-            const std::string message =
-                "Unknown motor pwm side (" + std::to_string(static_cast<uint32_t>(_pwm_side)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            Error&         error          = Error::get_instance();
+            constexpr char message_base[] = "Unknown motor pwm side (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(_pwm_side));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -169,9 +176,11 @@ void A3921::run_slow_decay()
             break;
 
         default:
-            Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(_state)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            Error&         error          = Error::get_instance();
+            constexpr char message_base[] = "Unknown motor state (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(_state));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -210,9 +219,11 @@ void A3921::run_fast_decay()
             break;
 
         default:
-            Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(_state)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            Error&         error          = Error::get_instance();
+            constexpr char message_base[] = "Unknown motor state (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(_state));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -224,9 +235,11 @@ void A3921::pulse_period(const float seconds)
         _pwml.period(seconds);
         _phase.period(seconds);
     } else {
-        Error&            error   = Error::get_instance();
-        const std::string message = "Invalid motor pulse period (" + std::to_string(seconds) + ")";
-        error.error(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+        Error&         error          = Error::get_instance();
+        constexpr char message_base[] = "Invalid motor pulse period (%1.4e)";
+        char           message[sizeof(message_base) + Error::max_float_1_4_e_length];
+        snprintf(message, sizeof(message), message_base, seconds);
+        error.error(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
     }
 }
 
