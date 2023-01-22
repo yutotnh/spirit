@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include "Error.h"
 #include "bit.h"
 
 namespace spirit {
@@ -66,8 +67,10 @@ Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
         case 0x03U:
             return Motor::State::Brake;
         default:
+            Error&            error   = Error::get_instance();
+            const std::string message = "Unknown motor state (" + std::to_string(state_uint32_t) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return Motor::State::Brake;
-            break;
     }
 }
 
@@ -87,6 +90,9 @@ void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer)
             set_range_value(0x03U, 18U, 2U, 8U, buffer);
             break;
         default:
+            Error&            error   = Error::get_instance();
+            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(state)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             break;
     }
 }

@@ -29,10 +29,12 @@ target_sources(spirit
     ./source/bfloat16.cpp
     ./source/bit.cpp
     ./source/CANMessage.cpp
+    ./source/Error.cpp
     ./source/FakeUdpConverter.cpp
     ./source/Id.cpp
     ./source/MdLed.cpp
     ./source/Motor.cpp
+    ./source/mutex.cpp
     ./source/PwmDataConverter.cpp
     ./source/SpeedDataConverter.cpp
 )

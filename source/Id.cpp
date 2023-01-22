@@ -1,5 +1,7 @@
 #include "Id.h"
 
+#include "Error.h"
+
 namespace spirit {
 
 namespace can {
@@ -42,11 +44,26 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
 
     constexpr uint32_t motor_count_prefix_size = 2;
 
+    if (motor_count == 0) {
+        Error&            error   = Error::get_instance();
+        const std::string message = "Total number of motors is 0";
+        error.warning(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+        return 0;
+    }
+
     if (motor_is_valid(motor, motor_count) == false) {
+        Error&            error = Error::get_instance();
+        const std::string message =
+            "Motor number (" + std::to_string(motor) + ") is out of range (0-" + std::to_string(motor_count - 1) + ")";
+        error.warning(Error::Type::IllegalCombination, 0, message.c_str(), __FILE__, __func__, __LINE__);
         return 0;
     }
 
     if (dip_switch_is_valid(dip_switch, dip_switch_size) == false) {
+        Error&            error   = Error::get_instance();
+        const std::string message = "Dip switch value (" + std::to_string(dip_switch) +
+                                    ") exceeds maximum bit width (" + std::to_string(dip_switch_size) + ")";
+        error.warning(Error::Type::IllegalCombination, 0, message.c_str(), __FILE__, __func__, __LINE__);
         return 0;
     }
 
@@ -58,6 +75,9 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     uint32_t type = 0;
 
     if ((motor_count == 0) || (4 < motor_count)) {
+        Error&            error   = Error::get_instance();
+        const std::string message = "Unknown motor count type (" + std::to_string(motor_count) + ")";
+        error.warning(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
         return 0;
     }
 
@@ -68,6 +88,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     } else if (motor_count <= 4) {
         type = 2;
     } else {
+        Error& error = Error::get_instance();
+        error.warning(Error::Type::UnknownValue, 0, "Unkown motor count type", __FILE__, __func__, __LINE__);
         return 0;
     }
 
@@ -106,6 +128,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             // 8個のモーターは未対応
             // 将来の拡張を考えて、0b11を残している
             // 例えば0b1100の場合8、0b1101の場合16をモーターに割り当てるなどする
+            Error& error = Error::get_instance();
+            error.warning(Error::Type::UnknownValue, 0, "Unkown motor count type", __FILE__, __func__, __LINE__);
             return 0;
     }
 }

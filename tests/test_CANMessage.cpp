@@ -17,13 +17,13 @@ TEST(CANMessage, ConstructorTest1)
     constexpr uint8_t  data[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
     constexpr uint8_t  length = 8;
 
-    CANMessage msg(id, data, length);
+    CANMessage message(id, data, length);
 
-    EXPECT_EQ(msg.get_id(), id);
-    EXPECT_EQ(msg.get_length(), length);
+    EXPECT_EQ(message.get_id(), id);
+    EXPECT_EQ(message.get_length(), length);
 
     uint8_t return_data[length];
-    msg.get_data(return_data);
+    message.get_data(return_data);
     EXPECT_EQ(memcmp(data, return_data, length), 0);
 }
 
@@ -37,15 +37,15 @@ TEST(CANMessage, IdTest)
         constexpr uint8_t data[] = {0x0F, 0x0E, 0x0D, 0x0C, 0x0B};
         constexpr uint8_t length = 5;
 
-        CANMessage msg(id, data, length);
+        CANMessage message(id, data, length);
 
-        EXPECT_EQ(msg.get_id(), expected_id);
+        EXPECT_EQ(message.get_id(), expected_id);
 
         // 境界値前後のデータ長が来ても、データとデータ長は変わらないことのテスト
-        EXPECT_EQ(msg.get_length(), length);
+        EXPECT_EQ(message.get_length(), length);
 
         uint8_t return_data[length];
-        msg.get_data(return_data);
+        message.get_data(return_data);
         EXPECT_EQ(memcmp(data, return_data, length), 0);
     };
 
@@ -89,15 +89,15 @@ TEST(CANMessage, DataTest)
             data_value = value;
         }
 
-        CANMessage msg(id, data, length);
+        CANMessage message(id, data, length);
 
         uint8_t return_data[length];
-        msg.get_data(return_data);
+        message.get_data(return_data);
         EXPECT_EQ(memcmp(data, return_data, length), 0);
 
         // いろんな値のデータが来てもIDとデータ長は変わらないことのテスト
-        EXPECT_EQ(msg.get_id(), id);
-        EXPECT_EQ(msg.get_length(), length);
+        EXPECT_EQ(message.get_id(), id);
+        EXPECT_EQ(message.get_length(), length);
     };
 
     // 型が uint8_t なので、データの最小値は0で、-1はない
@@ -123,15 +123,15 @@ TEST(CANMessage, LengthTest)
         constexpr uint16_t id     = 0x123;
         constexpr uint8_t  data[] = {0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07};
 
-        CANMessage msg(id, data, length);
+        CANMessage message(id, data, length);
 
-        EXPECT_EQ(msg.get_length(), expected_length);
+        EXPECT_EQ(message.get_length(), expected_length);
 
         // 境界値前後のデータ長が来ても、IDとデータは変わらないことのテスト
-        EXPECT_EQ(msg.get_id(), id);
+        EXPECT_EQ(message.get_id(), id);
 
         uint8_t return_data[CANMessage::max_data_length];
-        msg.get_data(return_data);
+        message.get_data(return_data);
         EXPECT_EQ(memcmp(data, return_data, expected_length), 0);
     };
 

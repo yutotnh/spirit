@@ -1,5 +1,7 @@
 #include "Motor.h"
 
+#include "Error.h"
+
 namespace spirit {
 
 void Motor::control_system(const ControlSystem type)
@@ -9,6 +11,9 @@ void Motor::control_system(const ControlSystem type)
         case ControlSystem::Speed:
             break;
         default:
+            Error&            error   = Error::get_instance();
+            const std::string message = "Unkown motor type (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -24,8 +29,17 @@ void Motor::duty_cycle(const float value)
 {
     if (1.00F < value) {
         _duty_cycle = 1.00F;
+
+        Error&            error = Error::get_instance();
+        const std::string message =
+            "Duty cycle (" + std::to_string(value) + ") is greater than 1.00, so it will be 1.00";
+        error.warning(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
     } else if (value < 0.00F) {
         _duty_cycle = 0.00F;
+
+        Error&            error   = Error::get_instance();
+        const std::string message = "Duty cycle (" + std::to_string(value) + ") is less than 0.00, so it will be 0.00";
+        error.warning(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
     } else {
         _duty_cycle = value;
     }
@@ -69,6 +83,9 @@ void Motor::state(const State type)
         case State::Brake:
             break;
         default:
+            Error&            error   = Error::get_instance();
+            const std::string message = "Unkown motor state (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -82,6 +99,21 @@ Motor::State Motor::get_state() const
 
 void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level)
 {
+    switch (level) {
+        case ChangeLevel::OFF:
+        case ChangeLevel::Low:
+        case ChangeLevel::Middle:
+        case ChangeLevel::High:
+        case ChangeLevel::Max:
+            break;
+        default:
+            Error&            error = Error::get_instance();
+            const std::string message =
+                "Unkown motor change level (" + std::to_string(static_cast<uint32_t>(level)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            return;
+    }
+
     switch (target) {
         case ChangeLevelTarget::Rise:
             _rise_change_level = level;
@@ -89,6 +121,12 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
         case ChangeLevelTarget::Fall:
             _fall_change_level = level;
             break;
+        default:
+            Error&            error = Error::get_instance();
+            const std::string message =
+                "Unkown motor change level target (" + std::to_string(static_cast<uint32_t>(target)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            return;
     }
 }
 
@@ -100,6 +138,10 @@ Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
         case ChangeLevelTarget::Fall:
             return _fall_change_level;
         default:
+            Error&            error = Error::get_instance();
+            const std::string message =
+                "Unkown motor change level target (" + std::to_string(static_cast<uint32_t>(target)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return ChangeLevel::OFF;
     }
 }
@@ -108,8 +150,20 @@ void Motor::pulse_period(const float seconds)
 {
     if (max_pulse_period < seconds) {
         _pulse_period = max_pulse_period;
+
+        Error&            error   = Error::get_instance();
+        const std::string message = "Pulse period (" + std::to_string(seconds) +
+                                    ") is greater than max pulse period (" + std::to_string(max_pulse_period) +
+                                    "), so it will be max pulse period (" + std::to_string(max_pulse_period) + ")";
+        error.warning(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
     } else if (seconds < min_pulse_period) {
         _pulse_period = min_pulse_period;
+
+        Error&            error   = Error::get_instance();
+        const std::string message = "Pulse period (" + std::to_string(seconds) + ") is less than min pulse period (" +
+                                    std::to_string(min_pulse_period) + "), so it will be min pulse period (" +
+                                    std::to_string(min_pulse_period) + ")";
+        error.warning(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
     } else {
         _pulse_period = seconds;
     }
@@ -132,14 +186,18 @@ float Motor::get_release_time() const
 
 void Motor::decay(const Decay type)
 {
+    Error& error = Error::get_instance();
     switch (type) {
         case Decay::Slow:
         case Decay::Fast:
             break;
-
-        // 非対応
         case Decay::Mixed:
+            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Decay::Mixed)", __FILE__, __func__,
+                        __LINE__);
+            return;
         default:
+            const std::string message = "Unkown motor decay (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -158,6 +216,9 @@ void Motor::pwm_side(const PwmSide type)
         case PwmSide::High:
             break;
         default:
+            Error&            error   = Error::get_instance();
+            const std::string message = "Unkown motor PWM side (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 

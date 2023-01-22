@@ -35,6 +35,10 @@ TEST(Id, IdCanMotorTest)
     EXPECT_EQ(0x300, can::get_motor_id(4, 0, 0x00));
 
     // 異常系のテスト
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     // dip_switchの値がビット幅( dip_switch_size )を超えている場合
     EXPECT_EQ(0, can::get_motor_id(1, 0, 0x20));
 
@@ -48,6 +52,8 @@ TEST(Id, IdCanMotorTest)
     EXPECT_EQ(0, can::get_motor_id(0, 0, 0x0));
     EXPECT_EQ(0, can::get_motor_id(5, 0, 0x0));
     EXPECT_EQ(0, can::get_motor_id(8, 0, 0x0));
+
+    testing::internal::GetCapturedStderr().c_str();
 }
 
 }  // namespace
