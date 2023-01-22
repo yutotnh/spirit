@@ -2,6 +2,8 @@
 
 #include <climits>
 
+#include "Error.h"
+
 namespace spirit {
 
 uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const std::size_t start,
@@ -9,6 +11,10 @@ uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, c
 {
     auto end = start + value_size - 1;
     if ((buffer_size * CHAR_BIT) < end) {
+        Error&            error   = Error::get_instance();
+        const std::string message = "Range (" + std::to_string(start) + "-" + std::to_string(end) +
+                                    ") is out of range (0-" + std::to_string((buffer_size * CHAR_BIT) - 1) + ")";
+        error.warning(Error::Type::IllegalCombination, 0, message.c_str(), __FILE__, __func__, __LINE__);
         return UINT32_MAX;
     }
 
@@ -30,6 +36,10 @@ bool set_range_value(const uint32_t value, const std::size_t start, const std::s
 {
     auto end = start + value_size - 1;
     if ((buffer_size * CHAR_BIT) < end) {
+        Error&            error   = Error::get_instance();
+        const std::string message = "Range (" + std::to_string(start) + "-" + std::to_string(end) +
+                                    ") is out of range (0-" + std::to_string((buffer_size * CHAR_BIT) - 1) + ")";
+        error.warning(Error::Type::IllegalCombination, 0, message.c_str(), __FILE__, __func__, __LINE__);
         return false;
     }
 
