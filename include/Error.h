@@ -2,7 +2,7 @@
 #define SPIRIT_ERROR_H
 
 #include <cstdint>
-#include <string>
+#include <cstdio>
 
 #include "include/mutex.h"
 
@@ -84,6 +84,9 @@ public:
      */
     void error(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                uint32_t line_number);
+
+    static constexpr uint32_t max_uint32_t_length    = 10;
+    static constexpr uint32_t max_float_1_4_e_length = 10;
 
 private:
     Error()  = default;
