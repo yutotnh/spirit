@@ -53,7 +53,7 @@ TEST(Id, IdCanMotorTest)
     EXPECT_EQ(0, can::get_motor_id(5, 0, 0x0));
     EXPECT_EQ(0, can::get_motor_id(8, 0, 0x0));
 
-    testing::internal::GetCapturedStderr().c_str();
+    testing::internal::GetCapturedStderr();
 }
 
 }  // namespace

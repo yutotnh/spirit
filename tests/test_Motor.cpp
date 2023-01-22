@@ -84,7 +84,7 @@ TEST(Motor, ControlSystemTest)
     motor.control_system(static_cast<Motor::ControlSystem>(3));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
 
-    testing::internal::GetCapturedStderr().c_str();
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -103,18 +103,25 @@ TEST(Motor, DutyCycleTest)
     motor.duty_cycle(1.00F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.00F);
 
+    // 異常系のテスト
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     // 境界値テスト
-    // 0.00F未満
+    /// @test 0.00F未満
     motor.duty_cycle(-0.01F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
     motor.duty_cycle(-0.50F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
 
-    // 1.00Fより大きい
+    /// @test 1.00Fより大きい
     motor.duty_cycle(1.01F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.00F);
     motor.duty_cycle(2.00F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.00F);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -231,18 +238,26 @@ TEST(Motor, PulsePeriodTest)
     motor.pulse_period(_10kHz);
     EXPECT_FLOAT_EQ(motor.get_pulse_period(), _10kHz);
 
+    // 異常系
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     // 境界値テスト
-    // Motor::min_pulse_period 未満
+    /// @test Motor::min_pulse_period 未満
     motor.pulse_period(Motor::min_pulse_period - (Motor::min_pulse_period * 0.1F));
     EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::min_pulse_period);
     motor.pulse_period(Motor::min_pulse_period - (Motor::min_pulse_period * 10.0F));
     EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::min_pulse_period);
 
-    // max_pulse_period より大きい
+    /// @test max_pulse_period より大きい
     motor.pulse_period(Motor::max_pulse_period + (Motor::max_pulse_period * 0.1F));
     EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::max_pulse_period);
     motor.pulse_period(Motor::max_pulse_period + (Motor::max_pulse_period * 10.0F));
     EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::max_pulse_period);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
