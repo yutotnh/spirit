@@ -3,7 +3,7 @@
 #ifdef __MBED__
 #include "mbed.h"
 #else
-#include <iostream>
+#include <cstdio>
 #endif
 
 namespace spirit {
