@@ -45,9 +45,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     constexpr uint32_t motor_count_prefix_size = 2;
 
     if (motor_count == 0) {
-        Error&            error   = Error::get_instance();
-        const std::string message = "Total number of motors is 0";
-        error.warning(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+        Error& error = Error::get_instance();
+        error.warning(Error::Type::InvalidValue, 0, "Total number of motors is 0", __FILE__, __func__, __LINE__);
         return 0;
     }
 

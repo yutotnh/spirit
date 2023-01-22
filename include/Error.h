@@ -2,7 +2,7 @@
 #define SPIRIT_ERROR_H
 
 #include <cstdint>
-#include <string>
+#include <cstdio>
 
 #include "include/mutex.h"
 

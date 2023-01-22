@@ -16,9 +16,6 @@ uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, c
         char           message[sizeof(message_base) + Error::max_uint32_t_length * 3];
         snprintf(message, sizeof(message), message_base, start, end, (buffer_size * CHAR_BIT) - 1);
         error.warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
-        // const std::string message = "Range (" + std::to_string(start) + "-" + std::to_string(end) +
-        // ") is out of range (0-" + std::to_string((buffer_size * CHAR_BIT) - 1) + ")";
-        // error.warning(Error::Type::IllegalCombination, 0, message.c_str(), __FILE__, __func__, __LINE__);
         return UINT32_MAX;
     }
 

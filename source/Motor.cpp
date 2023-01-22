@@ -119,9 +119,6 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             char           message[sizeof(message_base) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(level));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            // const std::string message =
-            //     "Unkown motor change level (" + std::to_string(static_cast<uint32_t>(level)) + ")";
-            // error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -138,9 +135,6 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             char           message[sizeof(message_base) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(target));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            // const std::string message =
-            //     "Unkown motor change level target (" + std::to_string(static_cast<uint32_t>(target)) + ")";
-            // error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 }
