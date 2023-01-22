@@ -11,7 +11,7 @@ void Motor::control_system(const ControlSystem type)
         case ControlSystem::Speed:
             break;
         default:
-            Error&      error   = Error::get_instance();
+            Error&            error   = Error::get_instance();
             const std::string message = "Unkown motor type (" + std::to_string(static_cast<uint32_t>(type)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
@@ -74,7 +74,7 @@ void Motor::state(const State type)
         case State::Brake:
             break;
         default:
-            Error&      error   = Error::get_instance();
+            Error&            error   = Error::get_instance();
             const std::string message = "Unkown motor state: " + std::to_string(static_cast<uint32_t>(type));
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
@@ -98,7 +98,7 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             _fall_change_level = level;
             break;
         default:
-            Error&      error = Error::get_instance();
+            Error&            error = Error::get_instance();
             const std::string message =
                 "Unkown motor change level target (" + std::to_string(static_cast<uint32_t>(target)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
@@ -176,7 +176,7 @@ void Motor::pwm_side(const PwmSide type)
         case PwmSide::High:
             break;
         default:
-            Error&      error   = Error::get_instance();
+            Error&            error   = Error::get_instance();
             const std::string message = "Unkown motor PWM side (" + std::to_string(static_cast<uint32_t>(type)) + ")";
             error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
