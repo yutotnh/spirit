@@ -8,7 +8,7 @@
 
 namespace spirit {
 
-// void error(const char* error_msg, const char* filename, const char* funcname, uint32_t line_number);
+// void error(const char* error_message, const char* filename, const char* funcname, uint32_t line_number);
 
 /**
  * @brief エラー管理クラス
@@ -65,24 +65,24 @@ public:
      * @brief 警告情報の出力と情報の保存を行う
      * @param type エラー(警告)の種類
      * @param code エラー(警告)の値
-     * @param msg エラー(警告)のメッセージ
+     * @param message エラー(警告)のメッセージ
      * @param filename ファイル名
      * @param funcname 関数名
      * @param line_number 行番号
      */
-    void warning(Type type, uint32_t code, const char* msg, const char* filename, const char* funcname,
+    void warning(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                  uint32_t line_number);
 
     /**
      * @brief エラー情報の出力と情報の保存を行う
      * @param type エラー(警告)の種類
      * @param code エラー(警告)の値
-     * @param msg エラー(警告)のメッセージ
+     * @param message エラー(警告)のメッセージ
      * @param filename ファイル名
      * @param funcname 関数名
      * @param line_number 行番号
      */
-    void error(Type type, uint32_t code, const char* msg, const char* filename, const char* funcname,
+    void error(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                uint32_t line_number);
 
 private:
@@ -97,12 +97,12 @@ private:
      * @brief エラー(警告)情報を出力する
      * @param type エラー(警告)の種類
      * @param code エラー(警告)の値
-     * @param msg エラー(警告)のメッセージ
+     * @param message エラー(警告)のメッセージ
      * @param filename ファイル名
      * @param funcname 関数名
      * @param line_number 行番号
      */
-    void print(Type type, uint32_t code, const char* msg, const char* filename, const char* funcname,
+    void print(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                uint32_t line_number);
 };
 

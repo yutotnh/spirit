@@ -40,32 +40,32 @@ TEST(IntegrationTest, 1)
         fake_udp.encode(pwm_data_buffer, pwm_data_buffer_size, max_fake_udp_buffer_size, fake_udp_buffer,
                         fake_udp_buffer_size);
 
-        ::CANMessage msg;
-        msg.id = can_id;
+        ::CANMessage message;
+        message.id = can_id;
         if (fake_udp_buffer_size % 8) {
-            msg.len = (fake_udp_buffer_size / 8) + 1;
+            message.len = (fake_udp_buffer_size / 8) + 1;
         } else {
-            msg.len = fake_udp_buffer_size / 8;
+            message.len = fake_udp_buffer_size / 8;
         }
 
-        memmove(msg.data, fake_udp_buffer, 8);
+        memmove(message.data, fake_udp_buffer, 8);
 
-        return msg;
+        return message;
     };
 
     /// 受信側
-    auto peripheral = [&dip_sw](const ::CANMessage &msg) {
+    auto peripheral = [&dip_sw](const ::CANMessage &message) {
         spirit::FakeUdpConverter fake_udp;
         spirit::PwmDataConverter pwm_data;
 
         const uint32_t can_id = spirit::can::get_motor_id(1, 0, dip_sw);
 
-        EXPECT_EQ(msg.id, can_id);
+        EXPECT_EQ(message.id, can_id);
 
         constexpr std::size_t max_payload_size = 64;
         uint8_t               payload[8]       = {};
         std::size_t           payload_size;
-        fake_udp.decode(msg.data, msg.len * 8, max_payload_size, payload, payload_size);
+        fake_udp.decode(message.data, message.len * 8, max_payload_size, payload, payload_size);
 
         spirit::Motor motor;
         pwm_data.decode(payload, payload_size, motor);
@@ -79,8 +79,8 @@ TEST(IntegrationTest, 1)
         motor.state(state);
         motor.duty_cycle(duty_cycle);
 
-        ::CANMessage  msg            = controller(motor);
-        spirit::Motor received_motor = peripheral(msg);
+        ::CANMessage  message            = controller(motor);
+        spirit::Motor received_motor = peripheral(message);
 
         // デューティー比は16bitで表現しているため、1/65535の誤差を許容する
         constexpr float allowable_error_margin = 1.0F / 65535.0F;

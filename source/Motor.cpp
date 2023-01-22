@@ -11,8 +11,9 @@ void Motor::control_system(const ControlSystem type)
         case ControlSystem::Speed:
             break;
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unkown motor type", __FILE__, __func__, __LINE__);
+            Error&      error = Error::get_instance();
+            std::string message   = "Unkown motor type (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -73,8 +74,9 @@ void Motor::state(const State type)
         case State::Brake:
             break;
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unkown motor state", __FILE__, __func__, __LINE__);
+            Error&      error = Error::get_instance();
+            std::string message   = "Unkown motor state: " + std::to_string(static_cast<uint32_t>(type));
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -96,8 +98,10 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             _fall_change_level = level;
             break;
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unkown motor change level target", __FILE__, __func__, __LINE__);
+            Error&      error = Error::get_instance();
+            std::string message =
+                "Unkown motor change level target (" + std::to_string(static_cast<uint32_t>(target)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -147,13 +151,13 @@ void Motor::decay(const Decay type)
         case Decay::Slow:
         case Decay::Fast:
             break;
-
-        // 非対応
         case Decay::Mixed:
-            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay", __FILE__, __func__, __LINE__);
+            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Decay::Mixed)", __FILE__, __func__,
+                        __LINE__);
             return;
         default:
-            error.error(Error::Type::UnknownValue, 0, "Unkown motor decay", __FILE__, __func__, __LINE__);
+            std::string message = "Unkown motor decay (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -172,8 +176,9 @@ void Motor::pwm_side(const PwmSide type)
         case PwmSide::High:
             break;
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unkown motor PWM side", __FILE__, __func__, __LINE__);
+            Error&      error = Error::get_instance();
+            std::string message   = "Unkown motor PWM side (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 

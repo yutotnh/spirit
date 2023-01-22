@@ -19,27 +19,27 @@ Error::Status Error::get_status()
     return _status;
 }
 
-void Error::warning(Type type, uint32_t code, const char* msg, const char* filename, const char* funcname,
+void Error::warning(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                     uint32_t line_number)
 {
     _mutex.lock();
     _status = Status::Warning;
     _code   = code;
-    print(type, code, msg, filename, funcname, line_number);
+    print(type, code, message, filename, funcname, line_number);
     _mutex.unlock();
 }
 
-void Error::error(Type type, uint32_t code, const char* msg, const char* filename, const char* funcname,
+void Error::error(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                   uint32_t line_number)
 {
     _mutex.lock();
     _status = Status::Error;
     _code   = code;
-    print(type, code, msg, filename, funcname, line_number);
+    print(type, code, message, filename, funcname, line_number);
     _mutex.unlock();
 }
 
-void Error::print(Type type, uint32_t code, const char* msg, const char* filename, const char* funcname,
+void Error::print(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                   uint32_t line_number)
 {
     uint8_t status_string[10]{};
@@ -88,7 +88,7 @@ void Error::print(Type type, uint32_t code, const char* msg, const char* filenam
         "\tFile: %s\n"
         "\tFunction: %s\n"
         "\tLine: %d\n\n",
-        status_string, type_string, code, msg, filename, funcname, line_number);
+        status_string, type_string, code, message, filename, funcname, line_number);
 #else
     std::fprintf(stderr,
                  "%s:\n"
@@ -98,7 +98,7 @@ void Error::print(Type type, uint32_t code, const char* msg, const char* filenam
                  "\tFile: %s\n"
                  "\tFunction: %s\n"
                  "\tLine: %d\n\n",
-                 status_string, type_string, code, msg, filename, funcname, line_number);
+                 status_string, type_string, code, message, filename, funcname, line_number);
     std::fflush(stderr);
 #endif
 }
