@@ -1,7 +1,5 @@
 #include "PwmDataConverter.h"
 
-#include <cstring>
-
 #include "bit.h"
 #include "include/Error.h"
 
