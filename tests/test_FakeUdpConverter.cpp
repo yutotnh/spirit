@@ -15,7 +15,7 @@ TEST(FakeUdpConverter, EncodeTest)
     // 正常系
     //
 
-    // payloadが1byteの場合
+    /// @test payloadが1byteの場合
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -35,7 +35,7 @@ TEST(FakeUdpConverter, EncodeTest)
         EXPECT_EQ(buffer_size, payload_size + 1);
     }
 
-    // payloadが2byteの場合
+    /// @test payloadが2byteの場合
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -56,7 +56,7 @@ TEST(FakeUdpConverter, EncodeTest)
         EXPECT_EQ(buffer_size, payload_size + 1);
     }
 
-    // payloadが7bitの場合
+    /// @test payloadが7bitの場合
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -79,7 +79,11 @@ TEST(FakeUdpConverter, EncodeTest)
     // 異常系
     //
 
-    // payload_size == 0
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    /// @test payload_size == 0
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -92,7 +96,7 @@ TEST(FakeUdpConverter, EncodeTest)
         EXPECT_FALSE(result);
     }
 
-    // payload_size > max_buffer_size
+    /// @test payload_size > max_buffer_size
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -105,7 +109,7 @@ TEST(FakeUdpConverter, EncodeTest)
         EXPECT_FALSE(result);
     }
 
-    // payload_size == max_buffer_size
+    /// @test payload_size == max_buffer_size
     // FakeUdpのデータを挿入するためサイズがpayload_sizeよりも1大きくなるため、
     // payload_size == max_buffer_size だとエラーにする必要がある
     {
@@ -119,6 +123,8 @@ TEST(FakeUdpConverter, EncodeTest)
 
         EXPECT_FALSE(result);
     }
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -130,7 +136,7 @@ TEST(FakeUdpConverter, DecodeTest)
     // 正常系
     //
 
-    // bufferが1byteの場合
+    /// @test bufferが1byteの場合
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -148,7 +154,7 @@ TEST(FakeUdpConverter, DecodeTest)
         EXPECT_EQ(payload_size, 7);
     }
 
-    // bufferが2byteの場合
+    /// @test bufferが2byteの場合
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -167,7 +173,7 @@ TEST(FakeUdpConverter, DecodeTest)
         EXPECT_EQ(payload_size, 15);
     }
 
-    // bufferが7bitの場合
+    /// @test bufferが7bitの場合
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -185,7 +191,7 @@ TEST(FakeUdpConverter, DecodeTest)
         EXPECT_EQ(payload_size, 6);
     }
 
-    // bufferが9bitの場合
+    /// @test bufferが9bitの場合
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -207,7 +213,11 @@ TEST(FakeUdpConverter, DecodeTest)
     // 異常系
     //
 
-    // buffer_size - 1 < max_payload_size
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    /// @test buffer_size - 1 < max_payload_size
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -221,7 +231,7 @@ TEST(FakeUdpConverter, DecodeTest)
         EXPECT_FALSE(result);
     }
 
-    // buffer_size = 0
+    /// @test buffer_size = 0
     {
         FakeUdpConverter fake_udp_converter;
 
@@ -234,6 +244,8 @@ TEST(FakeUdpConverter, DecodeTest)
 
         EXPECT_FALSE(result);
     }
+
+    testing::internal::GetCapturedStderr();
 }
 
 }  // namespace
