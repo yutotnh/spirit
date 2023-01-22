@@ -2,8 +2,8 @@
 
 #include <cstring>
 
-#include "Error.h"
 #include "bit.h"
+#include "include/Error.h"
 
 namespace spirit {
 

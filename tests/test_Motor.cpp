@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "Error.h"
 #include "Motor.h"
+#include "include/Error.h"
 
 namespace {
 
