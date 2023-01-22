@@ -94,9 +94,11 @@ Motor::State SpeedDataConverter::get_state(const uint8_t* buffer)
         case 0x03:
             return Motor::State::Brake;
         default:
-            Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(state)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            Error&         error          = Error::get_instance();
+            constexpr char message_base[] = "Unknown motor state (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(state));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return Motor::State::Coast;
     }
 }
@@ -120,9 +122,11 @@ void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer)
             set_range_value(0x03U, start, length, buffer_size, buffer);
             break;
         default:
-            Error&            error   = Error::get_instance();
-            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(state)) + ")";
-            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
+            Error&         error          = Error::get_instance();
+            constexpr char message_base[] = "Unknown motor state (%d)";
+            char           message[sizeof(message_base) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(state));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             break;
     }
 }
