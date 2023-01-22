@@ -36,8 +36,9 @@ void MdLed::state(const Motor::State type)
             break;
         default:
             // 未定義の値
-            Error &error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
+            Error            &error   = Error::get_instance();
+            const std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             break;
     }
 }
@@ -66,8 +67,9 @@ void MdLed::mode(const BlinkMode mode)
         case BlinkMode::Error:
             break;
         default:
-            Error &error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
+            Error            &error   = Error::get_instance();
+            const std::string message = "Unknown blink mode (" + std::to_string(static_cast<uint32_t>(mode)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -82,9 +84,9 @@ void MdLed::mode(const BlinkMode mode)
             concurrently_blink();
             break;
         default:
-
-            Error &error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
+            Error            &error   = Error::get_instance();
+            const std::string message = "Unknown blink mode (" + std::to_string(static_cast<uint32_t>(mode)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -116,8 +118,9 @@ void MdLed::coordinate()
                 error_blink();
                 break;
             default:
-                Error &error = Error::get_instance();
-                error.error(Error::Type::UnknownValue, 0, "Unkown blink mode", __FILE__, __func__, __LINE__);
+                Error            &error   = Error::get_instance();
+                const std::string message = "Unknown blink mode (" + std::to_string(static_cast<uint32_t>(_mode)) + ")";
+                error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
                 return;
         }
     }
