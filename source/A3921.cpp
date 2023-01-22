@@ -45,8 +45,9 @@ void A3921::state(const Motor::State type)
         case Motor::State::Brake:
             break;
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
+            Error&      error   = Error::get_instance();
+            std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -63,10 +64,12 @@ void A3921::decay(const Motor::Decay type)
 
         // 非対応
         case Motor::Decay::Mixed:
-            error.error(Error::Type::InvalidValue, 0, "Invalid motor state", __FILE__, __func__, __LINE__);
+            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)", __FILE__, __func__,
+                        __LINE__);
             return;
         default:
-            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
+            std::string message = "Unknown motor decay (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -80,8 +83,9 @@ void A3921::pwm_side(const Motor::PwmSide type)
         case Motor::PwmSide::High:
             break;
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
+            Error&      error   = Error::get_instance();
+            std::string message = "Unknown motor pwm side (" + std::to_string(static_cast<uint32_t>(type)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -101,10 +105,12 @@ void A3921::run()
             break;
 
         case Motor::Decay::Mixed:
-            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay", __FILE__, __func__, __LINE__);
+            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)", __FILE__, __func__,
+                        __LINE__);
             return;
         default:
-            error.error(Error::Type::UnknownValue, 0, "Unknown motor decay", __FILE__, __func__, __LINE__);
+            std::string message = "Unknown motor decay (" + std::to_string(static_cast<uint32_t>(_decay)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -124,8 +130,9 @@ void A3921::run_slow_decay()
             pwm_high_side = _duty_cycle;
             break;
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unknown motor pwm side", __FILE__, __func__, __LINE__);
+            Error&      error   = Error::get_instance();
+            std::string message = "Unknown motor pwm side (" + std::to_string(static_cast<uint32_t>(_pwm_side)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -161,8 +168,9 @@ void A3921::run_slow_decay()
             break;
 
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
+            Error&      error   = Error::get_instance();
+            std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(_state)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -201,8 +209,9 @@ void A3921::run_fast_decay()
             break;
 
         default:
-            Error& error = Error::get_instance();
-            error.error(Error::Type::UnknownValue, 0, "Unknown motor state", __FILE__, __func__, __LINE__);
+            Error&      error   = Error::get_instance();
+            std::string message = "Unknown motor state (" + std::to_string(static_cast<uint32_t>(_state)) + ")";
+            error.error(Error::Type::UnknownValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
             return;
     }
 }
@@ -213,6 +222,10 @@ void A3921::pulse_period(const float seconds)
         _pwmh.period(seconds);
         _pwml.period(seconds);
         _phase.period(seconds);
+    } else {
+        Error&      error   = Error::get_instance();
+        std::string message = "Invalid motor pulse period (" + std::to_string(seconds) + ")";
+        error.error(Error::Type::InvalidValue, 0, message.c_str(), __FILE__, __func__, __LINE__);
     }
 }
 
