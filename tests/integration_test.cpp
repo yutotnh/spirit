@@ -79,7 +79,7 @@ TEST(IntegrationTest, 1)
         motor.state(state);
         motor.duty_cycle(duty_cycle);
 
-        ::CANMessage  message            = controller(motor);
+        ::CANMessage  message        = controller(motor);
         spirit::Motor received_motor = peripheral(message);
 
         // デューティー比は16bitで表現しているため、1/65535の誤差を許容する
