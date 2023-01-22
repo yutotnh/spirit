@@ -60,10 +60,9 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     uint32_t type = 0;
 
     if ((motor_count == 0) || (4 < motor_count)) {
-        return 0;
-    } else {
         Error& error = Error::get_instance();
         error.warning(Error::Type::UnknownValue, 0, "Unkown motor count type", __FILE__, __func__, __LINE__);
+        return 0;
     }
 
     if (motor_count == 1) {

@@ -11,6 +11,10 @@ using namespace spirit;
  */
 TEST(Error, ErrorTest)
 {
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     spirit::Error& error = spirit::Error::get_instance();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 
@@ -27,6 +31,8 @@ TEST(Error, ErrorTest)
     error.error(spirit::Error::Type::IllegalCombination, 10, "Illegal combination2", __FILE__, __func__, __LINE__);
     error.warning(spirit::Error::Type::InvalidValue, 50, "Invalid value1", __FILE__, __func__, __LINE__);
     error.error(spirit::Error::Type::InvalidValue, 100, "Invalid value2", __FILE__, __func__, __LINE__);
+
+    testing::internal::GetCapturedStderr().c_str();
 }
 
 }  // namespace

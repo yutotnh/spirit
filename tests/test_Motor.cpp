@@ -74,10 +74,17 @@ TEST(Motor, ControlSystemTest)
     EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::PWM);
 
     // 異常系のテスト
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    /// @test 範囲外の値を指定した場合
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.control_system(static_cast<Motor::ControlSystem>(3));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr().c_str();
 }
 
 /**

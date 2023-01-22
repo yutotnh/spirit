@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "Error.h"
 #include "FakeUdpConverter.h"
 #include "Id.h"
 #include "Motor.h"
@@ -87,6 +88,9 @@ TEST(IntegrationTest, 1)
         EXPECT_NEAR(duty_cycle, received_motor.get_duty_cycle(), allowable_error_margin);
     };
 
+    spirit::Error &error = spirit::Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
     /// @test state = Brake, doty_cycle = 0.75
     test(spirit::Motor::State::Coast, 0.75F);
 
@@ -98,6 +102,8 @@ TEST(IntegrationTest, 1)
 
     /// @test state = CCW, doty_cycle = 1.0
     test(spirit::Motor::State::CCW, 1.0F);
+
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 }
 
 }  // namespace
