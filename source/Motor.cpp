@@ -170,7 +170,7 @@ void Motor::pulse_period(const float seconds)
         Error&         error = Error::get_instance();
         constexpr char message_base[] =
             "Pulse period (%1.4e) is greater than max pulse period (%1.4e), so it will be max pulse period (%1.4e)";
-        char message[sizeof(message_base) + Error::max_float_length * 3];
+        char message[sizeof(message_base) + Error::max_float_1_4_e_length * 3];
         snprintf(message, sizeof(message), message_base, seconds, max_pulse_period, max_pulse_period);
         error.warning(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
     } else if (seconds < min_pulse_period) {
