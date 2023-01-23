@@ -46,6 +46,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 if(DEFINED MBED_PATH)
+    add_compile_definitions(SPIRIT_TARGET=MBED)
+
+    target_link_libraries(spirit mbed-os)
+
     add_library(spirit-platform-mbed STATIC)
 
     if(MSVC)
