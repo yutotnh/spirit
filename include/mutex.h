@@ -1,6 +1,6 @@
 #ifndef SPIRIT_MUTEX_H
 
-#if SPIRIT_TARGET == MBED || defined(__MBED__)
+#if SPIRIT_MBED || __MBED__
 #include "mbed.h"
 #else
 #include <mutex>
@@ -18,7 +18,7 @@ public:
     void unlock();
 
 private:
-#if SPIRIT_TARGET == MBED || defined(__MBED__)
+#if SPIRIT_MBED || __MBED__
     Mutex _mutex;
 #else
     std::mutex _mutex;
