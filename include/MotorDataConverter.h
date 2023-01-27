@@ -1,6 +1,8 @@
 #ifndef SPIRIT_MOTOR_DATA_CONVERTER_H
 #define SPIRIT_MOTOR_DATA_CONVERTER_H
 
+#include <cstddef>
+
 #include "Motor.h"
 
 namespace spirit {
