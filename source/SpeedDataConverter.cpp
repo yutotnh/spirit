@@ -20,9 +20,12 @@ bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer
     buffer[0] = 0x40;
 
     set_speed(motor.get_speed(), buffer);
+
     float Kp{0.0F}, Ki{0.0F}, Kd{0.0F};
     motor.get_pid_gain_factor(Kp, Ki, Kd);
+
     set_pid_gain_factor(Kp, Ki, Kd, buffer);
+
     set_state(motor.get_state(), buffer);
 
     return true;
@@ -38,10 +41,14 @@ bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, 
         return false;
     }
 
+    motor.control_system(Motor::ControlSystem::Speed);
+
     motor.speed(get_speed(buffer));
+
     float Kp{0.0F}, Ki{0.0F}, Kd{0.0F};
     get_pid_gain_factor(buffer, Kp, Ki, Kd);
     motor.pid_gain_factor(Kp, Ki, Kd);
+
     motor.state(get_state(buffer));
 
     return true;

@@ -37,6 +37,7 @@ bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Mo
         return false;
     }
 
+    motor.control_system(Motor::ControlSystem::PWM);
     motor.duty_cycle(get_duty_cycle(buffer));
     motor.state(get_state(buffer));
 

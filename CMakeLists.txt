@@ -34,6 +34,7 @@ target_sources(spirit
     ./source/Id.cpp
     ./source/MdLed.cpp
     ./source/Motor.cpp
+    ./source/MotorDataConverter.cpp
     ./source/mutex.cpp
     ./source/PwmDataConverter.cpp
     ./source/SpeedDataConverter.cpp
