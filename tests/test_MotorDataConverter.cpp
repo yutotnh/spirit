@@ -134,4 +134,44 @@ TEST(MotorDataConverter, SpeedDataTest)
     test(1.00F, 0.75F, 0.20F, Motor::State::CCW);
 }
 
+/**
+ * @brief デコードするデータが現在対応しているヘッダであればtrueを返し、
+ * それ以外であればfalseを返すことの確認
+ */
+TEST(MotorDataConverter, DecodeErrorTest)
+{
+    // 正常な場合
+    MotorDataConverter    motor_data_converter;
+    Motor                 motor;
+    constexpr std::size_t buffer_size = 64;
+    uint8_t               buffer[buffer_size / 8]{0x00};
+
+    /// @test PWM制御(ヘッダ以外の添え字0のbitは0)
+    buffer[0] = 0x00 | 0x00F;
+    EXPECT_TRUE(motor_data_converter.decode(buffer, buffer_size, motor));
+    EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::PWM);
+
+    /// @test PWM制御(ヘッダ以外の添え字0のbitは1)
+    buffer[0] = 0x00 | 0x3F;
+    EXPECT_TRUE(motor_data_converter.decode(buffer, buffer_size, motor));
+    EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::PWM);
+
+    /// @test 速度制御(ヘッダ以外の添え字0のbitは0)
+    buffer[0] = 0x40 | 0x0F;
+    EXPECT_TRUE(motor_data_converter.decode(buffer, buffer_size, motor));
+    EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::Speed);
+
+    /// @test 速度制御(ヘッダ以外の添え字0のbitは1)
+    buffer[0] = 0x40 | 0x3F;
+    EXPECT_TRUE(motor_data_converter.decode(buffer, buffer_size, motor));
+    EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::Speed);
+
+    // 異常な場合
+    /// @test ヘッダ部分のFAILとなる全パターンでテスト
+    buffer[0] = 0x80;
+    EXPECT_FALSE(motor_data_converter.decode(buffer, buffer_size, motor));
+    buffer[0] = 0xC0;
+    EXPECT_FALSE(motor_data_converter.decode(buffer, buffer_size, motor));
+}
+
 }  // namespace
