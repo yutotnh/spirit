@@ -169,7 +169,7 @@ void A3921::run_slow_decay()
             break;
 
         case Motor::State::Brake:
-            _sr.write(0);
+            _sr.write(1);
             _pwmh.write(0.00F);
             _pwml.write(1.00F);
             _phase.write(0.00F);
