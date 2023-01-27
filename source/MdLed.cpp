@@ -109,7 +109,7 @@ void MdLed::reset_error()
 
 void MdLed::coordinate()
 {
-    if (++_counter >= _interval) {
+    if (_interval <= ++_counter) {
         _counter = 0;
         switch (_mode) {
             case BlinkMode::Normal:
