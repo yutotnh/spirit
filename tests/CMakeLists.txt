@@ -7,6 +7,9 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+
 # 親プロジェクトのコンパイラ・リンカ設定を上書きするのを防ぐ（Windowsのみ）
 if(WIN32)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
