@@ -19,9 +19,9 @@ bool FakeUdpConverter::encode(const uint8_t* payload, const std::size_t payload_
     buffer_size = payload_size + 1;
     if (max_buffer_size < buffer_size) {
         Error&         error          = Error::get_instance();
-        constexpr char message_base[] = "Buffer size (%zu) is larger than the maximum buffer size (%zu)";
-        char           message[sizeof(message_base) + Error::max_uint32_t_length * 2];
-        snprintf(message, sizeof(message), message_base, buffer_size, max_buffer_size);
+        constexpr char message_format[] = "Buffer size (%zu) is larger than the maximum buffer size (%zu)";
+        char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
+        snprintf(message, sizeof(message), message_format, buffer_size, max_buffer_size);
         error.warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
         return false;
     }
@@ -56,9 +56,9 @@ bool FakeUdpConverter::decode(const uint8_t* buffer, const std::size_t buffer_si
     // 最大ペイロードサイズがbuffer_size - 1よりも大きい場合は、デコードできない
     if (max_payload_size < buffer_size - 1) {
         Error&         error          = Error::get_instance();
-        constexpr char message_base[] = "Payload size (%zu) is larger than the maximum payload size (%zu)";
-        char           message[sizeof(message_base) + Error::max_uint32_t_length * 2];
-        snprintf(message, sizeof(message), message_base, buffer_size - 1, max_payload_size);
+        constexpr char message_format[] = "Payload size (%zu) is larger than the maximum payload size (%zu)";
+        char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
+        snprintf(message, sizeof(message), message_format, buffer_size - 1, max_payload_size);
         error.warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
         return false;
     }

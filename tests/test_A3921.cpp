@@ -114,8 +114,8 @@ TEST(A3921, ResetTest)
 
 /**
  * @brief Slow decay low side でのモーター制御のテスト
- * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、Coast/Brake 状態になったときに
- * pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
+ * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、
+ * Coast/Brake 状態になったときに pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
  */
 TEST(A3921, SlowDecayLowSideTest)
 {
@@ -164,8 +164,8 @@ TEST(A3921, SlowDecayLowSideTest)
 
 /**
  * @brief Slow decay high side でのモーター制御のテスト
- * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、Coast/Brake 状態になったときに
- * pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
+ * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、
+ * Coast/Brake 状態になったときに pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
  */
 TEST(A3921, SlowDecayHighSideTest)
 {
@@ -214,8 +214,8 @@ TEST(A3921, SlowDecayHighSideTest)
 
 /**
  * @brief Fast decay でのモーター制御のテスト
- * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、Coast/Brake 状態になったときに
- * pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
+ * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、
+ * Coast/Brake 状態になったときに pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
  */
 TEST(A3921, FastDecayTest)
 {
