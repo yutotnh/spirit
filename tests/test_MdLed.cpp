@@ -144,7 +144,7 @@ TEST(MdLed, ErrorBlinkTest)
     MdLed          mdled(led0, led1);
     mdled.blinking_rate(blinking_rate);
 
-    // Error Code: 0
+    /// @test Error Code: 0
     mdled.error(0);
     EXPECT_EQ(leds_value(led0, led1), 3);
     for (uint32_t i = 1; i < loop_count; i++) {
@@ -152,7 +152,7 @@ TEST(MdLed, ErrorBlinkTest)
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 3);
     }
 
-    // Error Code: 1
+    /// @test Error Code: 1
     mdled.error(1);
     EXPECT_EQ(leds_value(led0, led1), 3);
     for (uint32_t i = 1; i < loop_count; i++) {
@@ -160,7 +160,7 @@ TEST(MdLed, ErrorBlinkTest)
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 3);
     }
 
-    // Error Code: 6
+    /// @test Error Code: 6
     mdled.error(6);
     EXPECT_EQ(leds_value(led0, led1), 3);
     for (uint32_t i = 1; i < loop_count; i++) {
@@ -172,7 +172,7 @@ TEST(MdLed, ErrorBlinkTest)
         EXPECT_EQ(next_leds(mdled, led0, led1, blinking_rate), 3);
     }
 
-    // Error Code: 41
+    /// @test Error Code: 41
     mdled.error(41);
     EXPECT_EQ(leds_value(led0, led1), 3);
     for (uint32_t i = 1; i < loop_count; i++) {

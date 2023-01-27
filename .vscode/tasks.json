@@ -9,7 +9,8 @@
             "dependsOn": [
                 "Doxygen",
                 "CMake",
-                "Development Containers"
+                "Development Containers",
+                "Clang-Format"
             ],
             "problemMatcher": [],
             "group": {
@@ -124,5 +125,41 @@
             },
             "detail": "Develop Containers用のイメージをビルドする"
         },
+        {
+            "label": "Clang-Format",
+            "type": "shell",
+            "dependsOn": [
+                "Clang-Format: format all files",
+                "Clang-Format: format the current file"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "全てのClang-Format関連のタスクを実行する"
+        },
+        {
+            "label": "Clang-Format: format all file",
+            "type": "shell",
+            "command": "find include source tests platform -type f -name '*.cpp' -o -name '*.h' | xargs clang-format -i",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "対象ファイルをClang-Formatで整形する"
+        },
+        {
+            "label": "Clang-Format: format the current file",
+            "type": "shell",
+            "command": "clang-format -i -style=file ${file}",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "現在のファイルをClang-Formatで整形する"
+        }
     ]
 }

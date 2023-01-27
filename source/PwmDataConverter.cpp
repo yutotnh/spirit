@@ -65,10 +65,10 @@ Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
         case 0x03U:
             return Motor::State::Brake;
         default:
-            Error&         error          = Error::get_instance();
-            constexpr char message_base[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_base) + Error::max_uint32_t_length];
-            std::snprintf(message, sizeof(message), message_base, state_uint32_t);
+            Error&         error            = Error::get_instance();
+            constexpr char message_format[] = "Unknown motor state (%d)";
+            char           message[sizeof(message_format) + Error::max_uint32_t_length];
+            std::snprintf(message, sizeof(message), message_format, state_uint32_t);
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return Motor::State::Brake;
     }
@@ -90,10 +90,10 @@ void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer)
             set_range_value(0x03U, 18U, 2U, 8U, buffer);
             break;
         default:
-            Error&         error          = Error::get_instance();
-            constexpr char message_base[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_base) + Error::max_uint32_t_length];
-            std::snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(state));
+            Error&         error            = Error::get_instance();
+            constexpr char message_format[] = "Unknown motor state (%d)";
+            char           message[sizeof(message_format) + Error::max_uint32_t_length];
+            std::snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             break;
     }

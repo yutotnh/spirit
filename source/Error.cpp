@@ -54,10 +54,10 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
             sprintf((char*)status_string, "Error");
             break;
         default:
-            Error&         error          = Error::get_instance();
-            constexpr char message_base[] = "Unknown error status (%d)";
-            char           message[sizeof(message_base) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(_status));
+            Error&         error            = Error::get_instance();
+            constexpr char message_format[] = "Unknown error status (%d)";
+            char           message[sizeof(message_format) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_status));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             break;
     }
@@ -77,10 +77,10 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
             sprintf((char*)type_string, "InvalidValue");
             break;
         default:
-            Error&         error          = Error::get_instance();
-            constexpr char message_base[] = "Unknown error type (%d)";
-            char           message[sizeof(message_base) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_base, static_cast<uint32_t>(type));
+            Error&         error            = Error::get_instance();
+            constexpr char message_format[] = "Unknown error type (%d)";
+            char           message[sizeof(message_format) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             break;
     }
