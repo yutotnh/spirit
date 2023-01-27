@@ -12,7 +12,7 @@ CANMessage::CANMessage(const uint16_t id, const uint8_t* data, const uint8_t len
         _id = id;
     }
 
-    if (len > max_data_length) {
+    if (max_data_length < len) {
         _len = max_data_length;
     } else {
         _len = len;
