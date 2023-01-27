@@ -34,6 +34,10 @@ bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, 
         return false;
     }
 
+    if ((buffer[0] & 0xC0) != 0x40) {
+        return false;
+    }
+
     motor.speed(get_speed(buffer));
     float Kp{0.0F}, Ki{0.0F}, Kd{0.0F};
     get_pid_gain_factor(buffer, Kp, Ki, Kd);

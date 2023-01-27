@@ -110,4 +110,31 @@ TEST(PwmDataConverter, EncodeBufferSizeTest)
     buffer_size_test(32, true);
 }
 
+/**
+ * @brief decode時、バッファーのヘッダーから処理対象のデータかどうかを判断しているかのテスト
+ */
+TEST(PwmDataConverter, HeaderCheckTest)
+{
+    // 正常な場合
+    PwmDataConverter      pwm_data_converter;
+    Motor                 motor;
+    constexpr std::size_t buffer_size = 64;
+    uint8_t               buffer[buffer_size / 8]{};
+
+    EXPECT_TRUE(pwm_data_converter.decode(buffer, buffer_size, motor));
+
+    /// @test 添え字0のヘッダ部分以外を見ていないことを確認するために、ヘッダ部分以外は全て1で確かめる
+    buffer[0] = 0x3F;
+    EXPECT_TRUE(pwm_data_converter.decode(buffer, buffer_size, motor));
+
+    // 異常な場合
+    /// @test ヘッダ部分のFAILとなる全パターンでテスト
+    buffer[0] = 0x40;
+    EXPECT_FALSE(pwm_data_converter.decode(buffer, buffer_size, motor));
+    buffer[0] = 0x80;
+    EXPECT_FALSE(pwm_data_converter.decode(buffer, buffer_size, motor));
+    buffer[0] = 0xC0;
+    EXPECT_FALSE(pwm_data_converter.decode(buffer, buffer_size, motor));
+}
+
 }  // namespace
