@@ -36,7 +36,7 @@ void MdLed::state(const Motor::State type)
             break;
         default:
             // 未定義の値
-            Error         &error          = Error::get_instance();
+            Error         &error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor state (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
@@ -69,7 +69,7 @@ void MdLed::mode(const BlinkMode mode)
         case BlinkMode::Error:
             break;
         default:
-            Error         &error          = Error::get_instance();
+            Error         &error            = Error::get_instance();
             constexpr char message_format[] = "Unknown blink mode (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(mode));
@@ -88,7 +88,7 @@ void MdLed::mode(const BlinkMode mode)
             concurrently_blink();
             break;
         default:
-            Error         &error          = Error::get_instance();
+            Error         &error            = Error::get_instance();
             constexpr char message_format[] = "Unknown blink mode (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(mode));
@@ -124,7 +124,7 @@ void MdLed::coordinate()
                 error_blink();
                 break;
             default:
-                Error         &error          = Error::get_instance();
+                Error         &error            = Error::get_instance();
                 constexpr char message_format[] = "Unknown blink mode (%d)";
                 char           message[sizeof(message_format) + Error::max_uint32_t_length];
                 snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_mode));
