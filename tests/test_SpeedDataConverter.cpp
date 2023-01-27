@@ -73,8 +73,6 @@ TEST(SpeedDataConverter, EncodeDecodeSpeedTest)
     test(1.00F, 0.75F, 0.20F, Motor::State::CCW);
 }
 
-}  // namespace
-
 /**
  * @brief decode時、バッファーのヘッダーから処理対象のデータかどうかを判断しているかのテスト
  */
@@ -101,3 +99,5 @@ TEST(SpeedDataConverter, HeaderCheckTest)
     buffer[0] = 0xC0;
     EXPECT_FALSE(speed_data_converter.decode(buffer, buffer_size, motor));
 }
+
+}  // namespace
