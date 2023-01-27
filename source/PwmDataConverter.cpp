@@ -33,6 +33,10 @@ bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Mo
         return false;
     }
 
+    if ((buffer[0] & 0xC0) != 0x00) {
+        return false;
+    }
+
     motor.duty_cycle(get_duty_cycle(buffer));
     motor.state(get_state(buffer));
 
