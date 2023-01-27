@@ -28,7 +28,7 @@ bool dip_switch_is_valid(uint32_t dip_switch, std::size_t dip_switch_size)
  * @retval true モーターの数を超えていない (正常)
  * @retval false モーターの数を超えている (異常)
  */
-bool motor_is_valid(uint32_t motor, uint32_t motor_count)
+bool motor_is_valid(uint32_t motor_count, uint32_t motor)
 {
     // モーター番号がモーターの数を超えていないかチェックする
     // 例えば、モーターの数が2で、モーター番号が2の場合、モーター番号は0-1であるため、エラーとする
@@ -50,7 +50,7 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
         return 0;
     }
 
-    if (motor_is_valid(motor, motor_count) == false) {
+    if (motor_is_valid(motor_count, motor) == false) {
         Error&         error            = Error::get_instance();
         constexpr char message_format[] = "Motor number (%d) is out of range (0-%d)";
         char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
@@ -68,13 +68,6 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
         return 0;
     }
 
-    // motor_countの値によって、データを決定する
-    // - motor_count = 1: 0b00
-    // - motor_count = 2: 0b01
-    // - motor_count = 3: 0b10 // 3つの場合、表現に必要なビットは2bitであるため、4つの場合と同じになる
-    // - motor_count = 4: 0b10
-    uint32_t type = 0;
-
     if ((motor_count == 0) || (4 < motor_count)) {
         Error&         error            = Error::get_instance();
         constexpr char message_format[] = "Unknown motor count type (%d)";
@@ -83,6 +76,13 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
         error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
         return 0;
     }
+
+    // motor_countの値によって、データを決定する
+    // - motor_count = 1: 0b00
+    // - motor_count = 2: 0b01
+    // - motor_count = 3: 0b10 // 3つの場合、表現に必要なビットは2bitであるため、4つの場合と同じになる
+    // - motor_count = 4: 0b10
+    uint32_t type = 0;
 
     if (motor_count == 1) {
         type = 0;
