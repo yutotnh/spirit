@@ -1,9 +1,9 @@
 #include "MotorDataConverter.h"
 
-#include "Error.h"
 #include "Motor.h"
 #include "PwmDataConverter.h"
 #include "SpeedDataConverter.h"
+#include "include/Error.h"
 
 namespace spirit {
 
