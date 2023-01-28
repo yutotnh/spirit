@@ -107,6 +107,7 @@ Motor::State Motor::get_state() const
 void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level)
 {
     switch (level) {
+        case ChangeLevel::Manual:
         case ChangeLevel::OFF:
         case ChangeLevel::Low:
         case ChangeLevel::Middle:
@@ -153,6 +154,25 @@ Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return ChangeLevel::OFF;
+    }
+}
+
+void Motor::maximum_change_duty_cycle(const ChangeLevelTarget target, const float duty_cycle)
+{
+    switch (target) {
+        case ChangeLevelTarget::Rise:
+            _rise_maximum_change_duty_cycle = duty_cycle;
+            break;
+        case ChangeLevelTarget::Fall:
+            _fall_maximum_change_duty_cycle = duty_cycle;
+            break;
+        default:
+            Error&         error            = Error::get_instance();
+            constexpr char message_format[] = "Unknown motor change level target (%d)";
+            char           message[sizeof(message_format) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            return;
     }
 }
 
