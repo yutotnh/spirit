@@ -42,8 +42,10 @@ void adjust_duty_cycle(const Motor& target, spirit::Motor::State current_state, 
         return;
     }
 
-    // 回転方向・デューティー比が同じ場合
+    // 以降の処理は回転方向が同じ場合ということなので、次の回転方向を設定する
     next_state = target.get_state();
+
+    // 回転方向・デューティー比が同じ場合
     if (fabs(target.get_duty_cycle() - current_duty_cycle) < FLT_EPSILON) {
         next_duty_cycle = target.get_duty_cycle();
         return;
