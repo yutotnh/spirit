@@ -166,11 +166,11 @@ public:
     void change_level(ChangeLevelTarget target, ChangeLevel level);
 
     /**
-     * @brief 単位時間当たりの最大変化デューティ比を指定する( ChangeLevel::Manual の時のみ有効)
+     * @brief デューティ比の変化具合を設定する ChangeLevelTarget
      * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
      * @param duty_cycle 単位時間当たりの最大変化デューティ比
      */
-    void maximum_change_duty_cycle(ChangeLevelTarget target, float duty_cycle);
+    void change_level(ChangeLevelTarget target, float duty_cycle);
 
     /**
      * @brief デューティ比の変化具合を返す
@@ -178,6 +178,13 @@ public:
      * @return 設定したデューティ比の変化具合
      */
     ChangeLevel get_change_level(ChangeLevelTarget target) const;
+
+    /**
+     * @brief 単位時間当たりの最大変化デューティ比を返す
+     * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
+     * @retval duty_cycle 単位時間当たりの最大変化デューティ比
+     */
+    float get_maximum_change_duty_cycle(ChangeLevelTarget target) const;
 
     /**
      * @brief パルス周期を設定する
@@ -271,7 +278,7 @@ public:
         static constexpr State         state                     = State::Brake;
         static constexpr ChangeLevel   rise_change_level         = ChangeLevel::OFF;
         static constexpr ChangeLevel   fall_change_level         = ChangeLevel::OFF;
-        static constexpr float         maximum_change_duty_cycle = 0.00'01;
+        static constexpr float         maximum_change_duty_cycle = 0.00F;
         static constexpr float         Kp                        = 1.0;   // 暫定
         static constexpr float         Ki                        = 0.1;   // 暫定
         static constexpr float         Kd                        = 0.01;  // 暫定

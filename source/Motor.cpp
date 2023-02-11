@@ -106,16 +106,19 @@ Motor::State Motor::get_state() const
 
 void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level)
 {
+    Error& error = Error::get_instance();
     switch (level) {
-        case ChangeLevel::Manual:
         case ChangeLevel::OFF:
         case ChangeLevel::Low:
         case ChangeLevel::Middle:
         case ChangeLevel::High:
         case ChangeLevel::Max:
             break;
+        case ChangeLevel::Manual:
+            error.error(Error::Type::InvalidValue, 0, "Invalid motor change level (ChangeLevel::Manual)", __FILE__,
+                        __func__, __LINE__);
+            return;
         default:
-            Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor change level (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(level));
@@ -129,6 +132,27 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             break;
         case ChangeLevelTarget::Fall:
             _fall_change_level = level;
+            break;
+        default:
+            Error&         error            = Error::get_instance();
+            constexpr char message_format[] = "Unknown motor change level target (%d)";
+            char           message[sizeof(message_format) + Error::max_uint32_t_length];
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
+            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            return;
+    }
+}
+
+void Motor::change_level(const ChangeLevelTarget target, const float duty_cycle)
+{
+    switch (target) {
+        case ChangeLevelTarget::Rise:
+            _rise_change_level              = ChangeLevel::Manual;
+            _rise_maximum_change_duty_cycle = duty_cycle;
+            break;
+        case ChangeLevelTarget::Fall:
+            _fall_change_level              = ChangeLevel::Manual;
+            _fall_maximum_change_duty_cycle = duty_cycle;
             break;
         default:
             Error&         error            = Error::get_instance();
@@ -157,22 +181,47 @@ Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
     }
 }
 
-void Motor::maximum_change_duty_cycle(const ChangeLevelTarget target, const float duty_cycle)
+float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
 {
-    switch (target) {
-        case ChangeLevelTarget::Rise:
-            _rise_maximum_change_duty_cycle = duty_cycle;
-            break;
-        case ChangeLevelTarget::Fall:
-            _fall_maximum_change_duty_cycle = duty_cycle;
-            break;
+    ChangeLevel level = get_change_level(target);
+
+    /// ChangeLevel::Manual 時に最大変化デューティ比を返す
+    auto manual_maximum_change_duty_cycle = [this](ChangeLevelTarget target) {
+        switch (target) {
+            case ChangeLevelTarget::Rise:
+                return _rise_maximum_change_duty_cycle;
+            case ChangeLevelTarget::Fall:
+                return _fall_maximum_change_duty_cycle;
+            default:
+                Error&         error            = Error::get_instance();
+                constexpr char message_format[] = "Unknown motor change level target (%d)";
+                char           message[sizeof(message_format) + Error::max_uint32_t_length];
+                snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
+                error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+                return 0.00F;
+        }
+    };
+
+    switch (level) {
+        case ChangeLevel::Manual:
+            return manual_maximum_change_duty_cycle(target);
+        case ChangeLevel::OFF:
+            return 1.00F;
+        case ChangeLevel::Low:
+            return 0.001F;
+        case ChangeLevel::Middle:
+            return 0.0001F;
+        case ChangeLevel::High:
+            return 0.00001F;
+        case ChangeLevel::Max:
+            return 0.000001F;
         default:
             Error&         error            = Error::get_instance();
-            constexpr char message_format[] = "Unknown motor change level target (%d)";
+            constexpr char message_format[] = "Unknown motor change level (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(level));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            return;
+            return 0.00F;
     }
 }
 
