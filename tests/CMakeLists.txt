@@ -39,6 +39,7 @@ include(GoogleTest)
 # CTestへ単体テストを登録
 add_gtest(integration_test.cpp)
 add_gtest(test_A3921.cpp)
+add_gtest(test_adjust_duty_cycle.cpp)
 add_gtest(test_bfloat16.cpp)
 add_gtest(test_CANMessage.cpp)
 add_gtest(test_Error.cpp)

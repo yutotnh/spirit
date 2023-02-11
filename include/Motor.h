@@ -50,6 +50,8 @@ public:
      * @brief モータのデューティー比の立ち上がり・立ち下り時の変化具合を設定するための値
      */
     enum class ChangeLevel {
+        /// 手動で単位当たりの最大変化デューティ比を入力する
+        Manual,
         /// 設定したデューティー比を直ちにモーターに出力する
         OFF,
         /// ほんの少し余裕を持たせてモーターに出力する
@@ -159,9 +161,16 @@ public:
     /**
      * @brief デューティ比の変化具合を設定する ChangeLevelTarget
      * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
-     * @param level ChangeLevel::OFF, ChangeLevel::Low, ChangeLevel::Middle, ChangeLevel::High, ChangeLevel::Max のいずれかの設定したい変化具合
+     * @param level ChangeLevel::Manual, ChangeLevel::OFF, ChangeLevel::Low, ChangeLevel::Middle, ChangeLevel::High, ChangeLevel::Max のいずれかの設定したい変化具合
      */
     void change_level(ChangeLevelTarget target, ChangeLevel level);
+
+    /**
+     * @brief デューティ比の変化具合を設定する ChangeLevelTarget
+     * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
+     * @param duty_cycle 単位時間当たりの最大変化デューティ比
+     */
+    void change_level(ChangeLevelTarget target, float duty_cycle);
 
     /**
      * @brief デューティ比の変化具合を返す
@@ -169,6 +178,13 @@ public:
      * @return 設定したデューティ比の変化具合
      */
     ChangeLevel get_change_level(ChangeLevelTarget target) const;
+
+    /**
+     * @brief 単位時間当たりの最大変化デューティ比を返す
+     * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
+     * @retval duty_cycle 単位時間当たりの最大変化デューティ比
+     */
+    float get_maximum_change_duty_cycle(ChangeLevelTarget target) const;
 
     /**
      * @brief パルス周期を設定する
@@ -258,19 +274,20 @@ public:
      * @brief デフォルト値を格納している構造体
      */
     struct Default {
-        static constexpr ControlSystem control_system    = ControlSystem::PWM;
-        static constexpr State         state             = State::Brake;
-        static constexpr ChangeLevel   rise_change_level = ChangeLevel::OFF;
-        static constexpr ChangeLevel   fall_change_level = ChangeLevel::OFF;
-        static constexpr float         Kp                = 1.0;   // 暫定
-        static constexpr float         Ki                = 0.1;   // 暫定
-        static constexpr float         Kd                = 0.01;  // 暫定
-        static constexpr float         pulse_period      = 1.0F / 5'000.0F;
-        static constexpr float         release_time      = 0.500F;
-        static constexpr Decay         decay             = Decay::Slow;
-        static constexpr PwmSide       pwm_side          = PwmSide::Low;
-        static constexpr bool          reset             = false;
-        static constexpr bool          sleep             = false;
+        static constexpr ControlSystem control_system            = ControlSystem::PWM;
+        static constexpr State         state                     = State::Brake;
+        static constexpr ChangeLevel   rise_change_level         = ChangeLevel::OFF;
+        static constexpr ChangeLevel   fall_change_level         = ChangeLevel::OFF;
+        static constexpr float         maximum_change_duty_cycle = 0.00F;
+        static constexpr float         Kp                        = 1.0;   // 暫定
+        static constexpr float         Ki                        = 0.1;   // 暫定
+        static constexpr float         Kd                        = 0.01;  // 暫定
+        static constexpr float         pulse_period              = 1.0F / 5'000.0F;
+        static constexpr float         release_time              = 0.500F;
+        static constexpr Decay         decay                     = Decay::Slow;
+        static constexpr PwmSide       pwm_side                  = PwmSide::Low;
+        static constexpr bool          reset                     = false;
+        static constexpr bool          sleep                     = false;
     };
 
     static constexpr float min_pulse_period = 1.0F / 60'000.0F;
@@ -286,6 +303,8 @@ private:
     State         _state{Default::state};
     ChangeLevel   _rise_change_level{Default::rise_change_level};
     ChangeLevel   _fall_change_level{Default::fall_change_level};
+    float         _rise_maximum_change_duty_cycle{Default::maximum_change_duty_cycle};
+    float         _fall_maximum_change_duty_cycle{Default::maximum_change_duty_cycle};
     float         _pulse_period{Default::pulse_period};
     float         _release_time{Default::release_time};
     Decay         _decay{Default::decay};
