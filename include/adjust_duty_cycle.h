@@ -30,7 +30,7 @@ void adjust_duty_cycle(const Motor& target, spirit::Motor::State current_state, 
         } else if (current_duty_cycle <= fall_delta) {
             next_state = target.get_state();
             if ((current_state == Motor::State::Coast) || (current_state == Motor::State::Brake)) {
-                next_duty_cycle = fall_delta;
+                next_duty_cycle = rise_delta;
             } else {
                 next_duty_cycle = 0.00F;
             }

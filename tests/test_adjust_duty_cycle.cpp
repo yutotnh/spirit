@@ -46,7 +46,7 @@ TEST(AdjustDutyCycle, DifferentState)
         motor.state(Motor::State::CW);
         motor.duty_cycle(0.80F);
         motor.change_level(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Low);
-        motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Low);
+        motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::High);
 
         Motor::State current_state;
         float        current_duty_cycle;
@@ -110,7 +110,7 @@ TEST(AdjustDutyCycle, SameState)
         motor.state(Motor::State::CW);
         motor.duty_cycle(0.80F);
         motor.change_level(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Low);
-        motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Low);
+        motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::High);
 
         Motor::State current_state;
         float        current_duty_cycle;
