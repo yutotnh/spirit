@@ -54,14 +54,15 @@ TEST(AdjustDutyCycle, DifferentState)
         Motor::State next_state;
         float        next_duty_cycle;
 
+        // CW状態から、Stateとデューティー比が変化することの確認
         current_state      = Motor::State::CCW;
         current_duty_cycle = 0.80F;
-
         adjust_duty_cycle(motor, current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, current_state);
         EXPECT_FLOAT_EQ(next_duty_cycle,
                         current_duty_cycle - motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall));
 
+        // Brake状態から、Stateとデューティー比が変化することの確認
         current_state      = Motor::State::Brake;
         current_duty_cycle = 0.00F;
         adjust_duty_cycle(motor, current_state, current_duty_cycle, next_state, next_duty_cycle);
