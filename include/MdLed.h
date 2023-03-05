@@ -7,7 +7,7 @@
 namespace spirit {
 
 /**
- * @brief モーターの状態をLEDに表示するクラス
+ * @brief モーターの状態を2つのLEDを使って表示するクラス
  * @details
  * モーターの駆動状態をそのまま表示するNormalモードに加え、Errorの値を表示するErrorモードなどがある
  */
@@ -30,6 +30,8 @@ public:
 
     /**
      * @brief コンストラクタ
+     * @param [in,out] led0 下位ビットのLED
+     * @param [in,out] led1 上位ビットのLED
      */
     MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1);
 

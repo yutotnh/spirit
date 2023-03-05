@@ -10,11 +10,11 @@ namespace spirit {
 
 /**
  * @brief モーターのデューティー比を調整する
- * @param target 調整対象のモーター
- * @param current_state 前回の回転方向
- * @param current_duty_cycle 前回のデューティー比
- * @param next_state 次回の回転方向
- * @param next_duty_cycle 次回のデューティー比
+ * @param [in] target 調整対象のモーター
+ * @param [in] current_state 前回の回転方向
+ * @param [in] current_duty_cycle 前回のデューティー比
+ * @param [out] next_state 次回の回転方向
+ * @param [out] next_duty_cycle 次回のデューティー比
  */
 void adjust_duty_cycle(const Motor& target, spirit::Motor::State current_state, float current_duty_cycle,
                        spirit::Motor::State& next_state, float& next_duty_cycle)
