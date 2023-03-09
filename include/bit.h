@@ -7,7 +7,7 @@
 namespace spirit {
 
 /**
- * @brief バッファの指定した範囲のビットを取得する
+ * @brief バッファの指定した範囲のビットの値を取得する
  * @param buffer バッファ
  * @param buffer_size バッファのバイト幅
  * @param start 開始位置(0から始まる)
