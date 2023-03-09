@@ -14,10 +14,10 @@ namespace spirit {
  * @param [in] target_duty_cycle 目標のデューティー比
  * @param [in] max_rise_delta 最大上昇デューティー比
  * @param [in] max_fall_delta 最大下降デューティー比
- * @param [in] current_state 前回の回転方向
- * @param [in] current_duty_cycle 前回のデューティー比
- * @param [out] next_state 次回の回転方向
- * @param [out] next_duty_cycle 次回のデューティー比
+ * @param [in] current_state 現在の回転方向
+ * @param [in] current_duty_cycle 現在のデューティー比
+ * @param [out] next_state 次の回転方向
+ * @param [out] next_duty_cycle 次のデューティー比
  */
 void adjust_duty_cycle(spirit::Motor::State target_state, float target_duty_cycle, float max_rise_delta,
                        float max_fall_delta, spirit::Motor::State current_state, float current_duty_cycle,
