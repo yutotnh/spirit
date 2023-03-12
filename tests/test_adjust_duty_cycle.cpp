@@ -325,7 +325,8 @@ TEST(AdjustDutyCycle, Normal)
             << ", expected_duty_cycle: " << expected_duty_cycle << ", loop_count: " << loop_count;
     };
 
-    float        duty_cycles[] = {0.00F, 0.30F, 1.00F};
+    // 実行時間の関係で、テストケースは最小限にする
+    float        duty_cycles[] = {0.00F, 0.345F, 1.00F};
     Motor::State states[]      = {Motor::State::Coast, Motor::State::CW, Motor::State::CCW, Motor::State::Brake};
 
     auto max_delta = [](Motor::ChangeLevel level) -> float {
@@ -337,32 +338,28 @@ TEST(AdjustDutyCycle, Normal)
 
     float max_deltas[] = {max_delta(Motor::ChangeLevel::OFF),    max_delta(Motor::ChangeLevel::Low),
                           max_delta(Motor::ChangeLevel::Middle), max_delta(Motor::ChangeLevel::High),
-                          max_delta(Motor::ChangeLevel::Max),    0.50F};
+                          max_delta(Motor::ChangeLevel::Max),    0.567F};
 
-    // 最終的にデューティー比が目標値まで達することの確認
-    // 途中経過や、特定の回数できっかり目標値に達成するかは気にしない
-    {
-        for (auto target_duty_cycle : duty_cycles) {
-            for (auto target_state : states) {
-                for (auto max_rise_delta : max_deltas) {
-                    for (auto max_fall_delta : max_deltas) {
-                        for (auto current_duty_cycle : duty_cycles) {
-                            for (auto current_state : states) {
-                                // 回転方向がCoastまたはBrakeの場合デューティー比は0になるのでテストをスキップする
-                                if ((target_state == Motor::State::Coast) || (target_state == Motor::State::Brake)) {
-                                    continue;
-                                }
-
-                                // max_rise_delta と max_fall_delta の小さいほうを使用する
-                                float delta = std::min(max_rise_delta, max_fall_delta);
-                                // 100% -> 0% -> 100% の場合のループ回数を計算する
-                                uint32_t loop_count = static_cast<uint32_t>(std::ceil(1.00F / delta)) * 2;
-                                // 浮動小数点数の誤差を考慮して、ループの回数を1.1倍にする(1.01倍は適当)
-                                loop_count = static_cast<uint32_t>(std::ceil(loop_count * 1.01F));
-
-                                test(target_state, target_duty_cycle, max_rise_delta, max_fall_delta, current_state,
-                                     current_duty_cycle, target_state, target_duty_cycle, loop_count);
+    for (auto target_duty_cycle : duty_cycles) {
+        for (auto target_state : states) {
+            for (auto max_rise_delta : max_deltas) {
+                for (auto max_fall_delta : max_deltas) {
+                    for (auto current_duty_cycle : duty_cycles) {
+                        for (auto current_state : states) {
+                            // 回転方向がCoastまたはBrakeの場合デューティー比は0になるのでテストをスキップする
+                            if ((target_state == Motor::State::Coast) || (target_state == Motor::State::Brake)) {
+                                continue;
                             }
+
+                            // max_rise_delta と max_fall_delta の小さいほうを使用する
+                            float delta = std::min(max_rise_delta, max_fall_delta);
+                            // 100% -> 0% -> 100% の場合のループ回数を計算する
+                            uint32_t loop_count = static_cast<uint32_t>(std::ceil(1.00F / delta)) * 2;
+                            // 浮動小数点数の誤差を考慮して、ループの回数を1.1倍にする(1.01倍は適当)
+                            loop_count = static_cast<uint32_t>(std::ceil(loop_count * 1.01F));
+
+                            test(target_state, target_duty_cycle, max_rise_delta, max_fall_delta, current_state,
+                                 current_duty_cycle, target_state, target_duty_cycle, loop_count);
                         }
                     }
                 }
