@@ -18,6 +18,8 @@ namespace spirit {
  * @param [in] current_duty_cycle 現在のデューティー比
  * @param [out] next_state 次の回転方向
  * @param [out] next_duty_cycle 次のデューティー比
+ * @note
+ * Motor::State::Coast, Motor::State::Brake は必ずデューティー比を0として扱う
  */
 void adjust_duty_cycle(spirit::Motor::State target_state, float target_duty_cycle, float max_rise_delta,
                        float max_fall_delta, spirit::Motor::State current_state, float current_duty_cycle,
@@ -31,11 +33,16 @@ void adjust_duty_cycle(spirit::Motor::State target_state, float target_duty_cycl
         return;
     }
 
+    // 現在の回転方向がCoastの場合はデューティー比を0にする
+    if ((current_state == Motor::State::Coast) || (current_state == Motor::State::Brake)) {
+        current_duty_cycle = 0.00F;
+    }
+
     // 現在の回転方向と目標の回転方向が異なる場合
     if (current_state != target_state) {
         if (current_duty_cycle <= max_fall_delta) {
             next_state      = target_state;
-            next_duty_cycle = max_rise_delta;
+            next_duty_cycle = 0.00F;
         } else {
             next_state      = current_state;
             next_duty_cycle = current_duty_cycle - max_fall_delta;
