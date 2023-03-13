@@ -1,6 +1,7 @@
 #ifndef SPIRIT_MOTOR_H
 #define SPIRIT_MOTOR_H
 
+#include <cmath>
 #include <cstdint>
 
 namespace spirit {
@@ -292,6 +293,10 @@ public:
 
     static constexpr float min_pulse_period = 1.0F / 60'000.0F;
     static constexpr float max_pulse_period = 1.0F / 10.0F;
+
+    /// デューティ比の変化具合の最小値 @n
+    /// Float 型の 1.00 に対してこれよりも小さい値を足しても、情報落ちして 1.00 より大きくならない
+    static constexpr float minimum_maximum_change_duty_cycle = pow(2.0F, -23);
 
 private:
     ControlSystem _control_system{Default::control_system};
