@@ -212,9 +212,9 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
         case ChangeLevel::Middle:
             return 0.0001F;
         case ChangeLevel::High:
-            return 0.00001F;
+            return 0.0001F;
         case ChangeLevel::Max:
-            return 0.000001F;
+            return 0.00001F;
         default:
             Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor change level (%d)";
