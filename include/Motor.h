@@ -1,7 +1,6 @@
 #ifndef SPIRIT_MOTOR_H
 #define SPIRIT_MOTOR_H
 
-#include <cmath>
 #include <cstdint>
 
 namespace spirit {
