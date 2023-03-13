@@ -346,12 +346,10 @@ TEST(AdjustDutyCycle, Normal)
                 for (auto max_fall_delta : max_deltas) {
                     for (auto current_duty_cycle : duty_cycles) {
                         for (auto current_state : states) {
-                            // 回転方向がCoastまたはBrakeの場合デューティー比は0として扱う
+                            // 回転方向がCoastまたはBrakeの場合デューティー比は0として扱うので、目標値を0にする
+                            float expected_duty_cycle = target_duty_cycle;
                             if ((target_state == Motor::State::Coast) || (target_state == Motor::State::Brake)) {
-                                target_duty_cycle = 0.00F;
-                            }
-                            if ((current_state == Motor::State::Coast) || (current_state == Motor::State::Brake)) {
-                                current_duty_cycle = 0.00F;
+                                expected_duty_cycle = 0.00F;
                             }
 
                             // max_rise_delta と max_fall_delta の小さいほうを使用する
@@ -362,7 +360,7 @@ TEST(AdjustDutyCycle, Normal)
                             loop_count = static_cast<uint32_t>(std::ceil(loop_count * 1.01F));
 
                             test(target_state, target_duty_cycle, max_rise_delta, max_fall_delta, current_state,
-                                 current_duty_cycle, target_state, target_duty_cycle, loop_count);
+                                 current_duty_cycle, target_state, expected_duty_cycle, loop_count);
                         }
                     }
                 }
