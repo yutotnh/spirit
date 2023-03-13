@@ -33,7 +33,7 @@ void adjust_duty_cycle(spirit::Motor::State target_state, float target_duty_cycl
         return;
     }
 
-    // 現在の回転方向がCoastの場合はデューティー比を0にする
+    // 現在の回転方向がCoast or Brakeの場合は現在のデューティー比を0として扱う
     if ((current_state == Motor::State::Coast) || (current_state == Motor::State::Brake)) {
         current_duty_cycle = 0.00F;
     }
