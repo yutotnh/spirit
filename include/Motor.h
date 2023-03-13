@@ -296,7 +296,7 @@ public:
 
     /// デューティ比の変化具合の最小値 @n
     /// Float 型の 1.00 に対してこれよりも小さい値を足しても、情報落ちして 1.00 より大きくならない
-    static constexpr float minimum_maximum_change_duty_cycle = pow(2.0F, -23);
+    static constexpr float minimum_maximum_change_duty_cycle = std::pow(2.0F, -23.0F);
 
 private:
     ControlSystem _control_system{Default::control_system};
