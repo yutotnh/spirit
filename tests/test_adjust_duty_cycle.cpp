@@ -346,9 +346,12 @@ TEST(AdjustDutyCycle, Normal)
                 for (auto max_fall_delta : max_deltas) {
                     for (auto current_duty_cycle : duty_cycles) {
                         for (auto current_state : states) {
-                            // 回転方向がCoastまたはBrakeの場合デューティー比は0になるのでテストをスキップする
+                            // 回転方向がCoastまたはBrakeの場合デューティー比は0として扱う
                             if ((target_state == Motor::State::Coast) || (target_state == Motor::State::Brake)) {
-                                continue;
+                                target_duty_cycle = 0.00F;
+                            }
+                            if ((current_state == Motor::State::Coast) || (current_state == Motor::State::Brake)) {
+                                current_duty_cycle = 0.00F;
                             }
 
                             // max_rise_delta と max_fall_delta の小さいほうを使用する
