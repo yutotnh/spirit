@@ -42,48 +42,43 @@ void Error::error(Type type, uint32_t code, const char* message, const char* fil
 void Error::print(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
                   uint32_t line_number)
 {
-    uint8_t status_string[10]{};
-    switch (_status) {
-        case Status::Normal:
-            sprintf((char*)status_string, "Normal");
-            break;
-        case Status::Warning:
-            sprintf((char*)status_string, "Warning");
-            break;
-        case Status::Error:
-            sprintf((char*)status_string, "Error");
-            break;
-        default:
-            Error&         error            = Error::get_instance();
-            constexpr char message_format[] = "Unknown error status (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_status));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            break;
-    }
+    auto status_to_string = [](Status status) -> const char* {
+        switch (status) {
+            case Status::Normal:
+                return "Normal";
+            case Status::Warning:
+                return "Warning";
+            case Status::Error:
+                return "Error";
+            default:
+                Error&         error            = Error::get_instance();
+                constexpr char message_format[] = "Unknown error status (%d)";
+                char           message[sizeof(message_format) + Error::max_uint32_t_length];
+                snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(status));
+                error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+                return "Unknown";
+        }
+    };
 
-    uint8_t type_string[20]{};
-    switch (type) {
-        case Type::Normal:
-            sprintf((char*)type_string, "Normal");
-            break;
-        case Type::UnknownValue:
-            sprintf((char*)type_string, "UnknownValue");
-            break;
-        case Type::IllegalCombination:
-            sprintf((char*)type_string, "IllegalCombination");
-            break;
-        case Type::InvalidValue:
-            sprintf((char*)type_string, "InvalidValue");
-            break;
-        default:
-            Error&         error            = Error::get_instance();
-            constexpr char message_format[] = "Unknown error type (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            break;
-    }
+    auto type_to_string = [](Type type) -> const char* {
+        switch (type) {
+            case Type::Normal:
+                return "Normal";
+            case Type::UnknownValue:
+                return "UnknownValue";
+            case Type::IllegalCombination:
+                return "IllegalCombination";
+            case Type::InvalidValue:
+                return "InvalidValue";
+            default:
+                Error&         error            = Error::get_instance();
+                constexpr char message_format[] = "Unknown error type (%d)";
+                char           message[sizeof(message_format) + Error::max_uint32_t_length];
+                snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
+                error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+                return "Unknown";
+        }
+    };
 
 #ifdef __MBED__
     printf(
@@ -94,7 +89,7 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
         "\tFile: %s\n"
         "\tFunction: %s\n"
         "\tLine: %d\n\n",
-        status_string, type_string, code, message, filename, funcname, line_number);
+        status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number);
 #else
     std::fprintf(stderr,
                  "%s:\n"
@@ -104,7 +99,7 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
                  "\tFile: %s\n"
                  "\tFunction: %s\n"
                  "\tLine: %d\n\n",
-                 status_string, type_string, code, message, filename, funcname, line_number);
+                 status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number);
     std::fflush(stderr);
 #endif
 }
