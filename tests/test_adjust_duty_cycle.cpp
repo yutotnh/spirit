@@ -352,12 +352,18 @@ TEST(AdjustDutyCycle, Normal)
                                 expected_duty_cycle = 0.00F;
                             }
 
-                            // max_rise_delta と max_fall_delta の小さいほうを使用する
-                            float delta = std::min(max_rise_delta, max_fall_delta);
-                            // 100% -> 0% -> 100% の場合のループ回数を計算する
-                            uint32_t loop_count = static_cast<uint32_t>(std::ceil(1.00F / delta)) * 2;
+                            // current_duty_cycle -> 0% -> target_duty_cycle の場合のループ回数を計算する
+                            uint32_t loop_count = static_cast<uint32_t>(std::ceil(current_duty_cycle / max_fall_delta) +
+                                                                        std::ceil(target_duty_cycle / max_rise_delta));
                             // 浮動小数点数の誤差を考慮して、ループの回数を1.1倍にする(1.01倍は適当)
                             loop_count = static_cast<uint32_t>(std::ceil(loop_count * 1.01F));
+
+                            // current_duty_cycle == target_duty_cycle == 0.0F の場合はループ回数が0になるので、
+                            // adjust_duty_cycle() が実行されず回転方向が変わらなくなる
+                            // そのため、ループ回数が0の場合は1にする
+                            if (loop_count == 0) {
+                                loop_count = 1;
+                            }
 
                             test(target_state, target_duty_cycle, max_rise_delta, max_fall_delta, current_state,
                                  current_duty_cycle, target_state, expected_duty_cycle, loop_count);
