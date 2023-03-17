@@ -92,7 +92,6 @@ TEST(PwmDataConverter, EncodeBufferSizeTest)
 {
     auto buffer_size_test = [](std::size_t encode_buffer_size, bool expected_is_succeeded) {
         PwmDataConverter pwm_data_converter;
-        Motor            motor;
 
         constexpr std::size_t max_buffer_size = 8;
         uint8_t               buffer[max_buffer_size]{};
