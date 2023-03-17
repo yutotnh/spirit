@@ -26,6 +26,10 @@ TEST(Error, ErrorTest)
     error.error(spirit::Error::Type::UnknownValue, 0, "test", __FILE__, __func__, __LINE__);
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
 
+    /// @test reset が呼ばれたら、エラー状態が Normal になる
+    error.reset();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
     /// @test 目視確認
     error.warning(spirit::Error::Type::IllegalCombination, 10, "Illegal combination1", __FILE__, __func__, __LINE__);
     error.error(spirit::Error::Type::IllegalCombination, 10, "Illegal combination2", __FILE__, __func__, __LINE__);
