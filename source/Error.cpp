@@ -14,6 +14,11 @@ Error& Error::get_instance()
     return instance;
 }
 
+void Error::reset()
+{
+    _status = Status::Normal;
+}
+
 Error::Status Error::get_status()
 {
     return _status;

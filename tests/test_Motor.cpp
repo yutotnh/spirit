@@ -198,7 +198,7 @@ TEST(Motor, ChangeLevelTest)
     Motor::ChangeLevel levels[] = {Motor::ChangeLevel::OFF,  Motor::ChangeLevel::Low, Motor::ChangeLevel::Middle,
                                    Motor::ChangeLevel::High, Motor::ChangeLevel::Max, Motor::ChangeLevel::OFF};
 
-    // Fallに設定しても、Riseには反映されないことを確認
+    /// @test Fallに設定しても、Riseには反映されないことを確認
     for (const auto &rise : levels) {
         for (const auto &fall : levels) {
             motor.change_level(Motor::ChangeLevelTarget::Rise, rise);
@@ -210,7 +210,7 @@ TEST(Motor, ChangeLevelTest)
         }
     }
 
-    // Riseに設定しても、Fallには反映されないことを確認
+    /// @test Riseに設定しても、Fallには反映されないことを確認
     for (const auto &rise : levels) {
         for (const auto &fall : levels) {
             motor.change_level(Motor::ChangeLevelTarget::Fall, fall);
@@ -221,6 +221,38 @@ TEST(Motor, ChangeLevelTest)
             EXPECT_EQ(motor.get_change_level(Motor::ChangeLevelTarget::Fall), fall);
         }
     }
+
+    // 異常系
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    /// @test Motor::ChangeLevel::Manual が設定できず、エラーが発生することの確認
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Manual);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Manual);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    /// @test 設定値が範囲外の場合、エラーが発生することの確認
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(Motor::ChangeLevelTarget::Rise,
+                       Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(Motor::ChangeLevelTarget::Fall,
+                       Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
