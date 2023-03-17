@@ -50,6 +50,11 @@ public:
     static Error& get_instance();
 
     /**
+     * @brief エラー状態をリセットする
+     */
+    void reset();
+
+    /**
      * @brief エラー状態を取得する
      * @return エラー状態
      */

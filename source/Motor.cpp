@@ -145,6 +145,15 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
 
 void Motor::change_level(const ChangeLevelTarget target, const float duty_cycle)
 {
+    if (duty_cycle < minimum_maximum_change_duty_cycle) {
+        Error&         error            = Error::get_instance();
+        constexpr char message_format[] = "Duty cycle (%1.4e) is less than minimum duty cycle (%1.4e)";
+        char           message[sizeof(message_format) + Error::max_float_1_4_e_length * 2];
+        snprintf(message, sizeof(message), message_format, duty_cycle, minimum_maximum_change_duty_cycle);
+        error.error(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
+        return;
+    }
+
     switch (target) {
         case ChangeLevelTarget::Rise:
             _rise_change_level              = ChangeLevel::Manual;
