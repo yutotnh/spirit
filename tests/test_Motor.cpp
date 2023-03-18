@@ -185,6 +185,20 @@ TEST(Motor, StateTest)
 
     // 初期値が Motor::State::Coast なので、Motor::State::Coast 以外を指定しても Motor::State::Coast になる
     motor.state(Motor::State::Coast);
+
+    // 異常系のテスト
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    /// @test 範囲外の値を指定した場合
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.state(static_cast<Motor::State>(4));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -242,6 +256,16 @@ TEST(Motor, ChangeLevelTest)
     /// @test 設定値が範囲外の場合、エラーが発生することの確認
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(6));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(6));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.change_level(Motor::ChangeLevelTarget::Rise,
                        Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
     EXPECT_EQ(error.get_status(), Error::Status::Error);
@@ -250,6 +274,27 @@ TEST(Motor, ChangeLevelTest)
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.change_level(Motor::ChangeLevelTarget::Fall,
                        Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    /// @test ChangeLevelTarget が範囲外の場合
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(static_cast<Motor::ChangeLevelTarget>(2), Motor::ChangeLevel::Low);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.change_level(static_cast<Motor::ChangeLevelTarget>(2), 0.01F);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.get_change_level(static_cast<Motor::ChangeLevelTarget>(2));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.get_maximum_change_duty_cycle(static_cast<Motor::ChangeLevelTarget>(2));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
 
     testing::internal::GetCapturedStderr();
@@ -313,6 +358,20 @@ TEST(Motor, DecayTest)
 
     motor.decay(Motor::Decay::Fast);
     EXPECT_EQ(motor.get_decay(), Motor::Decay::Fast);
+
+    // 異常系
+
+    /// @test Decay == Mixed
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    motor.decay(Motor::Decay::Mixed);
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
+
+    /// @test Decay が範囲外の場合
+    error.reset();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    motor.decay(static_cast<Motor::Decay>(3));
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
 }
 
 /**
@@ -326,6 +385,14 @@ TEST(Motor, PwmSideTest)
 
     motor.pwm_side(Motor::PwmSide::High);
     EXPECT_EQ(motor.get_pwm_side(), Motor::PwmSide::High);
+
+    // 異常系
+
+    /// @test PwmSide が範囲外の場合
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    motor.pwm_side(static_cast<Motor::PwmSide>(2));
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
 }
 
 /**
