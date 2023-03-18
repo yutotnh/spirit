@@ -16,12 +16,8 @@ float bfloat16_to_float32(const uint16_t bfloat16)
         sign = -1.0F;
     }
 
-    if (exponent == 0) {
-        if (mantissa == 0) {
-            return 0.0F * sign;
-        } else {
-            return std::ldexp(static_cast<float>(mantissa), -126) * sign;
-        }
+    if ((exponent == 0) && (mantissa == 0)) {
+        return 0.0F * sign;
     } else if (exponent == 255) {
         if (mantissa == 0) {
             return std::numeric_limits<float>::infinity() * sign;
