@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "MdLed.h"
+#include "include/Error.h"
 #include "tests/stubs.h"
 
 namespace {
@@ -95,18 +96,59 @@ TEST(MdLed, SetGetValueTest)
     uint32_t rate = 80;
     mdled.blinking_rate(rate);
 
-    // state()でSet, Get
-    //  非operator
-    for (Motor::State value : states) {
-        mdled.state(value);
-        EXPECT_TRUE(compare_leds(mdled, led0, led1, state2uint(value), rate * 5));
+    for (Motor::State state : states) {
+        mdled.state(state);
+        EXPECT_TRUE(compare_leds(mdled, led0, led1, state2uint(state), rate * 5));
     }
+}
 
-    //  operator
-    for (Motor::State value : states) {
-        mdled = value;
-        EXPECT_TRUE(compare_leds(mdled, led0, led1, state2uint(value), rate * 5));
-    }
+/**
+ * @brief 未定義の Mode が設定された場合にエラーになることの確認
+ */
+TEST(MdLed, UndefinedModeTest)
+{
+    StubDigitalOut led0;
+    StubDigitalOut led1;
+    MdLed          mdled(led0, led1);
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    // 未定義の値を設定
+    Error& error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    mdled.mode(static_cast<MdLed::BlinkMode>(4));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    mdled.mode(MdLed::BlinkMode::Error);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
+}
+
+/**
+ * @brief 未定義の State が設定された場合にエラーになることの確認
+ */
+TEST(MdLed, UndefinedStateTest)
+{
+    StubDigitalOut led0;
+    StubDigitalOut led1;
+    MdLed          mdled(led0, led1);
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    // 未定義の値を設定
+    Error& error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    mdled.state(static_cast<Motor::State>(4));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**

@@ -36,6 +36,9 @@ TEST(Error, ErrorTest)
     error.warning(spirit::Error::Type::InvalidValue, 50, "Invalid value1", __FILE__, __func__, __LINE__);
     error.error(spirit::Error::Type::InvalidValue, 100, "Invalid value2", __FILE__, __func__, __LINE__);
 
+    /// 異常系
+    // error.
+
     testing::internal::GetCapturedStderr();
 }
 
