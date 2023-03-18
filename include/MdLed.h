@@ -83,10 +83,6 @@ public:
      */
     void blinking_rate(uint32_t unit);
 
-    MdLed &operator=(Motor::State type);
-    MdLed &operator=(BlinkMode type);
-    MdLed &operator=(uint32_t value);
-
 private:
     /// LEDの下位ビット
     InterfaceDigitalOut &_led0;

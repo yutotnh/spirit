@@ -151,24 +151,6 @@ void MdLed::error(const uint32_t status)
     error_blink();
 }
 
-MdLed &MdLed::operator=(const Motor::State type)
-{
-    state(type);
-    return *this;
-}
-
-MdLed &MdLed::operator=(const BlinkMode type)
-{
-    mode(type);
-    return *this;
-}
-
-MdLed &MdLed::operator=(const uint32_t value)
-{
-    write(value);
-    return *this;
-}
-
 void MdLed::alternately_blink()
 {
     if (read() == 1) {
