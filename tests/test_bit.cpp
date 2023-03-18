@@ -93,8 +93,7 @@ TEST(Bit, GetRangeValueTest)
         Error& error = Error::get_instance();
         error.reset();
         EXPECT_EQ(error.get_status(), Error::Status::Normal);
-        uint8_t  buffer[buffer_size] = {};
-        uint32_t value               = get_range_value(buffer, buffer_size, start, value_size);
+        uint32_t value = get_range_value(nullptr, buffer_size, start, value_size);
         EXPECT_EQ(value, UINT32_MAX) << "buffer_size = " << buffer_size << ", start = " << start
                                      << ", value_size = " << value_size;
         EXPECT_EQ(error.get_status(), Error::Status::Warning)
