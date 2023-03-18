@@ -108,6 +108,8 @@ void A3921::run()
             run_fast_decay();
             break;
 
+            // Mixed や default に来ることは、既に A3921::decay でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
+            // LCOV_EXCL_START
         case Motor::Decay::Mixed:
             error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)", __FILE__, __func__,
                         __LINE__);
@@ -118,6 +120,7 @@ void A3921::run()
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_decay));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
+            // LCOV_EXCL_STOP
     }
 }
 
@@ -135,6 +138,9 @@ void A3921::run_slow_decay()
             pwm_low_side  = 1.00F;
             pwm_high_side = _duty_cycle;
             break;
+
+            // default に来ることは、既に A3921::pwm_side でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
+            // LCOV_EXCL_START
         default:
             Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor pwm side (%d)";
@@ -142,6 +148,7 @@ void A3921::run_slow_decay()
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_pwm_side));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
+            // LCOV_EXCL_STOP
     }
 
     switch (_state) {
@@ -175,6 +182,8 @@ void A3921::run_slow_decay()
             _phase.write(0.00F);
             break;
 
+            // default に来ることは、既に A3921::state でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
+            // LCOV_EXCL_START
         default:
             Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor state (%d)";
@@ -182,6 +191,7 @@ void A3921::run_slow_decay()
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_state));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
+            // LCOV_EXCL_STOP
     }
 }
 
@@ -218,6 +228,8 @@ void A3921::run_fast_decay()
             _phase.write(0.00F);
             break;
 
+            // default に来ることは、既に A3921::state でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
+            // LCOV_EXCL_START
         default:
             Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor state (%d)";
@@ -225,6 +237,7 @@ void A3921::run_fast_decay()
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_state));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
+            // LCOV_EXCL_STOP
     }
 }
 

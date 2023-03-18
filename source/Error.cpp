@@ -55,13 +55,12 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
                 return "Warning";
             case Status::Error:
                 return "Error";
+
+                // default に来ることは、print を呼び出す関数が直接決めていて通常の利用ではありえないため、カバレッジ計測から除外する
+                // LCOV_EXCL_START
             default:
-                Error&         error            = Error::get_instance();
-                constexpr char message_format[] = "Unknown error status (%d)";
-                char           message[sizeof(message_format) + Error::max_uint32_t_length];
-                snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(status));
-                error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-                return "Unknown";
+                return "!!! Unknown status !!!";
+                // LCOV_EXCL_STOP
         }
     };
 
@@ -76,12 +75,8 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
             case Type::InvalidValue:
                 return "InvalidValue";
             default:
-                Error&         error            = Error::get_instance();
-                constexpr char message_format[] = "Unknown error type (%d)";
-                char           message[sizeof(message_format) + Error::max_uint32_t_length];
-                snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-                error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-                return "Unknown";
+                // mutex.lock() 中で error() は使えないので、直接値を書き込む
+                return "!!! Unknown error type !!!";
         }
     };
 

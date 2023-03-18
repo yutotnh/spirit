@@ -180,6 +180,7 @@ Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
             return _rise_change_level;
         case ChangeLevelTarget::Fall:
             return _fall_change_level;
+
         default:
             Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor change level target (%d)";
@@ -201,6 +202,9 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
                 return _rise_maximum_change_duty_cycle;
             case ChangeLevelTarget::Fall:
                 return _fall_maximum_change_duty_cycle;
+
+                // default に来ることは、get_change_level で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
+                // LCOV_EXCL_START
             default:
                 Error&         error            = Error::get_instance();
                 constexpr char message_format[] = "Unknown motor change level target (%d)";
@@ -208,6 +212,7 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
                 snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
                 error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
                 return 0.00F;
+                // LCOV_EXCL_STOP
         }
     };
 
@@ -224,6 +229,9 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
             return 0.0001F;
         case ChangeLevel::Max:
             return 0.00001F;
+
+            // default に来ることは、change_level で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
+            // LCOV_EXCL_START
         default:
             Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor change level (%d)";
@@ -231,6 +239,7 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(level));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return 0.00F;
+            // LCOV_EXCL_STOP
     }
 }
 

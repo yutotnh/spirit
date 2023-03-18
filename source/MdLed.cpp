@@ -123,6 +123,9 @@ void MdLed::coordinate()
             case BlinkMode::Error:
                 error_blink();
                 break;
+
+                // default に来ることは、MdLed::mode でチェックされていて通常の利用ではありえないため、カバレッジ計測から除外する
+                // LCOV_EXCL_START
             default:
                 Error         &error            = Error::get_instance();
                 constexpr char message_format[] = "Unknown blink mode (%d)";
@@ -130,6 +133,7 @@ void MdLed::coordinate()
                 snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_mode));
                 error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
                 return;
+                // LCOV_EXCL_STOP
         }
     }
 }
@@ -149,24 +153,6 @@ void MdLed::error(const uint32_t status)
     _error         = status;
     _error_section = 0;
     error_blink();
-}
-
-MdLed &MdLed::operator=(const Motor::State type)
-{
-    state(type);
-    return *this;
-}
-
-MdLed &MdLed::operator=(const BlinkMode type)
-{
-    mode(type);
-    return *this;
-}
-
-MdLed &MdLed::operator=(const uint32_t value)
-{
-    write(value);
-    return *this;
 }
 
 void MdLed::alternately_blink()

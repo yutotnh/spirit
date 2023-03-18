@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "A3921.h"
+#include "include/Error.h"
 #include "tests/stubs.h"
 
 namespace {
@@ -213,6 +214,33 @@ TEST(A3921, SlowDecayHighSideTest)
 }
 
 /**
+ * @brief Mixed decay でのモーター制御のテスト
+ * @details 現在は未対応なので、Error が発生することを確認する
+ */
+TEST(A3921, MixedDecayTest)
+{
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
+    A3921          a3921(sr, pwmh, pwml, phase, reset);
+
+    // 共通の設定
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    Error& error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    a3921.decay(Motor::Decay::Mixed);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
+}
+
+/**
  * @brief Fast decay でのモーター制御のテスト
  * @details  spirit::A3921::duty_cycle() に0.50Fを入力することで、
  * Coast/Brake 状態になったときに pwmh, pwml が意図した出力(0.50F以外)になっていることを確認する
@@ -262,6 +290,40 @@ TEST(A3921, FastDecayTest)
 }
 
 /**
+ * @brief A3921の各関数の Error が発生する条件のテスト
+ */
+TEST(A3921, NonNormalTest)
+{
+    StubDigitalOut sr;
+    StubPwmOut     pwmh;
+    StubPwmOut     pwml;
+    StubPwmOut     phase;
+    StubDigitalOut reset;
+    A3921          a3921(sr, pwmh, pwml, phase, reset);
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    Error& error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    a3921.state(static_cast<Motor::State>(4));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    a3921.pwm_side(static_cast<Motor::PwmSide>(3));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    a3921.decay(static_cast<Motor::Decay>(3));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
+}
+
+/**
  * @brief パルス周期の設定テスト
  */
 TEST(A3921, PulsePeriodTest)
@@ -273,13 +335,47 @@ TEST(A3921, PulsePeriodTest)
     StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
 
-    // Motor::Default::pulse_period と異なる値を設定するため、 0.005Fを加える
+    /// @test Motor::Default::pulse_period と異なる値
     float pulse_period = Motor::Default::pulse_period + 0.005F;
     a3921.pulse_period(pulse_period);
 
     EXPECT_FLOAT_EQ(pwmh.read_period(), pulse_period);
     EXPECT_FLOAT_EQ(pwml.read_period(), pulse_period);
     EXPECT_FLOAT_EQ(phase.read_period(), pulse_period);
+
+    // @test Motor::min_pulse_period と異なる値
+    a3921.pulse_period(Motor::min_pulse_period);
+
+    EXPECT_FLOAT_EQ(pwmh.read_period(), Motor::min_pulse_period);
+    EXPECT_FLOAT_EQ(pwml.read_period(), Motor::min_pulse_period);
+    EXPECT_FLOAT_EQ(phase.read_period(), Motor::min_pulse_period);
+
+    // @test Motor::max_pulse_period と異なる値
+    a3921.pulse_period(Motor::max_pulse_period);
+
+    EXPECT_FLOAT_EQ(pwmh.read_period(), Motor::max_pulse_period);
+    EXPECT_FLOAT_EQ(pwml.read_period(), Motor::max_pulse_period);
+    EXPECT_FLOAT_EQ(phase.read_period(), Motor::max_pulse_period);
+
+    // 異常系のテスト
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    /// @test pulse_period が min_pulse_period 未満の場合
+    Error& error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    a3921.pulse_period(Motor::min_pulse_period - Motor::min_pulse_period * 0.01F);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    /// @test pulse_period が max_pulse_period を超える場合
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    a3921.pulse_period(Motor::max_pulse_period + Motor::min_pulse_period * 0.01F);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 }  // namespace
