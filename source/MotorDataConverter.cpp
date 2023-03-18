@@ -18,6 +18,8 @@ bool MotorDataConverter::encode(const Motor& motor, const std::size_t max_buffer
         case Motor::ControlSystem::Speed:
             SpeedDataConverter speed_data_converter;
             return speed_data_converter.encode(motor, max_buffer_size, buffer, buffer_size);
+        // default になることは、 motor 側で事前にチェックしているのでありえないため、カバレッジ計測から除外する
+        // LCOV_EXCL_START
         default:
             Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor control system (%d)";
@@ -25,6 +27,7 @@ bool MotorDataConverter::encode(const Motor& motor, const std::size_t max_buffer
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(motor.get_control_system()));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return false;
+            // LCOV_EXCL_STOP
     }
 }
 

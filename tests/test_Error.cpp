@@ -37,7 +37,12 @@ TEST(Error, ErrorTest)
     error.error(spirit::Error::Type::InvalidValue, 100, "Invalid value2", __FILE__, __func__, __LINE__);
 
     /// 異常系
-    // error.
+
+    /// @test spirit::Error::Type が範囲外の時、エラー状態が Error になる
+    error.reset();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    error.error(static_cast<spirit::Error::Type>(4), 0, "test", __FILE__, __func__, __LINE__);
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
 
     testing::internal::GetCapturedStderr();
 }
