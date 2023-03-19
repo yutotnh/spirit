@@ -16,6 +16,7 @@ public:
     /**
      * @enum BlinkMode
      * @brief LEDに設定する値のソースを何にするかの値
+     * @details 優先度は Error > Alternate = Concurrent l Normal
      */
     enum class BlinkMode {
         /// Motor::Stateの値をそのままLEDに設定する
@@ -103,7 +104,7 @@ private:
      * @brief LEDの点滅を設定する
      * @param type 2つのLEDを2bitに置き換えた場合の値
      */
-    void write(uint32_t type);
+    void write(uint32_t value);
 
     /**
      * @brief LEDの点滅状態を返す
