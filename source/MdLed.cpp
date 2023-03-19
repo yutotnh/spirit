@@ -47,8 +47,8 @@ void MdLed::state(const Motor::State type)
 
 void MdLed::write(const uint32_t value)
 {
-    _led0.write(type & 1);
-    _led1.write((type & 2) >> 1);
+    _led0.write(value & 1);
+    _led1.write((value & 2) >> 1);
 }
 
 uint32_t MdLed::read() const
