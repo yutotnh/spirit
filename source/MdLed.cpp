@@ -45,10 +45,10 @@ void MdLed::state(const Motor::State type)
     }
 }
 
-void MdLed::write(const uint32_t type)
+void MdLed::write(const uint32_t value)
 {
-    _led0.write(type & 1);
-    _led1.write((type & 2) >> 1);
+    _led0.write(value & 1);
+    _led1.write((value & 2) >> 1);
 }
 
 uint32_t MdLed::read() const
@@ -56,13 +56,13 @@ uint32_t MdLed::read() const
     return (_led1.read() << 1) + _led0.read();
 }
 
-void MdLed::mode(const BlinkMode mode)
+void MdLed::mode(const BlinkMode type)
 {
-    if (_mode == mode) {
+    if (_mode == type) {
         return;
     }
 
-    switch (mode) {
+    switch (type) {
         case BlinkMode::Normal:
         case BlinkMode::Alternate:
         case BlinkMode::Concurrent:
@@ -72,15 +72,15 @@ void MdLed::mode(const BlinkMode mode)
             Error         &error            = Error::get_instance();
             constexpr char message_format[] = "Unknown blink mode (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(mode));
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
     _counter = 0;
-    _mode    = mode;
+    _mode    = type;
 
-    switch (mode) {
+    switch (_mode) {
         case BlinkMode::Alternate:
             alternately_blink();
             break;
@@ -91,7 +91,7 @@ void MdLed::mode(const BlinkMode mode)
             Error         &error            = Error::get_instance();
             constexpr char message_format[] = "Unknown blink mode (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(mode));
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_mode));
             error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
