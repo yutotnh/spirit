@@ -15,7 +15,7 @@
 #include "include/adjust_duty_cycle.h"
 #include "include/bfloat16.h"
 #include "include/bit.h"
-// #include "include/mutex.h"
+#include "include/mutex.h"
 
 #ifdef MBED_H
 #include "platform/mbed/include/DigitalOut.h"

@@ -1,4 +1,5 @@
 #ifndef SPIRIT_MUTEX_H
+#define SPIRIT_MUTEX_H
 
 #if SPIRIT_MBED || __MBED__
 #include "mbed.h"
