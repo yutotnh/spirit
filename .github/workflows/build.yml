@@ -59,6 +59,8 @@ jobs:
       - name: build-mbed-tools
         run: |
           set -e
+          cd ..
           mbed-tools new .
+          cp spirit/.github/workflows/build-mbed-tools/CMakeLists.txt CMakeLists.txt
           mbed-tools deploy
           mbed-tools compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
