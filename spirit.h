@@ -1,4 +1,5 @@
 #ifndef SPIRIT_H
+#define SPIRIT_H
 
 #include "include/A3921.h"
 #include "include/CANMessage.h"
