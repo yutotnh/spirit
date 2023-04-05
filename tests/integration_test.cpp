@@ -1,10 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "FakeUdpConverter.h"
-#include "Id.h"
-#include "Motor.h"
-#include "MotorDataConverter.h"
-#include "include/Error.h"
+#include "spirit.h"
 
 namespace {
 
