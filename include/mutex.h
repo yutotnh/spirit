@@ -1,7 +1,7 @@
 #ifndef SPIRIT_MUTEX_H
 #define SPIRIT_MUTEX_H
 
-#if SPIRIT_MBED || __MBED__
+#if defined(SPIRIT_MBED) || defined(__MBED__)
 #include "mbed.h"
 #else
 #include <mutex>
@@ -19,7 +19,7 @@ public:
     void unlock();
 
 private:
-#if SPIRIT_MBED || __MBED__
+#if defined(SPIRIT_MBED) || defined(__MBED__)
     Mutex _mutex;
 #else
     std::mutex _mutex;
