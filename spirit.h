@@ -18,7 +18,7 @@
 #include "include/bit.h"
 #include "include/mutex.h"
 
-#ifdef MBED_H
+#ifdef __MBED__
 #include "platform/mbed/include/DigitalOut.h"
 #include "platform/mbed/include/PwmOut.h"
 #endif  // MBED_H
