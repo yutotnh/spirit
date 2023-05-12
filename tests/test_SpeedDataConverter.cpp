@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include "SpeedDataConverter.h"
 
 namespace {
@@ -33,7 +35,7 @@ TEST(SpeedDataConverter, EncodeDecodeSpeedTest)
 
         // スピード, Kp, Kiは送受信中にbfloat16に変換している
         // bfloat16の仮数部は7bitなので、その分の誤差を考慮する必要がある
-        auto allowable_error_margin = [](const float bfloat16) { return bfloat16 / 127.0F; };
+        auto allowable_error_margin = [](const float bfloat16) { return bfloat16 / powf(2.0F, 7.0F); };
 
         EXPECT_NEAR(speed, decoded_motor.get_speed(), allowable_error_margin(speed));
 
