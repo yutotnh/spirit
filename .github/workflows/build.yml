@@ -50,16 +50,17 @@ jobs:
 
     strategy:
       matrix:
-        target: [NUCLEO_F303K8, LPC1768]
-        profile: [release, debug, develop]
+        target: [NUCLEO_F303K8]
+        profile: [develop]
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          path: spirit
 
       - name: build-mbed-tools
         run: |
           set -e
-          cd ..
           mbed-tools new .
           cp spirit/.github/workflows/build-mbed-tools/CMakeLists.txt CMakeLists.txt
           mbed-tools deploy
