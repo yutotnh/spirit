@@ -40,6 +40,13 @@ target_sources(spirit
     ./source/SpeedDataConverter.cpp
 )
 
+find_package(PythonInterp REQUIRED)
+add_custom_target(modify_commit_info ALL
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modify_commit_info.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h
+    COMMENT "Generating version infomation"
+)
+
+
 enable_testing()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
