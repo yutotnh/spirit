@@ -40,9 +40,14 @@ target_sources(spirit
     ./source/SpeedDataConverter.cpp
 )
 
-find_package(PythonInterp REQUIRED)
+find_package (Python3 COMPONENTS Interpreter Development)
+
+if (NOT Python3_FOUND)
+    message(FATAL_ERROR "Python3 not found")
+endif()
+
 add_custom_target(modify_commit_info ALL
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modify_commit_info.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modify_commit_info.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h
     COMMENT "Generating version infomation"
 )
 
