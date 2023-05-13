@@ -1,2 +1,5 @@
 build/
 doxygen/html/
+
+# 自動生成されるファイル
+include/version.h

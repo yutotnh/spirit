@@ -21,26 +21,26 @@ import argparse
 
 
 def main():
-    repo_path, output = parse_args()
+    repo_path, base, output = parse_args()
 
     if is_git_repository_root(repo_path) == False:
         print("Not Git repository root", file=sys.stderr)
-        modify_file(output, "Not Git repository", "Not Git repository")
+        generate_header(base,output, "Not Git repository", "Not Git repository")
         sys.exit(1)
 
     hash, date = commit_info(repo_path)
 
-    modify_file(output, hash, date)
+    generate_header(base, output, hash, date)
 
 
-def parse_args() -> Tuple[str, str]:
+def parse_args() -> Tuple[str, str, str]:
     """
     コマンドライン引数をパースする
 
     引数のパスが存在しない場合は、エラーを出力して終了する
 
     Returns:
-        Tuple[str, str]: パスと出力ファイルのパス
+        Tuple[str, str]: パスと元になるファイルと、出力先ファイルのパス
     """
 
     parser = argparse.ArgumentParser(description="与えらえたファイルにGitのコミットハッシュとコミット日時を書き込む")
@@ -52,6 +52,12 @@ def parse_args() -> Tuple[str, str]:
     )
 
     parser.add_argument(
+        "base",
+        type=str,
+        help="ベースファイルのパス",
+    )
+
+    parser.add_argument(
         "output",
         type=str,
         help="出力ファイルのパス",
@@ -59,15 +65,16 @@ def parse_args() -> Tuple[str, str]:
 
     args = parser.parse_args()
 
-    if os.path.exists(args.repo_path) == False:
-        print("Not found path: " + args.repo_path, file=sys.stderr)
-        sys.exit(1)
+    def exists(path: str):
+        if os.path.exists(path) == False:
+            print("Not file: " + path, file=sys.stderr)
+            sys.exit(1)
 
-    if os.path.exists(args.output) == False:
-        print("Not found path: " + args.output, file=sys.stderr)
-        sys.exit(1)
+    exists(args.repo_path)
+    exists(args.base)
+    exists(os.path.dirname(args.output))
 
-    return args.repo_path, args.output
+    return args.repo_path, args.base, args.output
 
 
 def is_git_repository_root(path: str) -> bool:
@@ -118,7 +125,7 @@ def commit_info(path: str) -> Tuple[str, str]:
     return hash, date
 
 
-def modify_file(path: str, hash: str, date: str):
+def generate_header(base:str, path: str, hash: str, date: str):
     """与えられたCソースファイルにコミットハッシュとコミット日時を書き込む
 
     コミットハッシュやコミット日時を書き込む場所は、以下のようにする
@@ -138,7 +145,7 @@ def modify_file(path: str, hash: str, date: str):
     """
 
     write_lines: list[str] = []
-    with open(path, mode="r") as f:
+    with open(base, mode="r") as f:
         lines = f.readlines()
         for line in lines:
             line = line.replace("!!!COMMIT_HASH!!!", hash)

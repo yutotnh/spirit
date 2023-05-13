@@ -46,11 +46,10 @@ if (NOT Python3_FOUND)
     message(FATAL_ERROR "Python3 not found")
 endif()
 
-add_custom_target(modify_commit_info ALL
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modify_commit_info.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h
+add_custom_target(generate_version_header ALL
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_version_header.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/version.base.txt ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h
     COMMENT "Generating version infomation"
 )
-
 
 enable_testing()
 
