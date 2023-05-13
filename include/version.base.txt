@@ -9,7 +9,7 @@
 
 #define SPIRIT_VERSION_STRING "0.1.0"
 
-#define COMMIT_HASH "!!!COMMIT_HASH!!!"
-#define COMMIT_DATE "!!!COMMIT_DATE!!!"
+#define SPIRIT_COMMIT_HASH "!!!COMMIT_HASH!!!"
+#define SPIRIT_COMMIT_DATE "!!!COMMIT_DATE!!!"
 
 #endif  // !SPIRIT_VERSION

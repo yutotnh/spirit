@@ -1,5 +1,7 @@
 #include "include/Error.h"
 
+#include "include/version.h"
+
 #ifdef __MBED__
 #include "mbed.h"
 #else
@@ -88,8 +90,12 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
         "\tMessage: %s\n"
         "\tFile: %s\n"
         "\tFunction: %s\n"
-        "\tLine: %d\n\n",
-        status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number);
+        "\tLine: %d\n"
+        "\tVersion: %s\n"
+        "\tCommit: %s\n"
+        "\tDate: %s\n\n",
+        status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number,
+        SPIRIT_VERSION_STRING, SPIRIT_COMMIT_HASH, SPIRIT_COMMIT_DATE);
 #else
     std::fprintf(stderr,
                  "%s:\n"
@@ -98,8 +104,12 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
                  "\tMessage: %s\n"
                  "\tFile: %s\n"
                  "\tFunction: %s\n"
-                 "\tLine: %d\n\n",
-                 status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number);
+                 "\tLine: %d\n"
+                 "\tVersion: %s\n"
+                 "\tCommit: %s\n"
+                 "\tDate: %s\n\n",
+                 status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number,
+                 SPIRIT_VERSION_STRING, SPIRIT_COMMIT_HASH, SPIRIT_COMMIT_DATE);
     std::fflush(stderr);
 #endif
 }
