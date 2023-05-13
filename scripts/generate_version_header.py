@@ -152,6 +152,11 @@ def generate_header(base:str, path: str, hash: str, date: str):
             line = line.replace("!!!COMMIT_DATE!!!", date)
             write_lines.append(line)
 
+    # 書き込みたいファイルの中身が変わらない場合は、書き込みをスキップする
+    with open(path, mode="r") as f:
+        if f.readlines() == write_lines:
+            return
+
     with open(path, mode="w") as f:
         f.writelines(write_lines)
 
