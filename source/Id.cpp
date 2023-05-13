@@ -35,45 +35,55 @@ bool motor_is_valid(uint32_t motor_count, uint32_t motor)
     return motor < motor_count;
 }
 
+/**
+ * @brief モータの総個数からIDのTypeを返す
+ * @param motor_count モーターの数
+*/
+uint32_t get_type(uint32_t motor_count)
+{
+    if (motor_count == 1) {
+        return 0;
+    } else if (motor_count <= 2) {
+        return 1;
+    } else if (motor_count <= 4) {
+        return 2;
+    } else {
+        constexpr char message_format[] = "Unknown motor count type (%d)";
+        char           message[sizeof(message_format) + Error::max_uint32_t_length];
+        snprintf(message, sizeof(message), message_format, motor_count);
+        Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+        return UINT32_MAX;
+    }
+}
+
 }  // namespace
 
 uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const uint32_t dip_switch)
 {
-    uint32_t id = 0;
-    id          = motor_prefix << (can_id_size - motor_prefix_size);
+    uint32_t id = motor_prefix << (can_id_size - motor_prefix_size);
 
     constexpr uint32_t motor_count_prefix_size = 2;
 
+    // モーターの数が0というのはあり得ないので警告する
     if (motor_count == 0) {
-        Error& error = Error::get_instance();
-        error.warning(Error::Type::InvalidValue, 0, "Total number of motors is 0", __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::InvalidValue, 0, "Total number of motors is 0", __FILE__, __func__,
+                                      __LINE__);
         return 0;
     }
 
-    if (motor_is_valid(motor_count, motor) == false) {
-        Error&         error            = Error::get_instance();
+    if (!motor_is_valid(motor_count, motor)) {
         constexpr char message_format[] = "Motor number (%d) is out of range (0-%d)";
         char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
         snprintf(message, sizeof(message), message_format, motor, motor_count - 1);
-        error.warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
         return 0;
     }
 
-    if (dip_switch_is_valid(dip_switch, dip_switch_size) == false) {
-        Error&         error            = Error::get_instance();
+    if (!dip_switch_is_valid(dip_switch, dip_switch_size)) {
         constexpr char message_format[] = "DIP switch value (%d) exceeds maximum bit width (%d)";
         char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
         snprintf(message, sizeof(message), message_format, dip_switch, dip_switch_size);
-        error.warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
-        return 0;
-    }
-
-    if ((motor_count == 0) || (4 < motor_count)) {
-        Error&         error            = Error::get_instance();
-        constexpr char message_format[] = "Unknown motor count type (%d)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length];
-        snprintf(message, sizeof(message), message_format, motor_count);
-        error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
         return 0;
     }
 
@@ -82,22 +92,7 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     // - motor_count = 2: 0b01
     // - motor_count = 3: 0b10 // 3つの場合、表現に必要なビットは2bitであるため、4つの場合と同じになる
     // - motor_count = 4: 0b10
-    uint32_t type = 0;
-
-    if (motor_count == 1) {
-        type = 0;
-    } else if (motor_count <= 2) {
-        type = 1;
-    } else if (motor_count <= 4) {
-        type = 2;
-    } else {
-        Error&         error            = Error::get_instance();
-        constexpr char message_format[] = "Unknown motor count type (%d)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length];
-        snprintf(message, sizeof(message), message_format, motor_count);
-        error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-        return 0;
-    }
+    const uint32_t type = get_type(motor_count);
 
     switch (type) {
         case 0:
@@ -131,14 +126,14 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
 
             return id;
         default:
-            // 8個のモーターは未対応
+            // モーターの数が5個以上の場合は未対応
             // 将来の拡張を考えて、0b11を残している
             // 例えば0b1100の場合8、0b1101の場合16をモーターに割り当てるなどする
-            Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor count type (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, motor_count);
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+
             return 0;
     }
 }
