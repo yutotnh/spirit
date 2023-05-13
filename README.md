@@ -4,10 +4,10 @@
 
 [![Build spirit](https://github.com/yutotnh/spirit/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/yutotnh/spirit/actions/workflows/build.yml)
 [![Testing With CMake and CTest](https://github.com/yutotnh/spirit/actions/workflows/cmake-test.yml/badge.svg?branch=main)](https://github.com/yutotnh/spirit/actions/workflows/cmake-test.yml)
-[![CodeQL](https://github.com/yutotnh/spirit/actions/workflows/codeql.yml/badge.svg)](https://github.com/yutotnh/spirit/actions/workflows/codeql.yml)
+[![CodeQL](https://github.com/yutotnh/spirit/actions/workflows/codeql.yml/badge.svg?=branch=main)](https://github.com/yutotnh/spirit/actions/workflows/codeql.yml)
 
-[![Dependency Review](https://github.com/yutotnh/spirit/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/yutotnh/spirit/actions/workflows/dependency-review.yml)
-[![Deploy static content to Pages](https://github.com/yutotnh/spirit/actions/workflows/deploy-static.yml/badge.svg)](https://github.com/yutotnh/spirit/actions/workflows/deploy-static.yml)
+[![Dependency Review](https://github.com/yutotnh/spirit/actions/workflows/dependency-review.yml/badge.svg?=branch=main)](https://github.com/yutotnh/spirit/actions/workflows/dependency-review.yml)
+[![Deploy static content to Pages](https://github.com/yutotnh/spirit/actions/workflows/deploy-static.yml/badge.svg?=branch=main)](https://github.com/yutotnh/spirit/actions/workflows/deploy-static.yml)
 
 </div>
 
