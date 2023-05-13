@@ -45,11 +45,10 @@ void A3921::state(const Motor::State type)
         case Motor::State::Brake:
             break;
         default:
-            Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor state (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -58,20 +57,19 @@ void A3921::state(const Motor::State type)
 
 void A3921::decay(const Motor::Decay type)
 {
-    Error& error = Error::get_instance();
     switch (type) {
         case Motor::Decay::Slow:
         case Motor::Decay::Fast:
             break;
         case Motor::Decay::Mixed:
-            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)", __FILE__, __func__,
-                        __LINE__);
+            Error::get_instance().error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)",
+                                        __FILE__, __func__, __LINE__);
             return;
         default:
             constexpr char message_format[] = "Unknown motor decay (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -85,11 +83,10 @@ void A3921::pwm_side(const Motor::PwmSide type)
         case Motor::PwmSide::High:
             break;
         default:
-            Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor pwm side (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
     }
 
@@ -98,7 +95,6 @@ void A3921::pwm_side(const Motor::PwmSide type)
 
 void A3921::run()
 {
-    Error& error = Error::get_instance();
     switch (_decay) {
         case Motor::Decay::Slow:
             run_slow_decay();
@@ -111,14 +107,14 @@ void A3921::run()
             // Mixed や default に来ることは、既に A3921::decay でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         case Motor::Decay::Mixed:
-            error.error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)", __FILE__, __func__,
-                        __LINE__);
+            Error::get_instance().error(Error::Type::InvalidValue, 0, "Invalid motor decay (Motor::Decay::Mixed)",
+                                        __FILE__, __func__, __LINE__);
             return;
         default:
             constexpr char message_format[] = "Unknown motor decay (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_decay));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
             // LCOV_EXCL_STOP
     }
@@ -142,11 +138,10 @@ void A3921::run_slow_decay()
             // default に来ることは、既に A3921::pwm_side でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor pwm side (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_pwm_side));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
             // LCOV_EXCL_STOP
     }
@@ -185,11 +180,10 @@ void A3921::run_slow_decay()
             // default に来ることは、既に A3921::state でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor state (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_state));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
             // LCOV_EXCL_STOP
     }
@@ -231,11 +225,10 @@ void A3921::run_fast_decay()
             // default に来ることは、既に A3921::state でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            Error&         error            = Error::get_instance();
             constexpr char message_format[] = "Unknown motor state (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
             snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_state));
-            error.error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return;
             // LCOV_EXCL_STOP
     }
@@ -248,11 +241,10 @@ void A3921::pulse_period(const float seconds)
         _pwml.period(seconds);
         _phase.period(seconds);
     } else {
-        Error&         error            = Error::get_instance();
         constexpr char message_format[] = "Invalid motor pulse period (%1.4e)";
         char           message[sizeof(message_format) + Error::max_float_1_4_e_length];
         snprintf(message, sizeof(message), message_format, seconds);
-        error.error(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().error(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
     }
 }
 
