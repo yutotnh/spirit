@@ -48,7 +48,8 @@ endif()
 
 add_custom_target(generate_version_header ALL
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_version_header.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/version.base.txt ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h
-    COMMENT "Generating version infomation"
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/include/version.base.txt
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 enable_testing()
@@ -59,6 +60,7 @@ endif()
 
 if(DEFINED MBED_PATH)
     target_link_libraries(spirit mbed-os)
+    add_dependencies(spirit generate_version_header)
 
     add_library(spirit-platform-mbed STATIC)
 
