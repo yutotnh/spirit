@@ -61,6 +61,7 @@ if(DEFINED MBED_PATH)
         PUBLIC
         .
         ./src
+        ./src/spirit
         ./platform/mbed/include
     )
 
