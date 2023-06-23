@@ -39,7 +39,7 @@ jobs:
           set -e
           mbed new .
           mbed deploy
-          echo "int main(){}">source/main.cpp
+          echo "int main(){}">src/main.cpp
           mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
 
   build-cli-v2:
