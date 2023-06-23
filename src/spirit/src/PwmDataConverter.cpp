@@ -1,7 +1,9 @@
-#include "PwmDataConverter.h"
+#include "spirit/include/PwmDataConverter.h"
 
-#include "bit.h"
-#include "include/Error.h"
+#include <cstdio>
+
+#include "spirit/include/Error.h"
+#include "spirit/include/bit.h"
 
 namespace spirit {
 
@@ -75,7 +77,7 @@ Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
         default:
             constexpr char message_format[] = "Unknown motor state (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            std::snprintf(message, sizeof(message), message_format, state_uint32_t);
+            snprintf(message, sizeof(message), message_format, state_uint32_t);
             Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             return Motor::State::Brake;
             // LCOV_EXCL_STOP
@@ -103,7 +105,7 @@ void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer)
         default:
             constexpr char message_format[] = "Unknown motor state (%d)";
             char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            std::snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
+            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
             Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
             break;
             // LCOV_EXCL_STOP

@@ -1,6 +1,6 @@
-#include "Motor.h"
+#include "spirit/include/Motor.h"
 
-#include "include/Error.h"
+#include "spirit/include/Error.h"
 
 namespace spirit {
 

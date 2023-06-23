@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "include/Error.h"
-#include "include/bit.h"
+#include "Error.h"
+#include "bit.h"
 
 namespace {
 

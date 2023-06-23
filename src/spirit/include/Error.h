@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 
-#include "include/mutex.h"
+#include "./mutex.h"
 
 namespace spirit {
 

@@ -5,7 +5,7 @@
 #include <thread>
 
 #include "A3921.h"
-#include "include/Error.h"
+#include "Error.h"
 #include "tests/stubs.h"
 
 namespace {

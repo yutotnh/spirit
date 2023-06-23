@@ -1,4 +1,4 @@
-#include "CANMessage.h"
+#include "spirit/include/CANMessage.h"
 
 #include <cstring>
 

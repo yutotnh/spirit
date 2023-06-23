@@ -282,7 +282,7 @@ public:
         static constexpr float         Kp                        = 1.0F;   // 暫定
         static constexpr float         Ki                        = 0.1F;   // 暫定
         static constexpr float         Kd                        = 0.01F;  // 暫定
-        static constexpr float         pulse_period              = 1.0F / 5'000.0F;
+        static constexpr float         pulse_period              = 1.0F / 5000.0F;
         static constexpr float         release_time              = 0.500F;
         static constexpr Decay         decay                     = Decay::Slow;
         static constexpr PwmSide       pwm_side                  = PwmSide::Low;
@@ -290,7 +290,7 @@ public:
         static constexpr bool          sleep                     = false;
     };
 
-    static constexpr float min_pulse_period = 1.0F / 60'000.0F;
+    static constexpr float min_pulse_period = 1.0F / 60000.0F;
     static constexpr float max_pulse_period = 1.0F / 10.0F;
 
     /// デューティ比の変化具合の最小値 @n

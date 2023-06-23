@@ -1,8 +1,8 @@
-#include "SpeedDataConverter.h"
+#include "spirit/include/SpeedDataConverter.h"
 
-#include "bfloat16.h"
-#include "bit.h"
-#include "include/Error.h"
+#include "spirit/include/Error.h"
+#include "spirit/include/bfloat16.h"
+#include "spirit/include/bit.h"
 
 namespace spirit {
 

@@ -1,8 +1,8 @@
-#include "bit.h"
+#include "spirit/include/bit.h"
 
 #include <climits>
 
-#include "include/Error.h"
+#include "spirit/include/Error.h"
 
 namespace spirit {
 
