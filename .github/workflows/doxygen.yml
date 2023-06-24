@@ -16,7 +16,7 @@ on:
   workflow_call:
 
 jobs:
-  deploy:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
