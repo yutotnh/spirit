@@ -866,12 +866,12 @@ WARN_LOGFILE           =
 
 INPUT                  = CONTRIBUTING.md \
                          README.md \
-                         include/Id.h \
-                         source/Id.cpp \
-                         include/Motor.h \
-                         source/Motor.cpp \
-                         include/CANMessage.h \
-                         source/CANMessage.cpp \
+                         src/spirit/include/Id.h \
+                         src/spirit/src/Id.cpp \
+                         src/spirit/include/Motor.h \
+                         src/spirit/src/Motor.cpp \
+                         src/spirit/include/CANMessage.h \
+                         src/spirit/src/CANMessage.cpp \
                          platform/mbed/include/DigitalOut.h \
                          platform/mbed/source/DigitalOut.cpp \
                          platform/mbed/include/PwmOut.h \
