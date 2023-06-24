@@ -27,7 +27,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     # デプロイするコンテンツを生成する
-    use: ./.github/workflows/doxygen.yml
+    uses: ./.github/workflows/doxygen.yml
     steps:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
