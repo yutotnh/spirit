@@ -866,6 +866,7 @@ WARN_LOGFILE           =
 
 INPUT                  = CONTRIBUTING.md \
                          README.md \
+                         spirit.h \
                          src/spirit/include/Id.h \
                          src/spirit/src/Id.cpp \
                          src/spirit/include/Motor.h \
