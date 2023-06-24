@@ -28,7 +28,7 @@ function(add_gtest target_source)
         target_compile_options(${target} PUBLIC -O2 -Wall -Wextra)
     endif()
 
-    target_include_directories(${target} PUBLIC ../include)
+    target_include_directories(${target} PUBLIC ../src/spirit/include)
     target_link_libraries(${target} PRIVATE gtest_main spirit)
     gtest_discover_tests(${target})
 endfunction()

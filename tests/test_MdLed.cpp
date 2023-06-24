@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
+#include "Error.h"
 #include "MdLed.h"
-#include "include/Error.h"
 #include "tests/stubs.h"
 
 namespace {

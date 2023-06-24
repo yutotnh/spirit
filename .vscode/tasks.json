@@ -81,9 +81,7 @@
             "type": "cmake",
             "label": "CMake: clean rebuild",
             "command": "cleanRebuild",
-            "targets": [
-                "all"
-            ],
+            "targets": ["all"],
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -101,9 +99,7 @@
         {
             "label": "Development Containers",
             "type": "shell",
-            "dependsOn": [
-                "Development Containers: build image"
-            ],
+            "dependsOn": ["Development Containers: build image"],
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -142,7 +138,7 @@
         {
             "label": "Clang-Format: format all file",
             "type": "shell",
-            "command": "find include source tests platform -type f -name '*.cpp' -o -name '*.h' | xargs clang-format -i",
+            "command": "find . -regextype posix-egrep -regex '.*\\.(cpp|h)'  -not -path './build/*' | xargs clang-format -i",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

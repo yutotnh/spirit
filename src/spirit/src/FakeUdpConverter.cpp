@@ -1,6 +1,6 @@
-#include "FakeUdpConverter.h"
+#include "spirit/include/FakeUdpConverter.h"
 
-#include "include/Error.h"
+#include "spirit/include/Error.h"
 
 namespace spirit {
 

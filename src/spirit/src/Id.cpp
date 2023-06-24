@@ -1,6 +1,6 @@
-#include "Id.h"
+#include "spirit/include/Id.h"
 
-#include "include/Error.h"
+#include "spirit/include/Error.h"
 
 namespace spirit {
 

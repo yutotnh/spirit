@@ -20,24 +20,24 @@ endif()
 target_include_directories(spirit
     PUBLIC
     .
-    ./include
+    ./src
 )
 
 target_sources(spirit
     PUBLIC
-    ./source/A3921.cpp
-    ./source/bfloat16.cpp
-    ./source/bit.cpp
-    ./source/CANMessage.cpp
-    ./source/Error.cpp
-    ./source/FakeUdpConverter.cpp
-    ./source/Id.cpp
-    ./source/MdLed.cpp
-    ./source/Motor.cpp
-    ./source/MotorDataConverter.cpp
-    ./source/mutex.cpp
-    ./source/PwmDataConverter.cpp
-    ./source/SpeedDataConverter.cpp
+    ./src/spirit/src/A3921.cpp
+    ./src/spirit/src/bfloat16.cpp
+    ./src/spirit/src/bit.cpp
+    ./src/spirit/src/CANMessage.cpp
+    ./src/spirit/src/Error.cpp
+    ./src/spirit/src/FakeUdpConverter.cpp
+    ./src/spirit/src/Id.cpp
+    ./src/spirit/src/MdLed.cpp
+    ./src/spirit/src/Motor.cpp
+    ./src/spirit/src/MotorDataConverter.cpp
+    ./src/spirit/src/mutex.cpp
+    ./src/spirit/src/PwmDataConverter.cpp
+    ./src/spirit/src/SpeedDataConverter.cpp
 )
 
 enable_testing()
@@ -60,7 +60,8 @@ if(DEFINED MBED_PATH)
     target_include_directories(spirit-platform-mbed
         PUBLIC
         .
-        ./include
+        ./src
+        ./src/spirit
         ./platform/mbed/include
     )
 

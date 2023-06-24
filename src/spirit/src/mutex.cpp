@@ -1,4 +1,4 @@
-#include "include/mutex.h"
+#include "spirit/include/mutex.h"
 
 namespace spirit {
 

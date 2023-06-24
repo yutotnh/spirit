@@ -1,6 +1,6 @@
-#include "A3921.h"
+#include "spirit/include/A3921.h"
 
-#include "include/Error.h"
+#include "spirit/include/Error.h"
 
 namespace spirit {
 
