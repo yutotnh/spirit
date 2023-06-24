@@ -26,22 +26,9 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    # デプロイするコンテンツを生成する
+    use: ./.github/workflows/doxygen.yml
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-      - name: Run doxygen
-        uses: mattnotmitt/doxygen-action@v1.9.1
-        with:
-          doxyfile-path: "doxygen/Doxyfile"
-      - name: Run doxygen
-        uses: mattnotmitt/doxygen-action@v1.9.1
-        with:
-          doxyfile-path: "doxygen/Doxyfile4GeneralUsers"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
