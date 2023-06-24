@@ -1,0 +1,35 @@
+# Doxygenを利用してソースからドキュメントを生成できるかテストする
+#
+# 生成するために利用するDoxyfileは以下の通り
+# - doxygen/Doxyfile
+#   - すべてのソースファイルからドキュメントを生成する
+# - doxygen/Doxyfile4GeneralUsers
+#   - Controller側で利用するAPIのみをまとめたドキュメントを生成する
+#
+name: Doxygen
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+      - name: Run doxygen
+        uses: mattnotmitt/doxygen-action@v1.9.1
+        with:
+          doxyfile-path: "doxygen/Doxyfile"
+      - name: Run doxygen
+        uses: mattnotmitt/doxygen-action@v1.9.1
+        with:
+          doxyfile-path: "doxygen/Doxyfile4GeneralUsers"
