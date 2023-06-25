@@ -1,6 +1,8 @@
 #include "mbed.h"
 #include "spirit.h"
 
+static constexpr uint32_t pc_baud = 115'200;
+
 int main()
 {
     // 念のため、mbedのライブラリを使うことができることを確認する
