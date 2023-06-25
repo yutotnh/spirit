@@ -71,7 +71,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        fqbn: [esp32:esp32:esp32, STMicroelectronics:stm32:GenF3, STMicroelectronics:stm32:GenL0]
+        fqbn: ['esp32:esp32:esp32', 'STMicroelectronics:stm32:GenF3', 'STMicroelectronics:stm32:GenL0']
 
     steps:
       - uses: actions/checkout@v3
