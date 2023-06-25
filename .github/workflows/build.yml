@@ -1,3 +1,10 @@
+# サポートしている各種マイコンボードのビルドを行う
+#
+# ビルドツールは以下の3つで、各種マイコンボードでビルドが通ることを確認する
+# - Mbed CLI 1 (mbed)
+# - Mbed CLI 2 (mbed-tools)
+# - Arduino CLI (arduino-cli)
+#
 name: Build spirit
 
 on:
@@ -39,7 +46,7 @@ jobs:
           set -e
           mbed new .
           mbed deploy
-          echo "int main(){}">src/main.cpp
+          cp spirit/.github/workflows/build-mbed/main.cpp .
           mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
 
   build-cli-v2:
@@ -61,7 +68,8 @@ jobs:
           set -e
           cd ..
           mbed-tools new .
-          cp spirit/.github/workflows/build-mbed-tools/CMakeLists.txt CMakeLists.txt
+          cp spirit/.github/workflows/build-mbed/main.cpp .
+          cp spirit/.github/workflows/build-mbed-tools/CMakeLists.txt .
           mbed-tools deploy
           mbed-tools compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
 
