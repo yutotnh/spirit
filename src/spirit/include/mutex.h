@@ -3,6 +3,8 @@
 
 #ifdef __MBED__
 #include "mbed.h"
+#elif defined(ARDUINO_ARCH_STM32)
+// ArduinoのSTM32ではmutexが存在しないため定義しない
 #else
 #include <mutex>
 #endif
@@ -21,6 +23,8 @@ public:
 private:
 #ifdef __MBED__
     Mutex _mutex;
+#elif defined(ARDUINO_ARCH_STM32)
+// ArduinoのSTM32ではmutexが存在しないため定義しない
 #else
     std::mutex _mutex;
 #endif
