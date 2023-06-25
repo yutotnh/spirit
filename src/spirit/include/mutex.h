@@ -4,7 +4,7 @@
 #ifdef __MBED__
 #include "mbed.h"
 #elif defined(ARDUINO_ARCH_STM32)
-// ArduinoのSTM32ではmutexが存在しないため定義しない
+// ArduinoのSTM32ではmutexが存在しないためインクルードしない
 #else
 #include <mutex>
 #endif
