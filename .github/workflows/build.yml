@@ -46,7 +46,7 @@ jobs:
           set -e
           mbed new .
           mbed deploy
-          cp spirit/.github/workflows/build-mbed/main.cpp .
+          cp .github/workflows/build-mbed/main.cpp .
           mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
 
   build-cli-v2:
