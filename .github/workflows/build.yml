@@ -71,6 +71,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        fqbn: ['esp32:esp32:esp32', 'STMicroelectronics:stm32:GenF3', 'STMicroelectronics:stm32:GenL0']
 
     steps:
       - uses: actions/checkout@v3
@@ -81,11 +82,21 @@ jobs:
       - name: Install platform
         run: |
           arduino-cli config init
+
+      - name: Install ESP32 package
+        if: matrix.fqbn == 'esp32:esp32:esp32'
+        run: |
           arduino-cli config add board_manager.additional_urls https://dl.espressif.com/dl/package_esp32_index.json
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
+      - name: Install STM32 package
+        if: matrix.fqbn != 'esp32:esp32:esp32'
+        run: |
+          arduino-cli config add board_manager.additional_urls https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+          arduino-cli core update-index
+          arduino-cli core install STMicroelectronics:stm32
+
       - name: Compile sketch
         run: |
-          cd .github/workflows/build-arduino-cli
-          arduino-cli compile --fqbn esp32:esp32:esp32 --library ../../../
+          arduino-cli compile --fqbn ${{ matrix.fqbn }} --library . .github/workflows/build-arduino-cli
