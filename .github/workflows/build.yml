@@ -105,6 +105,12 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install STMicroelectronics:stm32
 
+      - name: Install Mbed package
+        if: startsWith(matrix.fqbn, 'arduino:mbed')
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:mbed
+
       - name: Compile sketch
         run: |
           arduino-cli compile --fqbn ${{ matrix.fqbn }} --library . .github/workflows/build-arduino-cli
