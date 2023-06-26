@@ -61,14 +61,12 @@ if(DEFINED MBED_PATH)
         PUBLIC
         .
         ./src
-        ./src/spirit
-        ./platform/mbed/include
     )
 
     target_sources(spirit-platform-mbed
         PUBLIC
-        ./platform/mbed/source/DigitalOut.cpp
-        ./platform/mbed/source/PwmOut.cpp
+        ./src/spirit/platform/mbed/source/DigitalOut.cpp
+        ./src/spirit/platform/mbed/source/PwmOut.cpp
     )
 
     target_link_libraries(spirit-platform-mbed spirit mbed-os)
