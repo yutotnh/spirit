@@ -1,8 +1,8 @@
 #ifndef SPIRIT_MBED_DIGITALOUT_H
 #define SPIRIT_MBED_DIGITALOUT_H
 
-#include "include/InterfaceDigitalOut.h"
 #include "mbed.h"
+#include "spirit/include/InterfaceDigitalOut.h"
 
 namespace spirit {
 

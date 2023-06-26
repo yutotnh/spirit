@@ -1,4 +1,6 @@
-#include "platform/mbed/include/DigitalOut.h"
+#ifdef __MBED__
+
+#include "spirit/platform/mbed/include/DigitalOut.h"
 
 #include "mbed.h"
 
@@ -27,3 +29,5 @@ uint32_t DigitalOut::read()
 }  // namespace mbed
 
 }  // namespace spirit
+
+#endif  // __MBED__
