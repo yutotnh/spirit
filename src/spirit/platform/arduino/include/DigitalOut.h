@@ -1,3 +1,5 @@
+#ifndef __MBED__
+
 #ifndef SPIRIT_ARDUINO_DIGITALOUT_H
 #define SPIRIT_ARDUINO_DIGITALOUT_H
 
@@ -45,3 +47,5 @@ private:
 }  // namespace spirit
 
 #endif  // SPIRIT_ARDUINO_DIGITALOUT_H
+
+#endif  // __MBED__

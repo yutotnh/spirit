@@ -1,3 +1,5 @@
+#ifndef __MBED__
+
 #ifndef SPIRIT_ARDUINO_PWMOUT_H
 #define SPIRIT_ARDUINO_PWMOUT_H
 
@@ -53,3 +55,5 @@ private:
 }  // namespace spirit
 
 #endif  // SPIRIT_ARDUINO_PWMOUT_H
+
+#endif  // __MBED__

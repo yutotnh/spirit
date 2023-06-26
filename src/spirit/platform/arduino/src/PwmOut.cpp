@@ -1,3 +1,5 @@
+#ifndef __MBED__
+
 #include "spirit/platform/arduino/include/PwmOut.h"
 
 namespace spirit {
@@ -40,3 +42,5 @@ void PwmOut::period(const float seconds)
 }  // namespace arduino
 
 }  // namespace spirit
+
+#endif  // __MBED__
