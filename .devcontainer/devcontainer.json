@@ -10,10 +10,11 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-vscode.cpptools",
+				"EditorConfig.EditorConfig",
 				"ms-vscode.cmake-tools",
-				"twxs.cmake",
-				"EditorConfig.EditorConfig"
+				"ms-vscode.cpptools",
+				"streetsidesoftware.code-spell-checker",
+				"twxs.cmake"
 			]
 		}
 	},

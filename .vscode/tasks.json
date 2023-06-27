@@ -156,6 +156,28 @@
                 "isDefault": false
             },
             "detail": "現在のファイルをClang-Formatで整形する"
+        },
+        {
+            "label": "CSpell: spell check the current file",
+            "type": "shell",
+            "command": "cspell ${file}",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "detail": "現在のファイルをCSpellでスペルチェックする"
+        },
+        {
+            "label": "CSpell: spell check all file",
+            "type": "shell",
+            "command": "cspell .",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "detail": "全てのファイルをCSpellでスペルチェックする"
         }
     ]
 }
