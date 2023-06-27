@@ -23,8 +23,8 @@
             "label": "Doxygen",
             "type": "shell",
             "dependsOn": [
-                "Doxygen: Developper build",
-                "Doxygen: Genaral users build"
+                "Doxygen: Developer build",
+                "Doxygen: General users build"
             ],
             "problemMatcher": [],
             "group": {
@@ -34,7 +34,7 @@
             "detail": "全てのDoxygen関連のタスクを実行する"
         },
         {
-            "label": "Doxygen: Developper build",
+            "label": "Doxygen: Developer build",
             "type": "shell",
             "command": "doxygen ${workspaceFolder}/doxygen/Doxyfile",
             "problemMatcher": [],
@@ -45,7 +45,7 @@
             "detail": "開発者用の全部入りドキュメントを生成する"
         },
         {
-            "label": "Doxygen: Genaral users build",
+            "label": "Doxygen: General users build",
             "type": "shell",
             "command": "doxygen ${workspaceFolder}/doxygen/Doxyfile4GeneralUsers",
             "problemMatcher": [],
@@ -141,10 +141,10 @@
             "command": "find . -regextype posix-egrep -regex '.*\\.(cpp|h)'  -not -path './build/*' | xargs clang-format -i",
             "problemMatcher": [],
             "group": {
-                "kind": "build",
+                "kind": "none",
                 "isDefault": false
             },
-            "detail": "対象ファイルをClang-Formatで整形する"
+            "detail": "対象ファイル(.cpp/.h)をClang-Formatで整形する"
         },
         {
             "label": "Clang-Format: format the current file",
