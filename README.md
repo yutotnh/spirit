@@ -87,7 +87,7 @@ doxygen ${workspaceFolder}/doxygen/Doxyfile4GeneralUsers # Generate general user
 
 PullRequestやissueを送る際は、 [CONTRIBUTING.md](./CONTRIBUTING.md) をご覧ください
 
-## 🏃 Examples
+## 🏃 Using spirit
 
 - 🚧 [yutotnh/spirit-mbed-can-motor-controller](https://github.com/yutotnh/spirit-mbed-can-motor-controller)
   - spirit と CAN を用いた Mbed の モータードライバ制御プログラム(Controller側)
