@@ -43,7 +43,6 @@ jobs:
 
       - name: build-mbed-cli
         run: |
-          set -e
           mbed new .
           mbed deploy
           cp .github/workflows/build-mbed/main.cpp .
@@ -65,7 +64,6 @@ jobs:
 
       - name: build-mbed-tools
         run: |
-          set -e
           cd ..
           mbed-tools new .
           cp spirit/.github/workflows/build-mbed/main.cpp .
