@@ -20,17 +20,20 @@
         "Doxyfile",
         "DUTYCYCLE",
         "endfunction",
+        "envie",
         "fqbn",
         "googletest",
         "gtest",
         "jidicula",
         "LCOV",
+        "ledc",
         "leds",
         "mattnotmitt",
         "Mbed",
         "mdled",
         "noninteractive",
         "Nucleo",
+        "pico",
         "Protobuf",
         "pwmh",
         "pwml",
@@ -46,5 +49,5 @@
     "dictionaries": ["softwareTerms", "cpp"],
     "useGitignore": true,
     "enableGlobDot": true,
-    "ignorePaths": ["doxygen/Doxyfile", "doxygen/Doxyfile4GeneralUsers", ".git"]
+    "ignorePaths": ["doxygen/*", ".git"]
 }
