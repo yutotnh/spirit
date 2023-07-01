@@ -145,7 +145,7 @@ TEST(Motor, speedTest)
 }
 
 /**
- * @brief Motor::pid_gein_factor(), Motor::get_pid_gain_factor() のテスト
+ * @brief Motor::pid_gain_factor(), Motor::get_pid_gain_factor() のテスト
  */
 TEST(Motor, PidGainFactorTest)
 {

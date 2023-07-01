@@ -1,12 +1,14 @@
-#ifndef SPIRIT_MBED_DIGITALOUT_H
-#define SPIRIT_MBED_DIGITALOUT_H
+#ifdef ARDUINO
 
-#include "include/InterfaceDigitalOut.h"
-#include "mbed.h"
+#ifndef SPIRIT_ARDUINO_DIGITALOUT_H
+#define SPIRIT_ARDUINO_DIGITALOUT_H
+
+#include "Arduino.h"
+#include "spirit/include/InterfaceDigitalOut.h"
 
 namespace spirit {
 
-namespace mbed {
+namespace arduino {
 
 class DigitalOut : public InterfaceDigitalOut {
 public:
@@ -14,7 +16,7 @@ public:
      * @brief Constructor
      * @param pin DigitalOut pin to connect to
      */
-    DigitalOut(PinName pin);
+    DigitalOut(uint8_t pin);
 
     /**
      * @brief Destructor
@@ -25,7 +27,7 @@ public:
      * @brief 出力ピンの出力値を設定する
      * @param value 出力ピンの出力値
      *              - 0: Low
-     *              - 1: High
+     *              - 0以外: High
      */
     void write(uint32_t value) override;
 
@@ -37,11 +39,13 @@ public:
     uint32_t read() override;
 
 private:
-    ::mbed::DigitalOut _digital_out;
+    uint8_t _pin;
 };
 
-}  // namespace mbed
+}  // namespace arduino
 
 }  // namespace spirit
 
-#endif  // SPIRIT_MBED_DIGITALOUT_H
+#endif  // SPIRIT_ARDUINO_DIGITALOUT_H
+
+#endif  // ARDUINO

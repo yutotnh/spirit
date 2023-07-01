@@ -1,4 +1,6 @@
-#include "platform/mbed/include/PwmOut.h"
+#ifdef __MBED__
+
+#include "spirit/platform/mbed/include/PwmOut.h"
 
 #include "mbed.h"
 
@@ -32,3 +34,5 @@ void PwmOut::period(const float seconds)
 }  // namespace mbed
 
 }  // namespace spirit
+
+#endif  // __MBED__

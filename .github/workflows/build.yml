@@ -43,7 +43,6 @@ jobs:
 
       - name: build-mbed-cli
         run: |
-          set -e
           mbed new .
           mbed deploy
           cp .github/workflows/build-mbed/main.cpp .
@@ -65,7 +64,6 @@ jobs:
 
       - name: build-mbed-tools
         run: |
-          set -e
           cd ..
           mbed-tools new .
           cp spirit/.github/workflows/build-mbed/main.cpp .
@@ -73,13 +71,13 @@ jobs:
           mbed-tools deploy
           mbed-tools compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
 
-  build-arduio-cli:
+  build-arduino-cli:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        fqbn: ['esp32:esp32:esp32', 'STMicroelectronics:stm32:GenF3', 'STMicroelectronics:stm32:GenL0']
+        fqbn: ['esp32:esp32:esp32', 'STMicroelectronics:stm32:GenF3', 'STMicroelectronics:stm32:GenL0', 'arduino:mbed:pico', 'arduino:mbed:envie_m7']
 
     steps:
       - uses: actions/checkout@v3
@@ -99,11 +97,17 @@ jobs:
           arduino-cli core install esp32:esp32
 
       - name: Install STM32 package
-        if: matrix.fqbn != 'esp32:esp32:esp32'
+        if: startsWith(matrix.fqbn, 'STMicroelectronics:stm32')
         run: |
           arduino-cli config add board_manager.additional_urls https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
           arduino-cli core update-index
           arduino-cli core install STMicroelectronics:stm32
+
+      - name: Install Mbed package
+        if: startsWith(matrix.fqbn, 'arduino:mbed')
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:mbed
 
       - name: Compile sketch
         run: |
