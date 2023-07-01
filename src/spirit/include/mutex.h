@@ -1,10 +1,10 @@
 #ifndef SPIRIT_MUTEX_H
 #define SPIRIT_MUTEX_H
 
-#ifdef __MBED__
+#if defined(__MBED__) && !defined(ARDUINO)
 #include "mbed.h"
-#elif defined(ARDUINO_ARCH_STM32)
-// ArduinoのSTM32ではmutexが存在しないためインクルードしない
+#elif defined(ARDUINO_ARCH_STM32) || defined(ARDUINO_ARCH_MBED)
+// ArduinoのSTM32/Mbedではmutexが存在しないためインクルードしない
 #else
 #include <mutex>
 #endif
@@ -21,10 +21,10 @@ public:
     void unlock();
 
 private:
-#ifdef __MBED__
+#if defined(__MBED__) && !defined(ARDUINO)
     Mutex _mutex;
-#elif defined(ARDUINO_ARCH_STM32)
-// ArduinoのSTM32ではmutexが存在しないため定義しない
+#elif defined(ARDUINO_ARCH_STM32) || defined(ARDUINO_ARCH_MBED)
+    // ArduinoのSTM32/Mbedではmutexが存在しないため定義しない
 #else
     std::mutex _mutex;
 #endif

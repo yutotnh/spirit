@@ -1,8 +1,8 @@
 #ifndef SPIRIT_MBED_PWMOUT_H
 #define SPIRIT_MBED_PWMOUT_H
 
-#include "include/InterfacePwmOut.h"
 #include "mbed.h"
+#include "spirit/include/InterfacePwmOut.h"
 
 namespace spirit {
 

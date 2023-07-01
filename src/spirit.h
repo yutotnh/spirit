@@ -19,8 +19,8 @@
 #include "spirit/include/mutex.h"
 
 #ifdef __MBED__
-#include "platform/mbed/include/DigitalOut.h"
-#include "platform/mbed/include/PwmOut.h"
+#include "spirit/platform/mbed/include/DigitalOut.h"
+#include "spirit/platform/mbed/include/PwmOut.h"
 #endif  // MBED_H
 
 #ifdef ARDUINO
