@@ -11,7 +11,7 @@
 
 </div>
 
-# spirit
+# 👻 spirit
 
 モータードライバーを駆動するためのライブラリ
 
@@ -27,6 +27,20 @@ flowchart TB
 ```
 
 最終的にはMbed/Arduino等での利用を想定していますが、自動テストを非マイコンで行う都合上、可能な限り特定の環境への依存を減らしています
+
+
+## 💻 Supported platforms
+
+下記の環境では多分動きます
+
+| Platform  |   architecture    |
+| :-------: | :---------------: |
+|  Arduino  |       ESP32       |
+|  Arduino  |     Portenta      |
+|  Arduino  | Raspberry Pi Pico |
+|  Arduino  |       STM32       |
+| Mbed OS 6 |      LPCxxxx      |
+| Mbed OS 6 |       STM32       |
 
 ## ⌨️ Development
 
@@ -61,11 +75,21 @@ Doxygenを使って、ソースコードからドキュメントを生成して�
 - [開発者用](https://yutotnh.github.io/spirit)
   - Controller/Peripheral側の全てのAPIをまとめたページ(=全部入り)
 
+リポジトリのルートディレクトリで下の手順を行うことで、各ドキュメントの生成ができます
+
+```shell
+git submodule update --init                              # For doxygen-awesome-css
+doxygen ${workspaceFolder}/doxygen/Doxyfile              # Generate developer documentation for spirit
+doxygen ${workspaceFolder}/doxygen/Doxyfile4GeneralUsers # Generate general user documentation
+```
+
 ## 🤝 Contributing
 
 PullRequestやissueを送る際は、 [CONTRIBUTING.md](./CONTRIBUTING.md) をご覧ください
 
-## 🏃 利用例
+## 🏃 Examples
 
-- [yutotnh/mbed-can-motor-driver-for-spirit](https://github.com/yutotnh/mbed-can-motor-driver-for-spirit.git)
-  - spirit と CAN を用いた Mbed の モータードライバ制御プログラム
+- 🚧 [yutotnh/spirit-mbed-can-motor-controller](https://github.com/yutotnh/spirit-mbed-can-motor-controller)
+  - spirit と CAN を用いた Mbed の モータードライバ制御プログラム(Controller側)
+- [yutotnh/spirit-mbed-can-motor-driver](https://github.com/yutotnh/spirit-mbed-can-motor-driver.git)
+  - spirit と CAN を用いた Mbed の モータードライバ制御プログラム(Peripheral側)
