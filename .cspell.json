@@ -34,6 +34,7 @@
         "noninteractive",
         "Nucleo",
         "pico",
+        "Portenta",
         "Protobuf",
         "pwmh",
         "pwml",
