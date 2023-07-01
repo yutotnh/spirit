@@ -1,4 +1,4 @@
-#ifndef __MBED__
+#ifdef ARDUINO
 
 #include "spirit/platform/arduino/include/DigitalOut.h"
 
@@ -38,4 +38,4 @@ uint32_t DigitalOut::read()
 
 }  // namespace spirit
 
-#endif  // __MBED__
+#endif  // ARDUIO

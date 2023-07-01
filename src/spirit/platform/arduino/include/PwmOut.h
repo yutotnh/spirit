@@ -1,4 +1,4 @@
-#ifndef __MBED__
+#ifdef ARDUINO
 
 #ifndef SPIRIT_ARDUINO_PWMOUT_H
 #define SPIRIT_ARDUINO_PWMOUT_H
@@ -56,4 +56,4 @@ private:
 
 #endif  // SPIRIT_ARDUINO_PWMOUT_H
 
-#endif  // __MBED__
+#endif  // ARDUINO

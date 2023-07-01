@@ -1,4 +1,4 @@
-#ifndef __MBED__
+#ifdef ARDUINO
 
 #ifndef SPIRIT_ARDUINO_DIGITALOUT_H
 #define SPIRIT_ARDUINO_DIGITALOUT_H
@@ -48,4 +48,4 @@ private:
 
 #endif  // SPIRIT_ARDUINO_DIGITALOUT_H
 
-#endif  // __MBED__
+#endif  // ARDUINO
