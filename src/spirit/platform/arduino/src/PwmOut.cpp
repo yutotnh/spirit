@@ -1,4 +1,4 @@
-#ifdef ARDUIO
+#ifdef ARDUINO
 
 #include "spirit/platform/arduino/include/PwmOut.h"
 
@@ -10,7 +10,7 @@ PwmOut::PwmOut(const uint8_t pin, const uint8_t channel)
 {
     _pin = pin;
 
-    // _chennelは未使用
+    // _channelは未使用
     // ledcを利用する時に必要なので、あらかじめ宣言しておく
     _channel = channel;
 }

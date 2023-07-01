@@ -71,7 +71,7 @@ jobs:
           mbed-tools deploy
           mbed-tools compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
 
-  build-arduio-cli:
+  build-arduino-cli:
     runs-on: ${{ matrix.os }}
 
     strategy:
