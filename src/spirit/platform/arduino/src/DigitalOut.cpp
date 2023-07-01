@@ -38,4 +38,4 @@ uint32_t DigitalOut::read()
 
 }  // namespace spirit
 
-#endif  // ARDUIO
+#endif  // ARDUINO
