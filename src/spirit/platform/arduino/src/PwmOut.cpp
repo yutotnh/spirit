@@ -27,11 +27,19 @@ void PwmOut::write(const float value)
 #else
     analogWrite(_pin, value * 255);
 #endif
+
+    if (value < 0.00F) {
+        _duty_cycle = 0.00F;
+    } else if (1.00F < value) {
+        _duty_cycle = 1.00F;
+    } else {
+        _duty_cycle = value;
+    }
 }
 
 float PwmOut::read()
 {
-    return analogRead(_pin);
+    return _duty_cycle;
 }
 
 void PwmOut::period(const float seconds)
