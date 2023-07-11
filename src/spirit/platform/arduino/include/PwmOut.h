@@ -48,6 +48,7 @@ public:
 private:
     uint8_t _pin;
     uint8_t _channel;
+    float   _duty_cycle{0.00F};
 };
 
 }  // namespace arduino
