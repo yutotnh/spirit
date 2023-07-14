@@ -92,10 +92,9 @@ private:
 
     Motor::State _state{Motor::Default::state};
     BlinkMode    _mode{Default::blink_mode};
-    // Mutex  _mutex;
-    uint32_t _interval{Default::interval};
-    uint32_t _counter{0};
-    uint32_t _error{0};
+    uint32_t     _interval{Default::interval};
+    uint32_t     _counter{0};
+    uint32_t     _error{0};
 
     uint32_t _error_section{0};
     uint32_t _error_bit_width{0};
