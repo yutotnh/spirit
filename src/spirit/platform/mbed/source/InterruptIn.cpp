@@ -1,4 +1,5 @@
-#ifdef __MBED__
+#if defined(__MBED__) && !defined(ARDUINO)
+// ArduinoのMbedではCallbackが使えないので、定義しない
 
 #include "spirit/platform/mbed/include/InterruptIn.h"
 
@@ -35,4 +36,4 @@ uint32_t InterruptIn::read()
 
 }  // namespace spirit
 
-#endif  // __MBED__
+#endif  // defined(__MBED__) && !defined(ARDUINO)

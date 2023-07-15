@@ -1,6 +1,8 @@
 #ifndef SPIRIT_MBED_INTERRUPTIN_H
 #define SPIRIT_MBED_INTERRUPTIN_H
 
+#if !defined(ARDUINO)
+
 #include "mbed.h"
 #include "spirit/include/InterfaceInterruptIn.h"
 
@@ -47,5 +49,7 @@ private:
 }  // namespace mbed
 
 }  // namespace spirit
+
+#endif  // !defined(ARDUINO)
 
 #endif  // SPIRIT_MBED_INTERRUPTIN_H

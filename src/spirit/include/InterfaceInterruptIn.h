@@ -3,8 +3,10 @@
 
 #include <cstdint>
 
-#if defined(__MBED__)
+#if defined(__MBED__) && !defined(ARDUINO)
 #include "mbed.h"
+#elif defined(ARDUINO)
+// TODO: Arduinoの場合に必要なヘッダファイルを追加する
 #else
 #include <functional>
 #endif
@@ -21,12 +23,14 @@ public:
      */
     virtual ~InterfaceInterruptIn() = default;
 
-#if defined(__MBED__)
+#if defined(__MBED__) && !defined(ARDUINO)
     /**
      * @brief 立ち上がり時に呼び出される関数を設定する
      * @param func_rise 立ち上がり時に呼び出される関数
      */
     virtual void rise(Callback<void()> func_rise) = 0;
+#elif defined(ARDUINO)
+    // TODO: Arduinoの場合の実装を追加する
 #else
     /**
      * @brief 立ち上がり時に呼び出される関数を設定する
@@ -35,12 +39,14 @@ public:
     virtual void rise(std::function<void(void)>& func_rise) = 0;
 #endif
 
-#if defined(__MBED__)
+#if defined(__MBED__) && !defined(ARDUINO)
     /**
      * @brief 立ち下がり時に呼び出される関数を設定する
      * @param func_fall 立ち下がり時に呼び出される関数
      */
     virtual void fall(Callback<void()> func_fall) = 0;
+#elif defined(ARDUINO)
+    // TODO: Arduinoの場合の実装を追加する
 #else
     /**
      * @brief 立ち下がり時に呼び出される関数を設定する
