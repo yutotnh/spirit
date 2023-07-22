@@ -1,0 +1,31 @@
+name: "Dev Containers"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install Dev Container CLI
+        run: npm install -g @devcontainers/cli
+
+      - name: Building image
+        run: devcontainer build --workspace-folder .
+
+      - name: Spins up containers
+        run: devcontainer up --workspace-folder .
