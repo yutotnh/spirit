@@ -29,3 +29,16 @@ jobs:
 
       - name: Spins up containers
         run: devcontainer up --workspace-folder .
+
+      - name: Build with Arduino CLI
+        run: |
+          devcontainer exec --workspace-folder . arduino-cli compile --fqbn esp32:esp32:esp32 --library . .github/workflows/build-arduino-cli
+          devcontainer exec --workspace-folder . arduino-cli compile --fqbn STMicroelectronics:stm32:GenF3 --library . .github/workflows/build-arduino-cli
+          devcontainer exec --workspace-folder . arduino-cli compile --fqbn arduino:mbed:pico --library . .github/workflows/build-arduino-cli
+
+      - name: Build with Mbed CLI 1
+        run: |
+          mbed new .
+          mbed deploy
+          cp .github/workflows/build-mbed/main.cpp .
+          mbed compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
