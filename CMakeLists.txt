@@ -38,6 +38,7 @@ target_sources(spirit
     ./src/spirit/src/mutex.cpp
     ./src/spirit/src/PwmDataConverter.cpp
     ./src/spirit/src/SpeedDataConverter.cpp
+    ./src/spirit/src/SpeedController.cpp
 )
 
 enable_testing()
@@ -66,6 +67,7 @@ if(DEFINED MBED_PATH)
     target_sources(spirit-platform-mbed
         PUBLIC
         ./src/spirit/platform/mbed/source/DigitalOut.cpp
+        ./src/spirit/platform/mbed/source/InterruptIn.cpp
         ./src/spirit/platform/mbed/source/PwmOut.cpp
     )
 

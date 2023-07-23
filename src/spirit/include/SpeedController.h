@@ -19,9 +19,16 @@ public:
     /**
      * @brief 目標rpsを与えると速度制御の計算結果を返す
      * @param target_rps 速度制御の目標rps
-     * @param dt         制御周期
+     * @param dt         制御周期(s)
      */
     float calculation(float target_rps, float dt);
+
+    /**
+     * @brief rpsを算出して返す
+     * @param dt rps
+     * @return 算出されたrps
+     */
+    float rps(float dt);
 
     /**
      * @brief 速度制御の計算結果にかける上限値と下限値を設定
@@ -35,13 +42,19 @@ public:
      * @param kp 比例ゲイン
      * @param ki 積分ゲイン
      * @param kd 微分ゲイン
+     * @return true:ゲイン変更, false:ゲイン変更なし
      */
-    void pid_gain(float kp, float ki, float kd);
+    bool pid_gain(float kp, float ki, float kd);
 
     /**
      * @brief ロータリーエンコーダの計算値をリセット
      */
     void reset();
+
+    /**
+     * @brief ロータリーエンコーダの角度を返す
+     */
+    float angle();
 
 private:
     InterfaceInterruptIn& _a_phase;
@@ -51,27 +64,21 @@ private:
     float _ki{0.0f};
     float _kd{0.0f};
 
-    float _deg_unit;  // 最小角度
+    int   _ppr{200};
+    float _deg_unit{360.0f / _ppr / 4.0f};
 
-    int64_t _angle_counter;
+    int64_t _angle_counter{0};
 
     const static int _angle_buff_max{10};
     int              _angle_buff_index{0};
     int              _angle_buff[_angle_buff_max];
 
-    float _sum_error;
+    float _sum_error{0.0f};
     float _delta_error;
-    float _last_error;
+    float _last_error{0.0f};
 
     float _high_limit{0.00f};
     float _low_limit{0.00f};
-
-    /**
-     * @brief rpsを算出して返す
-     * @param target_rps 速度制御の目標rps
-     * @return 算出されたrps
-     */
-    float rps_calculation(float dt);
 
     /**
      * @brief 元の数値にリミッターをかける
