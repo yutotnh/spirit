@@ -21,11 +21,11 @@ TEST(Motor, InitValueTest)
 
     EXPECT_FLOAT_EQ(motor.get_speed(), 0.00F);
 
-    float Kp, Ki, Kd;
-    motor.get_pid_gain_factor(Kp, Ki, Kd);
-    EXPECT_FLOAT_EQ(Kp, Motor::Default::Kp);
-    EXPECT_FLOAT_EQ(Ki, Motor::Default::Ki);
-    EXPECT_FLOAT_EQ(Kd, Motor::Default::Kd);
+    float kp, ki, kd;
+    motor.get_pid_gain_factor(kp, ki, kd);
+    EXPECT_FLOAT_EQ(kp, Motor::Default::kp);
+    EXPECT_FLOAT_EQ(ki, Motor::Default::ki);
+    EXPECT_FLOAT_EQ(kd, Motor::Default::kd);
 
     // enum class や bool で定義した型を使うと、以下のようなエラーになるので、一旦変数に保存させる
     //      undefined reference to `spirit::Motor::Default::rise_change_level'
@@ -149,16 +149,16 @@ TEST(Motor, speedTest)
  */
 TEST(Motor, PidGainFactorTest)
 {
-    auto test = [](float Kp, float Ki, float Kd) {
+    auto test = [](float kp, float ki, float kd) {
         Motor motor;
-        motor.pid_gain_factor(Kp, Ki, Kd);
-        motor.get_pid_gain_factor(Kp, Ki, Kd);
-        EXPECT_FLOAT_EQ(Kp, Kp);
-        EXPECT_FLOAT_EQ(Ki, Ki);
-        EXPECT_FLOAT_EQ(Ki, Ki);
+        motor.pid_gain_factor(kp, ki, kd);
+        motor.get_pid_gain_factor(kp, ki, kd);
+        EXPECT_FLOAT_EQ(kp, kp);
+        EXPECT_FLOAT_EQ(ki, ki);
+        EXPECT_FLOAT_EQ(ki, ki);
     };
 
-    // とりあえず、Kp, Ki, Kdが異なる適当な値を入れてテスト
+    // とりあえず、kp, ki, kdが異なる適当な値を入れてテスト
     test(0.00F, 0.01F, 0.02F);
     test(0.50F, 0.51F, 0.52F);
     test(1000.00F, 100.00F, 10.00F);

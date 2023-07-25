@@ -48,8 +48,14 @@ float Motor::get_duty_cycle() const
 
 void Motor::speed(const float rps)
 {
-    /// @todo rpsはマイナスにならないはずなので、範囲チェックを足す
-    _speed = rps;
+    if (rps < 0.00F) {
+        _speed = rps;
+
+        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                      "RPS (%g) is less than 0.00, so it will be 0.00", rps);
+    } else {
+        _speed = rps;
+    }
 }
 
 float Motor::get_speed() const
@@ -57,20 +63,20 @@ float Motor::get_speed() const
     return _speed;
 }
 
-void Motor::pid_gain_factor(const float Kp, const float Ki, const float Kd)
+void Motor::pid_gain_factor(const float kp, const float ki, const float kd)
 {
-    /// @todo Kp, Ki, Kdの範囲チェック
+    /// @todo kp, ki, kdの範囲チェック
 
-    _Kp = Kp;
-    _Ki = Ki;
-    _Kd = Kd;
+    _kp = kp;
+    _ki = ki;
+    _kd = kd;
 }
 
-void Motor::get_pid_gain_factor(float& Kp, float& Ki, float& Kd) const
+void Motor::get_pid_gain_factor(float& kp, float& ki, float& kd) const
 {
-    Kp = _Kp;
-    Ki = _Ki;
-    Kd = _Kd;
+    kp = _kp;
+    ki = _ki;
+    kd = _kd;
 }
 
 void Motor::state(const State type)
