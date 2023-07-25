@@ -132,19 +132,19 @@ public:
 
     /**
      * @brief PID制御のゲイン係数を設定する
-     * @param Kp 比例ゲイン係数
-     * @param Ki 積分ゲイン係数
-     * @param Kd 微分ゲイン係数
+     * @param kp 比例ゲイン係数
+     * @param ki 積分ゲイン係数
+     * @param kd 微分ゲイン係数
      */
-    void pid_gain_factor(float Kp, float Ki, float Kd);
+    void pid_gain_factor(float kp, float ki, float kd);
 
     /**
      * @brief PID制御のゲイン係数を返す
-     * @param Kp 比例ゲイン係数
-     * @param Ki 積分ゲイン係数
-     * @param Kd 微分ゲイン係数
+     * @param kp 比例ゲイン係数
+     * @param ki 積分ゲイン係数
+     * @param kd 微分ゲイン係数
      */
-    void get_pid_gain_factor(float& Kp, float& Ki, float& Kd) const;
+    void get_pid_gain_factor(float& kp, float& ki, float& kd) const;
 
     /**
      * @brief 回転方向を設定する
@@ -279,9 +279,9 @@ public:
         static constexpr ChangeLevel   rise_change_level         = ChangeLevel::OFF;
         static constexpr ChangeLevel   fall_change_level         = ChangeLevel::OFF;
         static constexpr float         maximum_change_duty_cycle = 0.00F;
-        static constexpr float         Kp                        = 1.0F;   // 暫定
-        static constexpr float         Ki                        = 0.1F;   // 暫定
-        static constexpr float         Kd                        = 0.01F;  // 暫定
+        static constexpr float         kp                        = 1.0F;   // 暫定
+        static constexpr float         ki                        = 0.1F;   // 暫定
+        static constexpr float         kd                        = 0.01F;  // 暫定
         static constexpr float         pulse_period              = 1.0F / 5000.0F;
         static constexpr float         release_time              = 0.500F;
         static constexpr Decay         decay                     = Decay::Slow;
@@ -301,9 +301,9 @@ private:
     ControlSystem _control_system{Default::control_system};
     float         _duty_cycle{0.00F};
     float         _speed{0.00F};
-    float         _Kp{Default::Kp};
-    float         _Ki{Default::Ki};
-    float         _Kd{Default::Kd};
+    float         _kp{Default::kp};
+    float         _ki{Default::ki};
+    float         _kd{Default::kd};
     State         _state{Default::state};
     ChangeLevel   _rise_change_level{Default::rise_change_level};
     ChangeLevel   _fall_change_level{Default::fall_change_level};

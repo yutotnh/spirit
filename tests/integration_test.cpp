@@ -86,18 +86,18 @@ TEST(IntegrationTest, 1)
         EXPECT_NEAR(duty_cycle, received_motor.get_duty_cycle(), allowable_error_margin);
     };
 
-    auto speed_test = [&controller, &peripheral](const spirit::Motor::State state, const float speed, const float Kp,
-                                                 const float Ki, const float Kd) {
+    auto speed_test = [&controller, &peripheral](const spirit::Motor::State state, const float speed, const float kp,
+                                                 const float ki, const float kd) {
         spirit::Motor motor;
         motor.control_system(spirit::Motor::ControlSystem::Speed);
         motor.state(state);
         motor.speed(speed);
-        motor.pid_gain_factor(Kp, Ki, Kd);
+        motor.pid_gain_factor(kp, ki, kd);
 
         ::CANMessage  message        = controller(motor);
         spirit::Motor received_motor = peripheral(message);
 
-        // スピード, Kp, Kiは送受信中にbfloat16に変換している
+        // スピード, kp, kiは送受信中にbfloat16に変換している
         // bfloat16の仮数部は7bitなので、その分の誤差を考慮する必要がある
         auto allowable_error_margin = [](const float bfloat16) { return bfloat16 / 127.0F; };
 
@@ -105,10 +105,10 @@ TEST(IntegrationTest, 1)
         EXPECT_EQ(state, received_motor.get_state());
         EXPECT_NEAR(speed, motor.get_speed(), allowable_error_margin(speed));
 
-        float return_Kp, return_Ki, return_Kd;
-        received_motor.get_pid_gain_factor(return_Kp, return_Ki, return_Kd);
-        EXPECT_NEAR(Kp, return_Kp, allowable_error_margin(Kp));
-        EXPECT_NEAR(Ki, return_Ki, allowable_error_margin(Ki));
+        float return_kp, return_ki, return_kd;
+        received_motor.get_pid_gain_factor(return_kp, return_ki, return_kd);
+        EXPECT_NEAR(kp, return_kp, allowable_error_margin(kp));
+        EXPECT_NEAR(ki, return_ki, allowable_error_margin(ki));
     };
 
     spirit::Error &error = spirit::Error::get_instance();
@@ -128,17 +128,17 @@ TEST(IntegrationTest, 1)
     /// @test state = CCW, doty_cycle = 1.0
     pwm_test(spirit::Motor::State::CCW, 1.0F);
 
-    // 速度制御(通信の都合上Kdの値は無視される)
-    /// @test state = Brake, speed = 0.75, Kp = 0.2, Ki = 0.5, Kd = 1.0
+    // 速度制御(通信の都合上kdの値は無視される)
+    /// @test state = Brake, speed = 0.75, kp = 0.2, ki = 0.5, kd = 1.0
     speed_test(spirit::Motor::State::Coast, 0.75F, 0.2F, 0.5F, 1.0F);
 
-    /// @test state = Brake, speed = 0.2, Kp = 0.5, Ki = 1.0, Kd = 0.2
+    /// @test state = Brake, speed = 0.2, kp = 0.5, ki = 1.0, kd = 0.2
     speed_test(spirit::Motor::State::Brake, 0.2F, 0.5F, 1.0F, 0.2F);
 
-    /// @test state = CW, speed = 0.5, Kp = 1.0, Ki = 0.2, Kd = 0.5
+    /// @test state = CW, speed = 0.5, kp = 1.0, ki = 0.2, kd = 0.5
     speed_test(spirit::Motor::State::CW, 0.5F, 1.0F, 0.2F, 0.5F);
 
-    /// @test state = CCW, speed = 1.0, Kp = 0.2, Ki = 0.5, Kd = 1.0
+    /// @test state = CCW, speed = 1.0, kp = 0.2, ki = 0.5, kd = 1.0
     speed_test(spirit::Motor::State::CCW, 1.0F, 0.2F, 0.5F, 1.0F);
 
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
