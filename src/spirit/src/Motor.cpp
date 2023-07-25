@@ -134,7 +134,7 @@ void Motor::change_level(const ChangeLevelTarget target, const float duty_cycle)
 
     if (duty_cycle < minimum_maximum_change_duty_cycle) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "Duty cycle (%g) is less than minimum duty cycle (%g)",
+                                    "Duty cycle (%g) is less than minimum duty cycle (%g)", duty_cycle,
                                     minimum_maximum_change_duty_cycle);
         return;
     }
