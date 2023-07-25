@@ -49,13 +49,12 @@ float Motor::get_duty_cycle() const
 void Motor::speed(const float rps)
 {
     if (rps < 0.00F) {
-        _speed = rps;
-
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                      "RPS (%g) is less than 0.00, so it will be 0.00", rps);
-    } else {
-        _speed = rps;
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "RPS (%g) is less than 0.00", rps);
+        return;
     }
+
+    _speed = rps;
 }
 
 float Motor::get_speed() const
@@ -65,7 +64,23 @@ float Motor::get_speed() const
 
 void Motor::pid_gain_factor(const float kp, const float ki, const float kd)
 {
-    /// @todo kp, ki, kdの範囲チェック
+    if (kp < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "kp (%g) is less than 0.00", kp);
+        return;
+    }
+
+    if (ki < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "ki (%g) is less than 0.00", ki);
+        return;
+    }
+
+    if (kd < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "kd (%g) is less than 0.00", kd);
+        return;
+    }
 
     _kp = kp;
     _ki = ki;
@@ -134,13 +149,32 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
     }
 }
 
-void Motor::change_level(const ChangeLevelTarget target, const float duty_cycle)
+Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
 {
-    /// @todo duty_cycleは最大でも200%しか変化しないはずなので、範囲チェックをする
+    switch (target) {
+        case ChangeLevelTarget::Rise:
+            return _rise_change_level;
+        case ChangeLevelTarget::Fall:
+            return _fall_change_level;
+
+        default:
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
+            return ChangeLevel::OFF;
+    }
+}
+
+void Motor::maximum_change_duty_cycle(const ChangeLevelTarget target, float duty_cycle)
+{
+    if (2.00F < duty_cycle) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Change duty cycle (%g) is greater than 2.00", duty_cycle);
+        return;
+    }
 
     if (duty_cycle < minimum_maximum_change_duty_cycle) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "Duty cycle (%g) is less than minimum duty cycle (%g)", duty_cycle,
+                                    "Change duty cycle (%g) is less than minimum duty cycle (%g)", duty_cycle,
                                     minimum_maximum_change_duty_cycle);
         return;
     }
@@ -158,21 +192,6 @@ void Motor::change_level(const ChangeLevelTarget target, const float duty_cycle)
             Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
                                         "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
             return;
-    }
-}
-
-Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
-{
-    switch (target) {
-        case ChangeLevelTarget::Rise:
-            return _rise_change_level;
-        case ChangeLevelTarget::Fall:
-            return _fall_change_level;
-
-        default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
-                                        "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
-            return ChangeLevel::OFF;
     }
 }
 
@@ -225,22 +244,19 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
 void Motor::pulse_period(const float seconds)
 {
     if (max_pulse_period < seconds) {
-        _pulse_period = max_pulse_period;
-
-        Error::get_instance().warning(
-            Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-            "Pulse period (%g) is greater than max pulse period (%g), so it will be max pulse period (%g)", seconds,
-            max_pulse_period, max_pulse_period);
-    } else if (seconds < min_pulse_period) {
-        _pulse_period = min_pulse_period;
-
-        Error::get_instance().warning(
-            Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-            "Pulse period (%g) is less than min pulse period (%g), so it will be min pulse period (%g)", seconds,
-            min_pulse_period, min_pulse_period);
-    } else {
-        _pulse_period = seconds;
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Pulse period (%g) is greater than max pulse period (%g)", seconds,
+                                    max_pulse_period);
+        return;
     }
+
+    if (seconds < min_pulse_period) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Pulse period (%g) is less than min pulse period (%g)", seconds, min_pulse_period);
+        return;
+    }
+
+    _pulse_period = seconds;
 }
 
 float Motor::get_pulse_period() const
@@ -250,7 +266,12 @@ float Motor::get_pulse_period() const
 
 void Motor::release_time(const float seconds)
 {
-    /// @todo マイナス秒はありえないので、エラーにする
+    if (seconds < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Seconds (%g) is less than 0.00", seconds);
+        return;
+    }
+
     _release_time = seconds;
 }
 
