@@ -106,7 +106,7 @@ void Error::print(Type type, uint32_t code, const char* filename, const char* fu
         status_to_string(_status), type_to_string(type), code, filename, funcname, line_number);
 
 #ifdef __MBED__
-    vprintf(stderr, message, arg);
+    vprintf(message, arg);
     printf("\n\n");
 #else
     std::vfprintf(stderr, message, arg);
