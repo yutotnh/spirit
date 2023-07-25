@@ -78,8 +78,11 @@ TEST(Motor, ControlSystemTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test 範囲外の値を指定した場合
     Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+    /// @test 範囲外の値を指定した場合
+    error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.control_system(static_cast<Motor::ControlSystem>(3));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
@@ -108,18 +111,35 @@ TEST(Motor, DutyCycleTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
     // 境界値テスト
     /// @test 0.00F未満
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.duty_cycle(-0.01F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
+    EXPECT_EQ(error.get_status(), Error::Status::Warning);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.duty_cycle(-0.50F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
+    EXPECT_EQ(error.get_status(), Error::Status::Warning);
 
     /// @test 1.00Fより大きい
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.duty_cycle(1.01F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.00F);
+    EXPECT_EQ(error.get_status(), Error::Status::Warning);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.duty_cycle(2.00F);
     EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.00F);
+    EXPECT_EQ(error.get_status(), Error::Status::Warning);
 
     testing::internal::GetCapturedStderr();
 }
@@ -238,8 +258,11 @@ TEST(Motor, StateTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test 範囲外の値を指定した場合
     Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+    /// @test 範囲外の値を指定した場合
+    error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.state(static_cast<Motor::State>(4));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
@@ -288,8 +311,11 @@ TEST(Motor, ChangeLevelTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test Motor::ChangeLevel::Manual が設定できず、エラーが発生することの確認
     Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+    /// @test Motor::ChangeLevel::Manual が設定できず、エラーが発生することの確認
+    error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Manual);
     EXPECT_EQ(error.get_status(), Error::Status::Error);
@@ -503,8 +529,11 @@ TEST(Motor, DecayTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test Decay == Mixed
     Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    /// @test Decay == Mixed
+    error.reset();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
     motor.decay(Motor::Decay::Mixed);
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
@@ -536,9 +565,10 @@ TEST(Motor, PwmSideTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test PwmSide が範囲外の場合
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    /// @test PwmSide が範囲外の場合
 
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -559,6 +589,10 @@ TEST(Motor, ResetTest)
 
     motor.reset(false);
     EXPECT_EQ(motor.get_reset(), false);
+
+    // Errorが発生していないことを確認
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 }
 
 /**
@@ -572,6 +606,10 @@ TEST(Motor, SleepTest)
 
     motor.sleep(false);
     EXPECT_EQ(motor.get_sleep(), false);
+
+    // Errorが発生していないことを確認
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 }
 
 }  // namespace
