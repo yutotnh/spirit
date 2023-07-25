@@ -162,15 +162,10 @@ public:
      * @brief デューティ比の変化具合を設定する ChangeLevelTarget
      * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
      * @param level ChangeLevel::Manual, ChangeLevel::OFF, ChangeLevel::Low, ChangeLevel::Middle, ChangeLevel::High, ChangeLevel::Max のいずれかの設定したい変化具合
+     * @attention この関数を実行すると、それより前に Motor::maximum_change_duty_cycle(ChangeLevelTarget, float) で設定した値は無効になり、
+     * Motor::get_maximum_change_duty_cycle(ChangeLevelTarget) は 設定した ChangeLevel に対応した値を返す
      */
     void change_level(ChangeLevelTarget target, ChangeLevel level);
-
-    /**
-     * @brief デューティ比の変化具合を設定する ChangeLevelTarget
-     * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
-     * @param duty_cycle 単位時間当たりの最大変化デューティ比
-     */
-    void change_level(ChangeLevelTarget target, float duty_cycle);
 
     /**
      * @brief デューティ比の変化具合を返す
@@ -178,6 +173,15 @@ public:
      * @return 設定したデューティ比の変化具合
      */
     ChangeLevel get_change_level(ChangeLevelTarget target) const;
+
+    /**
+     * @brief 単位時間当たりの最大変化デューティ比を設定する
+     * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
+     * @param duty_cycle 単位時間当たりの最大変化デューティ比
+     * @attention この関数を実行すると、それより前に Motor::change_level(ChangeLevelTarget, ChangeLevel) で設定した値は無効になり、
+     * Motor::get_change_level(ChangeLevelTarget) は ChangeLevel::Manual を返す
+     */
+    void maximum_change_duty_cycle(ChangeLevelTarget target, float duty_cycle);
 
     /**
      * @brief 単位時間当たりの最大変化デューティ比を返す
