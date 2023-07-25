@@ -54,6 +54,8 @@ float PwmDataConverter::get_duty_cycle(const uint8_t* buffer)
 
 void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer)
 {
+    /// @todo デューティー比がマイナスを取ることはないため、その場合はエラーにする
+
     const uint16_t duty_cycle_16bit = 65535 * duty_cycle;  // 2^16 - 1 = 65535
     set_range_value(duty_cycle_16bit, 2, 16, 8, buffer);
 }
@@ -75,10 +77,8 @@ Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
             // default に来ることは、取得しているビット幅が2bitでありcase文0-3までで処理が決まっていてありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, state_uint32_t);
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", state_uint32_t);
             return Motor::State::Brake;
             // LCOV_EXCL_STOP
     }
@@ -103,11 +103,9 @@ void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer)
             // default に来ることは、state で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            break;
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(state));
+            return;
             // LCOV_EXCL_STOP
     }
 }

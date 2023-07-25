@@ -15,19 +15,16 @@ uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, c
 
     // value_size > 1 なので、 buffer_size == 0 になると確実にバッファオーバーランするため、警告を出す
     if (buffer_size == 0) {
-        constexpr char message_format[] = "buffer_size is 0";
-        char           message[sizeof(message_format)];
-        snprintf(message, sizeof(message), message_format);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "buffer_size is 0");
         return UINT32_MAX;
     }
 
     auto end = start + value_size - 1;
     if ((buffer_size * CHAR_BIT) - 1 < end) {
-        constexpr char message_format[] = "Range (%zu-%zu) is out of range (0-%zu)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 3];
-        snprintf(message, sizeof(message), message_format, start, end, (buffer_size * CHAR_BIT) - 1);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "Range (%zu-%zu) is out of range (0-%zu)", start, end,
+                                      (buffer_size * CHAR_BIT) - 1);
         return UINT32_MAX;
     }
 
@@ -53,19 +50,16 @@ bool set_range_value(const uint32_t value, const std::size_t start, const std::s
 
     // value_size > 1 なので、 buffer_size == 0 になると確実にバッファオーバーランするため、警告を出す
     if (buffer_size == 0) {
-        constexpr char message_format[] = "buffer_size is 0";
-        char           message[sizeof(message_format)];
-        snprintf(message, sizeof(message), message_format);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "buffer_size is 0");
         return false;
     }
 
     auto end = start + value_size - 1;
     if ((buffer_size * CHAR_BIT) - 1 < end) {
-        constexpr char message_format[] = "Range (%zu-%zu) is out of range (0-%zu)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 3];
-        snprintf(message, sizeof(message), message_format, start, end, (buffer_size * CHAR_BIT) - 1);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "Range (%zu-%zu) is out of range (0-%zu)", start, end,
+                                      (buffer_size * CHAR_BIT) - 1);
         return false;
     }
 

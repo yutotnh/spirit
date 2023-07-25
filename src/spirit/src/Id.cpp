@@ -48,10 +48,8 @@ uint32_t get_type(uint32_t motor_count)
     } else if (motor_count <= 4) {
         return 2;
     } else {
-        constexpr char message_format[] = "Unknown motor count type (%d)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length];
-        snprintf(message, sizeof(message), message_format, motor_count);
-        Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                    "Unknown motor count type (%d)", motor_count);
         return UINT32_MAX;
     }
 }
@@ -66,24 +64,21 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
 
     // モーターの数が0というのはあり得ないので警告する
     if (motor_count == 0) {
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, "Total number of motors is 0", __FILE__, __func__,
-                                      __LINE__);
+        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                      "Total number of motors is 0");
         return 0;
     }
 
     if (!motor_is_valid(motor_count, motor)) {
-        constexpr char message_format[] = "Motor number (%d) is out of range (0-%d)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
-        snprintf(message, sizeof(message), message_format, motor, motor_count - 1);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "Motor number (%d) is out of range (0-%d)", motor, motor_count - 1);
         return 0;
     }
 
     if (!dip_switch_is_valid(dip_switch, dip_switch_size)) {
-        constexpr char message_format[] = "DIP switch value (%d) exceeds maximum bit width (%d)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
-        snprintf(message, sizeof(message), message_format, dip_switch, dip_switch_size);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "DIP switch value (%d) exceeds maximum bit width (%d)", dip_switch,
+                                      dip_switch_size);
         return 0;
     }
 
@@ -129,11 +124,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             // モーターの数が5個以上の場合は未対応
             // 将来の拡張を考えて、0b11を残している
             // 例えば0b1100の場合8、0b1101の場合16をモーターに割り当てるなどする
-            constexpr char message_format[] = "Unknown motor count type (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, motor_count);
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor count type (%d)", motor_count);
             return 0;
     }
 }
