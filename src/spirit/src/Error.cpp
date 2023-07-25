@@ -1,5 +1,7 @@
 #include "spirit/include/Error.h"
 
+#include "cstdarg"
+
 #ifdef __MBED__
 #include "mbed.h"
 #else
@@ -24,28 +26,37 @@ Error::Status Error::get_status()
     return _status;
 }
 
-void Error::warning(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
-                    uint32_t line_number)
+void Error::warning(Type type, uint32_t code, const char* filename, const char* funcname, uint32_t line_number,
+                    const char* message, ...)
 {
     _mutex.lock();
     _status = Status::Warning;
     _code   = code;
-    print(type, code, message, filename, funcname, line_number);
+
+    va_list arg;
+    va_start(arg, message);
+    print(type, code, filename, funcname, line_number, message, arg);
+    va_end(arg);
+
     _mutex.unlock();
 }
 
-void Error::error(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
-                  uint32_t line_number)
+void Error::error(Type type, uint32_t code, const char* filename, const char* funcname, uint32_t line_number,
+                  const char* message, ...)
 {
     _mutex.lock();
     _status = Status::Error;
     _code   = code;
-    print(type, code, message, filename, funcname, line_number);
+
+    va_list arg;
+    va_start(arg, message);
+    print(type, code, filename, funcname, line_number, message, arg);
+    va_end(arg);
     _mutex.unlock();
 }
 
-void Error::print(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
-                  uint32_t line_number)
+void Error::print(Type type, uint32_t code, const char* filename, const char* funcname, uint32_t line_number,
+                  const char* message, va_list arg)
 {
     auto status_to_string = [](Status status) -> const char* {
         switch (status) {
@@ -82,26 +93,29 @@ void Error::print(Type type, uint32_t code, const char* message, const char* fil
 
 #ifdef __MBED__
     printf(
+#else
+    std::fprintf(stderr,
+#endif  // __MBED__
         "%s:\n"
         "\tType: %s\n"
         "\tError code: %d\n"
-        "\tMessage: %s\n"
         "\tFile: %s\n"
         "\tFunction: %s\n"
-        "\tLine: %d\n\n",
-        status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number);
+        "\tLine: %d\n"
+        "\tMessage: ",
+        status_to_string(_status), type_to_string(type), code, filename, funcname, line_number);
+
+#ifdef __MBED__
+    vprintf(message, arg);
+    printf("\n\n");
 #else
-    std::fprintf(stderr,
-                 "%s:\n"
-                 "\tType: %s\n"
-                 "\tError code: %d\n"
-                 "\tMessage: %s\n"
-                 "\tFile: %s\n"
-                 "\tFunction: %s\n"
-                 "\tLine: %d\n\n",
-                 status_to_string(_status), type_to_string(type), code, message, filename, funcname, line_number);
-    std::fflush(stderr);
+    std::vfprintf(stderr, message, arg);
+    std::fprintf(stderr, "\n\n");
 #endif
+
+#ifndef __MBED__
+    std::fflush(stderr);
+#endif  // !__MBED__
 }
 
 }  // namespace spirit

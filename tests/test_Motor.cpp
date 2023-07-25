@@ -361,6 +361,10 @@ TEST(Motor, DecayTest)
 
     // 異常系
 
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     /// @test Decay == Mixed
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
@@ -372,6 +376,8 @@ TEST(Motor, DecayTest)
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
     motor.decay(static_cast<Motor::Decay>(3));
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -388,11 +394,17 @@ TEST(Motor, PwmSideTest)
 
     // 異常系
 
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     /// @test PwmSide が範囲外の場合
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
     motor.pwm_side(static_cast<Motor::PwmSide>(2));
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**

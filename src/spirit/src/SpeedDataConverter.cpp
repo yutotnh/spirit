@@ -62,6 +62,7 @@ float SpeedDataConverter::get_speed(const uint8_t* buffer)
 
 void SpeedDataConverter::set_speed(float speed, uint8_t* buffer)
 {
+    /// @todo speedの範囲チェック
     uint16_t speed_16bit = float32_to_bfloat16(speed);
     set_range_value(speed_16bit, 2, 16, 7, buffer);
 }
@@ -82,6 +83,8 @@ void SpeedDataConverter::set_pid_gain_factor(float Kp, float Ki, float Kd, uint8
 {
     // Kdは送受信しないので処理しない
     (void)Kd;
+
+    /// @todo Kp, Ki, Kdの範囲チェック
 
     uint16_t Kp_16bit = float32_to_bfloat16(Kp);
     set_range_value(Kp_16bit, 18, 16, 7, buffer);
@@ -108,10 +111,8 @@ Motor::State SpeedDataConverter::get_state(const uint8_t* buffer)
             // default に来ることは、取得しているビット幅が2bitでありcase文0-3までで処理が決まっていてありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(state));
             return Motor::State::Brake;
             // LCOV_EXCL_STOP
     }
@@ -139,11 +140,9 @@ void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer)
             // default に来ることは、state で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            break;
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(state));
+            return;
             // LCOV_EXCL_STOP
     }
 }
