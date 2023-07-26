@@ -404,7 +404,7 @@ TEST(A3921, FastDecayTest)
 /**
  * @brief A3921の各関数の Error が発生する条件のテスト
  */
-TEST(A3921, AnnomalyTest)
+TEST(A3921, AnomalyTest)
 {
     StubDigitalOut sr;
     StubPwmOut     pwmh;

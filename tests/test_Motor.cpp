@@ -118,7 +118,7 @@ TEST(Motor, DutyCycleTest)
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 
-    auto annomaly_test = [](float duty_cycle, float expected_duty_cycle) {
+    auto anomaly_test = [](float duty_cycle, float expected_duty_cycle) {
         Error &error = Error::get_instance();
         error.reset();
         EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -133,12 +133,12 @@ TEST(Motor, DutyCycleTest)
 
     // 境界値テスト
     /// @test 0.00F未満
-    annomaly_test(-0.01F, 0.00F);
-    annomaly_test(-0.50F, 0.00F);
+    anomaly_test(-0.01F, 0.00F);
+    anomaly_test(-0.50F, 0.00F);
 
     /// @test 1.00Fより大きい
-    annomaly_test(1.01F, 1.00F);
-    annomaly_test(2.00F, 1.00F);
+    anomaly_test(1.01F, 1.00F);
+    anomaly_test(2.00F, 1.00F);
 
     testing::internal::GetCapturedStderr();
 }
@@ -313,7 +313,7 @@ TEST(Motor, ChangeLevelTest)
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
 
-    auto annomaly_test = [](Motor::ChangeLevelTarget target, Motor::ChangeLevel level) {
+    auto anomaly_test = [](Motor::ChangeLevelTarget target, Motor::ChangeLevel level) {
         Error &error = Error::get_instance();
         error.reset();
         EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -325,20 +325,20 @@ TEST(Motor, ChangeLevelTest)
     };
 
     /// @test Motor::ChangeLevel::Manual が設定できず、エラーが発生することの確認
-    annomaly_test(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Manual);
+    anomaly_test(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Manual);
 
-    annomaly_test(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Manual);
+    anomaly_test(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Manual);
 
     /// @test 設定値が範囲外の場合、エラーが発生することの確認
-    annomaly_test(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(6));
-    annomaly_test(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(10));
+    anomaly_test(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(6));
+    anomaly_test(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(10));
 
-    annomaly_test(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(6));
-    annomaly_test(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(10));
+    anomaly_test(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(6));
+    anomaly_test(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(10));
 
     /// @test ChangeLevelTarget が範囲外の場合
-    annomaly_test(static_cast<Motor::ChangeLevelTarget>(2), Motor::ChangeLevel::Low);
-    annomaly_test(static_cast<Motor::ChangeLevelTarget>(7), Motor::ChangeLevel::Low);
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(2), Motor::ChangeLevel::Low);
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(7), Motor::ChangeLevel::Low);
 
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -396,7 +396,7 @@ TEST(Motor, MaximumChangeDutyCycleTest)
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
 
-    auto annomaly_test = [](Motor::ChangeLevelTarget target, float duty_cycle) {
+    auto anomaly_test = [](Motor::ChangeLevelTarget target, float duty_cycle) {
         Error &error = Error::get_instance();
         error.reset();
         EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -408,19 +408,19 @@ TEST(Motor, MaximumChangeDutyCycleTest)
     };
 
     /// @test 設定値が範囲外(x < Motor::minimum_maximum_change_duty_cycle, 2.00 < x)の場合、エラーが発生することの確認
-    annomaly_test(Motor::ChangeLevelTarget::Rise,
+    anomaly_test(Motor::ChangeLevelTarget::Rise,
                   Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
 
-    annomaly_test(Motor::ChangeLevelTarget::Fall,
+    anomaly_test(Motor::ChangeLevelTarget::Fall,
                   Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
 
-    annomaly_test(Motor::ChangeLevelTarget::Rise, 2.01F);
+    anomaly_test(Motor::ChangeLevelTarget::Rise, 2.01F);
 
-    annomaly_test(Motor::ChangeLevelTarget::Fall, 2.01F);
+    anomaly_test(Motor::ChangeLevelTarget::Fall, 2.01F);
 
     /// @test ChangeLevelTarget が範囲外の場合
-    annomaly_test(static_cast<Motor::ChangeLevelTarget>(2), 1.00F);
-    annomaly_test(static_cast<Motor::ChangeLevelTarget>(4), 1.00F);
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(2), 1.00F);
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(4), 1.00F);
 
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -455,7 +455,7 @@ TEST(Motor, PulsePeriodTest)
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 
     // 境界値テスト
-    auto annomaly_test = [](float pulse_period) {
+    auto anomaly_test = [](float pulse_period) {
         Error &error = Error::get_instance();
         error.reset();
         EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -467,14 +467,14 @@ TEST(Motor, PulsePeriodTest)
     };
 
     /// @test Motor::min_pulse_period 未満
-    annomaly_test(Motor::min_pulse_period - (Motor::min_pulse_period * 0.1F));
+    anomaly_test(Motor::min_pulse_period - (Motor::min_pulse_period * 0.1F));
 
-    annomaly_test(Motor::min_pulse_period - (Motor::min_pulse_period * 10.0F));
+    anomaly_test(Motor::min_pulse_period - (Motor::min_pulse_period * 10.0F));
 
     /// @test max_pulse_period より大きい
-    annomaly_test(Motor::max_pulse_period + (Motor::max_pulse_period * 0.1F));
+    anomaly_test(Motor::max_pulse_period + (Motor::max_pulse_period * 0.1F));
 
-    annomaly_test(Motor::max_pulse_period + (Motor::max_pulse_period * 10.0F));
+    anomaly_test(Motor::max_pulse_period + (Motor::max_pulse_period * 10.0F));
 
     testing::internal::GetCapturedStderr();
 }
