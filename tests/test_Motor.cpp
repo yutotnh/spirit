@@ -409,10 +409,10 @@ TEST(Motor, MaximumChangeDutyCycleTest)
 
     /// @test 設定値が範囲外(x < Motor::minimum_maximum_change_duty_cycle, 2.00 < x)の場合、エラーが発生することの確認
     anomaly_test(Motor::ChangeLevelTarget::Rise,
-                  Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
+                 Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
 
     anomaly_test(Motor::ChangeLevelTarget::Fall,
-                  Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
+                 Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
 
     anomaly_test(Motor::ChangeLevelTarget::Rise, 2.01F);
 
