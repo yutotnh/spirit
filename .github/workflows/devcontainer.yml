@@ -38,7 +38,7 @@ jobs:
 
       - name: Build with Mbed CLI 1
         run: |
-          mbed new .
-          mbed deploy
+          mbed-cli new .
+          mbed-cli deploy
           cp .github/workflows/build-mbed/main.cpp .
-          mbed compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
+          mbed-cli compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
