@@ -1,6 +1,7 @@
 #ifndef SPIRIT_ERROR_H
 #define SPIRIT_ERROR_H
 
+#include <cstdarg>
 #include <cstdint>
 #include <cstdio>
 
@@ -68,30 +69,29 @@ public:
 
     /**
      * @brief 警告情報の出力と情報の保存を行う
-     * @param type エラー(警告)の種類
-     * @param code エラー(警告)の値
-     * @param message エラー(警告)のメッセージ
+     * @param type 警告の種類
+     * @param code 警告の値
      * @param filename ファイル名
      * @param funcname 関数名
      * @param line_number 行番号
+     * @param message 警告のメッセージ
+     * @param ... messageのための可変長引
      */
-    void warning(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
-                 uint32_t line_number);
+    void warning(Type type, uint32_t code, const char* filename, const char* funcname, uint32_t line_number,
+                 const char* message, ...);
 
     /**
      * @brief エラー情報の出力と情報の保存を行う
-     * @param type エラー(警告)の種類
-     * @param code エラー(警告)の値
-     * @param message エラー(警告)のメッセージ
+     * @param type エラーの種類
+     * @param code エラーの値
      * @param filename ファイル名
      * @param funcname 関数名
      * @param line_number 行番号
+     * @param message エラーのメッセージ
+     * @param ... messageのための可変長引数
      */
-    void error(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
-               uint32_t line_number);
-
-    static constexpr uint32_t max_uint32_t_length    = 10;
-    static constexpr uint32_t max_float_1_4_e_length = 10;
+    void error(Type type, uint32_t code, const char* filename, const char* funcname, uint32_t line_number,
+               const char* message, ...);
 
 private:
     Error()  = default;
@@ -105,13 +105,14 @@ private:
      * @brief エラー(警告)情報を出力する
      * @param type エラー(警告)の種類
      * @param code エラー(警告)の値
-     * @param message エラー(警告)のメッセージ
      * @param filename ファイル名
      * @param funcname 関数名
      * @param line_number 行番号
+     * @param message エラー(警告)のメッセージ
+     * @param arg messageのための可変長引数
      */
-    void print(Type type, uint32_t code, const char* message, const char* filename, const char* funcname,
-               uint32_t line_number);
+    void print(Type type, uint32_t code, const char* filename, const char* funcname, uint32_t line_number,
+               const char* message, va_list arg);
 };
 
 }  // namespace spirit

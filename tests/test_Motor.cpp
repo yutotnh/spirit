@@ -21,11 +21,11 @@ TEST(Motor, InitValueTest)
 
     EXPECT_FLOAT_EQ(motor.get_speed(), 0.00F);
 
-    float Kp, Ki, Kd;
-    motor.get_pid_gain_factor(Kp, Ki, Kd);
-    EXPECT_FLOAT_EQ(Kp, Motor::Default::Kp);
-    EXPECT_FLOAT_EQ(Ki, Motor::Default::Ki);
-    EXPECT_FLOAT_EQ(Kd, Motor::Default::Kd);
+    float kp, ki, kd;
+    motor.get_pid_gain_factor(kp, ki, kd);
+    EXPECT_FLOAT_EQ(kp, Motor::Default::kp);
+    EXPECT_FLOAT_EQ(ki, Motor::Default::ki);
+    EXPECT_FLOAT_EQ(kd, Motor::Default::kd);
 
     // enum class や bool で定義した型を使うと、以下のようなエラーになるので、一旦変数に保存させる
     //      undefined reference to `spirit::Motor::Default::rise_change_level'
@@ -54,6 +54,10 @@ TEST(Motor, InitValueTest)
 
     auto sleep = Motor::Default::sleep;
     EXPECT_EQ(motor.get_sleep(), sleep);
+
+    // Errorが発生していないことを確認
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 }
 
 /**
@@ -78,8 +82,11 @@ TEST(Motor, ControlSystemTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test 範囲外の値を指定した場合
     Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+    /// @test 範囲外の値を指定した場合
+    error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.control_system(static_cast<Motor::ControlSystem>(3));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
@@ -108,18 +115,30 @@ TEST(Motor, DutyCycleTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    auto anomaly_test = [](float duty_cycle, float expected_duty_cycle) {
+        Error &error = Error::get_instance();
+        error.reset();
+        EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+        Motor motor;
+        motor.duty_cycle(duty_cycle);
+
+        EXPECT_FLOAT_EQ(motor.get_duty_cycle(), expected_duty_cycle);
+
+        EXPECT_EQ(error.get_status(), Error::Status::Warning);
+    };
+
     // 境界値テスト
     /// @test 0.00F未満
-    motor.duty_cycle(-0.01F);
-    EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
-    motor.duty_cycle(-0.50F);
-    EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 0.00F);
+    anomaly_test(-0.01F, 0.00F);
+    anomaly_test(-0.50F, 0.00F);
 
     /// @test 1.00Fより大きい
-    motor.duty_cycle(1.01F);
-    EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.00F);
-    motor.duty_cycle(2.00F);
-    EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.00F);
+    anomaly_test(1.01F, 1.00F);
+    anomaly_test(2.00F, 1.00F);
 
     testing::internal::GetCapturedStderr();
 }
@@ -127,12 +146,9 @@ TEST(Motor, DutyCycleTest)
 /**
  * @brief Motor::speed(), Motor::get_speed() のテスト
  */
-TEST(Motor, speedTest)
+TEST(Motor, SpeedTest)
 {
     Motor motor;
-
-    motor.speed(0.00F);
-    EXPECT_FLOAT_EQ(motor.get_speed(), 0.00F);
 
     motor.speed(0.50F);
     EXPECT_FLOAT_EQ(motor.get_speed(), 0.50F);
@@ -140,8 +156,24 @@ TEST(Motor, speedTest)
     motor.speed(1.00F);
     EXPECT_FLOAT_EQ(motor.get_speed(), 1.00F);
 
-    motor.speed(-0.50F);
-    EXPECT_FLOAT_EQ(motor.get_speed(), -0.50F);
+    motor.speed(0.00F);
+    EXPECT_FLOAT_EQ(motor.get_speed(), 0.00F);
+
+    // 異常系のテスト
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.speed(-0.01F);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -149,19 +181,52 @@ TEST(Motor, speedTest)
  */
 TEST(Motor, PidGainFactorTest)
 {
-    auto test = [](float Kp, float Ki, float Kd) {
+    auto test = [](float kp, float ki, float kd) {
         Motor motor;
-        motor.pid_gain_factor(Kp, Ki, Kd);
-        motor.get_pid_gain_factor(Kp, Ki, Kd);
-        EXPECT_FLOAT_EQ(Kp, Kp);
-        EXPECT_FLOAT_EQ(Ki, Ki);
-        EXPECT_FLOAT_EQ(Ki, Ki);
+        motor.pid_gain_factor(kp, ki, kd);
+        motor.get_pid_gain_factor(kp, ki, kd);
+        EXPECT_FLOAT_EQ(kp, kp);
+        EXPECT_FLOAT_EQ(ki, ki);
+        EXPECT_FLOAT_EQ(ki, ki);
     };
 
-    // とりあえず、Kp, Ki, Kdが異なる適当な値を入れてテスト
+    // とりあえず、kp, ki, kdが異なる適当な値を入れてテスト
     test(0.00F, 0.01F, 0.02F);
     test(0.50F, 0.51F, 0.52F);
     test(1000.00F, 100.00F, 10.00F);
+
+    // 異常系のテスト
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    // Errorになることを確認する
+    auto minus_test = [](float kp, float ki, float kd) {
+        Error &error = Error::get_instance();
+        error.reset();
+        EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+        Motor motor;
+        motor.pid_gain_factor(kp, ki, kd);
+
+        EXPECT_EQ(error.get_status(), Error::Status::Error);
+    };
+
+    /// @test kp, ki, kdの値がマイナスの場合をテストする @n
+    /// 手間ではないので7通り全てテストする
+
+    // minus_test(0.01F, 0.01F, 0.01F); // これはエラーにならない
+    minus_test(0.01F, 0.01F, -0.01F);
+    minus_test(0.01F, -0.01F, 0.01F);
+    minus_test(0.01F, -0.01F, -0.01F);
+    minus_test(-0.01F, 0.01F, 0.01F);
+    minus_test(-0.01F, 0.01F, -0.01F);
+    minus_test(-0.01F, -0.01F, 0.01F);
+    minus_test(-0.01F, -0.01F, -0.01F);
 }
 
 /**
@@ -192,8 +257,11 @@ TEST(Motor, StateTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test 範囲外の値を指定した場合
     Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+    /// @test 範囲外の値を指定した場合
+    error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.state(static_cast<Motor::State>(4));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
@@ -242,55 +310,117 @@ TEST(Motor, ChangeLevelTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
-    /// @test Motor::ChangeLevel::Manual が設定できず、エラーが発生することの確認
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Manual);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
 
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Manual);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
+    auto anomaly_test = [](Motor::ChangeLevelTarget target, Motor::ChangeLevel level) {
+        Error &error = Error::get_instance();
+        error.reset();
+        EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+        Motor motor;
+        motor.change_level(target, level);
+
+        EXPECT_EQ(error.get_status(), Error::Status::Error);
+    };
+
+    /// @test Motor::ChangeLevel::Manual が設定できず、エラーが発生することの確認
+    anomaly_test(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Manual);
+
+    anomaly_test(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Manual);
 
     /// @test 設定値が範囲外の場合、エラーが発生することの確認
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(6));
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
+    anomaly_test(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(6));
+    anomaly_test(Motor::ChangeLevelTarget::Rise, static_cast<Motor::ChangeLevel>(10));
 
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(6));
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
-
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(Motor::ChangeLevelTarget::Rise,
-                       Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
-
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(Motor::ChangeLevelTarget::Fall,
-                       Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
+    anomaly_test(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(6));
+    anomaly_test(Motor::ChangeLevelTarget::Fall, static_cast<Motor::ChangeLevel>(10));
 
     /// @test ChangeLevelTarget が範囲外の場合
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(static_cast<Motor::ChangeLevelTarget>(2), Motor::ChangeLevel::Low);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
-
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.change_level(static_cast<Motor::ChangeLevelTarget>(2), 0.01F);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(2), Motor::ChangeLevel::Low);
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(7), Motor::ChangeLevel::Low);
 
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.get_change_level(static_cast<Motor::ChangeLevelTarget>(2));
     EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.get_change_level(static_cast<Motor::ChangeLevelTarget>(7));
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
+}
+
+/**
+ * @brief Motor::maximum_change_duty_cycle(), Motor::get_maximum_change_duty_cycle() のテスト
+ */
+TEST(Motor, MaximumChangeDutyCycleTest)
+{
+    Motor motor;
+    /// 値の範囲は Motor::minimum_maximum_change_duty_cycle < x < 2.00
+    float duty_cycles[] = {Motor::minimum_maximum_change_duty_cycle, 0.01F, 0.50F, 1.00F, 2.00F,
+                           Motor::minimum_maximum_change_duty_cycle};
+
+    /// @test Fallに設定しても、Riseには反映されないことを確認
+    for (const auto &rise : duty_cycles) {
+        for (const auto &fall : duty_cycles) {
+            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, fall);
+            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
+
+            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, rise);
+            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise), rise);
+            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
+        }
+    }
+
+    /// @test Riseに設定しても、Fallには反映されないことを確認
+    for (const auto &rise : duty_cycles) {
+        for (const auto &fall : duty_cycles) {
+            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, fall);
+            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
+
+            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, rise);
+            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise), rise);
+            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
+        }
+    }
+
+    // 異常系
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+    auto anomaly_test = [](Motor::ChangeLevelTarget target, float duty_cycle) {
+        Error &error = Error::get_instance();
+        error.reset();
+        EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+        Motor motor;
+        motor.maximum_change_duty_cycle(target, duty_cycle);
+
+        EXPECT_EQ(error.get_status(), Error::Status::Error);
+    };
+
+    /// @test 設定値が範囲外(x < Motor::minimum_maximum_change_duty_cycle, 2.00 < x)の場合、エラーが発生することの確認
+    anomaly_test(Motor::ChangeLevelTarget::Rise,
+                 Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
+
+    anomaly_test(Motor::ChangeLevelTarget::Fall,
+                 Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001);
+
+    anomaly_test(Motor::ChangeLevelTarget::Rise, 2.01F);
+
+    anomaly_test(Motor::ChangeLevelTarget::Fall, 2.01F);
+
+    /// @test ChangeLevelTarget が範囲外の場合
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(2), 1.00F);
+    anomaly_test(static_cast<Motor::ChangeLevelTarget>(4), 1.00F);
 
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
@@ -321,18 +451,30 @@ TEST(Motor, PulsePeriodTest)
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
     testing::internal::CaptureStderr();
 
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
     // 境界値テスト
+    auto anomaly_test = [](float pulse_period) {
+        Error &error = Error::get_instance();
+        error.reset();
+        EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+        Motor motor;
+        motor.pulse_period(pulse_period);
+
+        EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
+    };
+
     /// @test Motor::min_pulse_period 未満
-    motor.pulse_period(Motor::min_pulse_period - (Motor::min_pulse_period * 0.1F));
-    EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::min_pulse_period);
-    motor.pulse_period(Motor::min_pulse_period - (Motor::min_pulse_period * 10.0F));
-    EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::min_pulse_period);
+    anomaly_test(Motor::min_pulse_period - (Motor::min_pulse_period * 0.1F));
+
+    anomaly_test(Motor::min_pulse_period - (Motor::min_pulse_period * 10.0F));
 
     /// @test max_pulse_period より大きい
-    motor.pulse_period(Motor::max_pulse_period + (Motor::max_pulse_period * 0.1F));
-    EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::max_pulse_period);
-    motor.pulse_period(Motor::max_pulse_period + (Motor::max_pulse_period * 10.0F));
-    EXPECT_FLOAT_EQ(motor.get_pulse_period(), Motor::max_pulse_period);
+    anomaly_test(Motor::max_pulse_period + (Motor::max_pulse_period * 0.1F));
+
+    anomaly_test(Motor::max_pulse_period + (Motor::max_pulse_period * 10.0F));
 
     testing::internal::GetCapturedStderr();
 }
@@ -345,6 +487,26 @@ TEST(Motor, ReleaseTimeTest)
     Motor motor;
     motor.release_time(1.00F);
     EXPECT_EQ(motor.get_release_time(), 1.00F);
+
+    motor.release_time(0.50F);
+    EXPECT_EQ(motor.get_release_time(), 0.50F);
+
+    // 異常系
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    /// @test マイナスの値を設定した場合
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    motor.release_time(-0.01F);
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -361,8 +523,15 @@ TEST(Motor, DecayTest)
 
     // 異常系
 
-    /// @test Decay == Mixed
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    /// @test Decay == Mixed
+    error.reset();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
     motor.decay(Motor::Decay::Mixed);
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
@@ -372,6 +541,8 @@ TEST(Motor, DecayTest)
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
     motor.decay(static_cast<Motor::Decay>(3));
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -388,11 +559,20 @@ TEST(Motor, PwmSideTest)
 
     // 異常系
 
-    /// @test PwmSide が範囲外の場合
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+
+    /// @test PwmSide が範囲外の場合
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
     motor.pwm_side(static_cast<Motor::PwmSide>(2));
     EXPECT_EQ(error.get_status(), spirit::Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
 }
 
 /**
@@ -406,6 +586,10 @@ TEST(Motor, ResetTest)
 
     motor.reset(false);
     EXPECT_EQ(motor.get_reset(), false);
+
+    // Errorが発生していないことを確認
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 }
 
 /**
@@ -419,6 +603,10 @@ TEST(Motor, SleepTest)
 
     motor.sleep(false);
     EXPECT_EQ(motor.get_sleep(), false);
+
+    // Errorが発生していないことを確認
+    Error &error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
 }
 
 }  // namespace

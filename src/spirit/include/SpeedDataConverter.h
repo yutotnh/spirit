@@ -52,20 +52,20 @@ private:
     /**
      * @brief バッファからPID制御のゲイン係数を取得する
      * @param buffer バッファ
-     * @param [out] Kp 比例ゲイン係数
-     * @param [out] Ki 積分ゲイン係数
-     * @param [out] Kd 微分ゲイン係数
+     * @param [out] kp 比例ゲイン係数
+     * @param [out] ki 積分ゲイン係数
+     * @param [out] kd 微分ゲイン係数
     */
-    void get_pid_gain_factor(const uint8_t* buffer, float& Kp, float& Ki, float& Kd);
+    void get_pid_gain_factor(const uint8_t* buffer, float& kp, float& ki, float& kd);
 
     /**
      * @brief バッファにPID制御のゲイン係数を設定する
-     * @param [in] Kp 比例ゲイン係数
-     * @param [in] Ki 積分ゲイン係数
-     * @param [in] Kd 微分ゲイン係数
+     * @param [in] kp 比例ゲイン係数
+     * @param [in] ki 積分ゲイン係数
+     * @param [in] kd 微分ゲイン係数
      * @param [out] buffer バッファ
      */
-    void set_pid_gain_factor(float Kp, float Ki, float Kd, uint8_t* buffer);
+    void set_pid_gain_factor(float kp, float ki, float kd, uint8_t* buffer);
 
     /**
      * @brief バッファから回転方向を取得する
