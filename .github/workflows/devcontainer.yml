@@ -22,7 +22,7 @@ jobs:
           node-version: 18.x
 
       - name: Install Dev Container CLI
-        run: npm install -g @devcontainers/cli
+        run: npm install -g @devcontainers/cli@0.50.0
 
       - name: Building image
         run: devcontainer build --workspace-folder .
