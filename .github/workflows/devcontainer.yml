@@ -16,31 +16,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Build and run dev container task
+        uses: devcontainers/ci@v0.3
         with:
-          node-version: 18.x
+          runCmd: |
+            # Arduino CLI
+            arduino-cli compile --fqbn esp32:esp32:esp32 --library . .github/workflows/build-arduino-cli
+            arduino-cli compile --fqbn STMicroelectronics:stm32:GenF3 --library . .github/workflows/build-arduino-cli
+            arduino-cli compile --fqbn arduino:mbed:pico --library . .github/workflows/build-arduino-cli
 
-      - name: Install Dev Container CLI
-        run: npm install -g @devcontainers/cli@0.50.0
+            # Mbed CLI 1
+            mkdir /tmp/mbed-cli-1
+            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp /tmp/mbed-cli-1
+            cd /tmp/mbed-cli-1
+            mbed new .
+            mbed deploy
+            mbed compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
 
-      - name: Building image
-        run: devcontainer build --workspace-folder .
-
-      - name: Spins up containers
-        run: devcontainer up --workspace-folder .
-
-      - name: Build with Arduino CLI
-        run: |
-          devcontainer exec --workspace-folder . arduino-cli compile --fqbn esp32:esp32:esp32 --library . .github/workflows/build-arduino-cli
-          devcontainer exec --workspace-folder . arduino-cli compile --fqbn STMicroelectronics:stm32:GenF3 --library . .github/workflows/build-arduino-cli
-          devcontainer exec --workspace-folder . arduino-cli compile --fqbn arduino:mbed:pico --library . .github/workflows/build-arduino-cli
-
-      - name: Build with Mbed CLI 1
-        run: |
-          devcontainer exec --workspace-folder . mkdir /tmp/mbed-cli-1
-          devcontainer exec --workspace-folder . cp .github/workflows/build-mbed/main.cpp /tmp/mbed-cli-1
-          devcontainer exec --workspace-folder . cd /tmp/mbed-cli-1
-          devcontainer exec --workspace-folder . mbed new .
-          devcontainer exec --workspace-folder . mbed deploy
-          devcontainer exec --workspace-folder . mbed compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
+            # Mbed CLI 2
+            mkdir /tmp/mbed-cli-2
+            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp /tmp/mbed-cli-2
+            cp /workspaces/spirit/.github/workflows/build-mbed-tools/CMakeLists.txt /tmp/mbed-cli-2
+            cd /tmp/mbed-cli-2
+            mbed-tools new .
+            mbed-tools deploy
+            mbed-tools compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
