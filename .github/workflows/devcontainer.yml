@@ -39,9 +39,9 @@ jobs:
             set -e
 
             # Arduino CLI
-            arduino-cli compile --fqbn esp32:esp32:esp32 --library . .github/workflows/build-arduino-cli
-            arduino-cli compile --fqbn STMicroelectronics:stm32:GenF3 --library . .github/workflows/build-arduino-cli
-            arduino-cli compile --fqbn arduino:mbed:pico --library . .github/workflows/build-arduino-cli
+            arduino-cli compile --fqbn esp32:esp32:esp32 --library . --verbose .github/workflows/build-arduino-cli
+            arduino-cli compile --fqbn STMicroelectronics:stm32:GenF3 --library . --verbose .github/workflows/build-arduino-cli
+            arduino-cli compile --fqbn arduino:mbed:pico --library . --verbose .github/workflows/build-arduino-cli
 
             # Mbed CLI 1
             mkdir /tmp/mbed-cli-1
