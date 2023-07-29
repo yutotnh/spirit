@@ -34,19 +34,19 @@ jobs:
 
             # Mbed CLI 1
             mkdir /tmp/mbed-cli-1
-            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp /tmp/mbed-cli-1
             cd /tmp/mbed-cli-1
-            ln -s /workspaces/spirit
             mbed new .
             mbed deploy
+            ln -s /workspaces/spirit
+            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp .
             mbed compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
 
             # Mbed CLI 2
             mkdir /tmp/mbed-cli-2
-            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp /tmp/mbed-cli-2
-            cp /workspaces/spirit/.github/workflows/build-mbed-tools/CMakeLists.txt /tmp/mbed-cli-2
             cd /tmp/mbed-cli-2
-            ln -s /workspaces/spirit
             mbed-tools new .
             mbed-tools deploy
+            ln -s /workspaces/spirit
+            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp .
+            cp /workspaces/spirit/.github/workflows/build-mbed-tools/CMakeLists.txt .
             mbed-tools compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
