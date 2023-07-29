@@ -20,4 +20,16 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
                                                   clang-format \
                                                   nodejs \
                                                   npm \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
     && npm -g install cspell
+
+USER vscode
+
+COPY ./script/* /tmp/
+
+RUN /tmp/install-arduino-cli.sh && \
+    # PATHを設定しているため現行環境でシェルを実行する
+    . /tmp/install-gcc-arm-none-eabi.sh && \
+    /tmp/install-mbed-cli-1.sh && \
+    /tmp/install-mbed-cli-2.sh
