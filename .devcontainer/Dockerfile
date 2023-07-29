@@ -18,14 +18,13 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
 # 下記のソフトウェアを使うために必要なパッケージをインストールする
 # - doxygen
 # - clang-format
-# - cpsell
+# - cspell
 RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends graphviz \
                                                   doxygen \
                                                   clang-format \
                                                   nodejs \
-                                                  npm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && npm -g install cspell
