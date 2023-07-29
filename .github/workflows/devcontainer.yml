@@ -51,6 +51,8 @@ jobs:
             ln -s /workspaces/spirit
             cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp .
             mbed compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
+            # Remove build directory to save disk space
+            rm -rf /tmp/mbed-cli-1/BUILD
 
             # Mbed CLI 2
             mkdir /tmp/mbed-cli-2
