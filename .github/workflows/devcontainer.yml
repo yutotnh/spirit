@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - ".devcontainer/**"
   pull_request:
     branches:
       - "main"
+    paths:
+      - ".devcontainer/**"
   workflow_dispatch:
 
 jobs:
@@ -20,6 +24,9 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
+            # In runCmd, processing continues except for the last command, even if the exit status is not 0.
+            set -e
+
             # Arduino CLI
             arduino-cli compile --fqbn esp32:esp32:esp32 --library . .github/workflows/build-arduino-cli
             arduino-cli compile --fqbn STMicroelectronics:stm32:GenF3 --library . .github/workflows/build-arduino-cli
