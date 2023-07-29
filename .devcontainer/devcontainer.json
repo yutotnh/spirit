@@ -1,7 +1,8 @@
 {
 	"name": "C++",
 	"build": {
-		"dockerfile": "Dockerfile"
+		"dockerfile": "Dockerfile",
+        "cacheFrom": "ghcr.io/yutotnh/spirit"
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
