@@ -16,9 +16,9 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
 # [Optional] Uncomment this section to install additional packages.
 # [Optional] Uncomment this section to install additional packages.
 # 下記のソフトウェアを使うために必要なパッケージをインストールする
-# - doxygen
-# - clang-format
-# - cspell
+# - Doxygen
+# - ClangFormat
+# - CSpell
 RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends graphviz \

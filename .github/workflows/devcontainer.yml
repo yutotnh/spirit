@@ -1,3 +1,12 @@
+# Devcontainer 用 Image を作成する
+#
+# 以下のことを行います
+# - Dev Container 用の Image を作成する
+# - 作成した Image で利用したいツールが利用できるかをテストする
+#   - Arduino CLI などのビルドツールは、ビルドできることを確認する
+#   - Doxygen などのビルド以外のためのツールは、バージョンを確認する
+# - テストに成功した場合 GitHub Container Registry に Image を Push する
+#
 name: "Dev Containers"
 
 on:
@@ -37,6 +46,15 @@ jobs:
           runCmd: |
             # In runCmd, processing continues except for the last command, even if the exit status is not 0.
             set -e
+
+            # Doxygen
+            doxygen --version
+
+            # ClangFormat
+            clang-format --version
+
+            # CSpell
+            cspell --version
 
             # Arduino CLI
             arduino-cli compile --fqbn esp32:esp32:esp32 --library . --verbose .github/workflows/build-arduino-cli
