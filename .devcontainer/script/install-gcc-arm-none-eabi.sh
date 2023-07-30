@@ -24,8 +24,8 @@ if [ -f "/usr/local/gcc-arm-none-eabi-${GCC_ARM_VERSION}/bin/arm-none-eabi-gcc" 
 fi
 
 wget "${url}" -P /tmp/
-tar -xvf "/tmp/gcc-arm-none-eabi-${GCC_ARM_VERSION}-*-linux.tar.bz2" -C /tmp/
+tar -xvf "/tmp/gcc-arm-none-eabi-${GCC_ARM_VERSION}-${machine}-linux.tar.bz2" -C /tmp/
 sudo mv "/tmp/gcc-arm-none-eabi-${GCC_ARM_VERSION}" /usr/local/
-rm "/tmp/gcc-arm-none-eabi-${GCC_ARM_VERSION}-*-linux.tar.bz2"
+rm "/tmp/gcc-arm-none-eabi-${GCC_ARM_VERSION}-${machine}-linux.tar.bz2"
 
-sudo ln -s "/usr/local/gcc-arm-none-eabi-${GCC_ARM_VERSION}/bin/*" /usr/local/bin/
+sudo ln -s "/usr/local/gcc-arm-none-eabi-${GCC_ARM_VERSION}/bin/"* /usr/local/bin/
