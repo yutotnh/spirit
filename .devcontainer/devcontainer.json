@@ -1,5 +1,5 @@
 {
-    "name": "C++",
+    "name": "spirit",
     "build": {
         "dockerfile": "Dockerfile",
         "cacheFrom": "ghcr.io/yutotnh/spirit"
@@ -19,7 +19,7 @@
                 "twxs.cmake"
             ]
         }
-    },
+    }
 
     // Features to add to the dev container. More info: https://containers.dev/features.
     // "features": {},
@@ -28,7 +28,7 @@
     // "forwardPorts": [],
 
     // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
+    // "postCreateCommand": ""
 
     // Configure tool-specific properties.
     // "customizations": {},
