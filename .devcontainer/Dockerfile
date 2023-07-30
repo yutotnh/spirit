@@ -14,7 +14,6 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
 # RUN su vscode -c "${VCPKG_ROOT}/vcpkg install <your-port-name-here>"
 
 # [Optional] Uncomment this section to install additional packages.
-# [Optional] Uncomment this section to install additional packages.
 # 下記のソフトウェアを使うために必要なパッケージをインストールする
 # - Doxygen
 # - ClangFormat
