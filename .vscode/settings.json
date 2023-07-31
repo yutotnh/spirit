@@ -8,5 +8,8 @@
     "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.doxygen.generatedStyle": "/**",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "files.encoding": "utf8"
+    "files.encoding": "utf8",
+    "files.associations": {
+        "*.tcc": "cpp"
+    }
 }

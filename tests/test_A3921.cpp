@@ -132,6 +132,12 @@ TEST(A3921, ResetTest)
  */
 TEST(A3921, SlowDecayLowSideTest)
 {
+    /**
+     * @brief テストの実体
+     * @param duty_cycle 設定するデューティー比
+     * @param expected_duty_cycle A3921から期待するデューティー比
+     * @param expected_status テスト終了後に期待する sprit::Error::Status
+     */
     auto test = [](float duty_cycle, float expected_duty_cycle, Error::Status expected_status) {
         Error& error = Error::get_instance();
         error.reset();
@@ -192,13 +198,14 @@ TEST(A3921, SlowDecayLowSideTest)
         }
     };
 
+    /// @test デューティー比が範囲内(0.00 < x < 1.00)の時に期待通りの出力になることを確認
     test(0.00F, 0.00F, Error::Status::Normal);
     test(0.01F, 0.01F, Error::Status::Normal);
     test(0.50F, 0.50F, Error::Status::Normal);
     test(0.99F, 0.99F, Error::Status::Normal);
     test(1.00F, 1.00F, Error::Status::Normal);
 
-    // デューティー比が範囲外(x < 0.00, 1.00 < x)のときに境界値になることを確認
+    /// @test デューティー比が範囲外(x < 0.00, 1.00 < x)のときに境界値になることを確認
     test(-0.01F, 0.00F, Error::Status::Warning);
     test(-1.00F, 0.00F, Error::Status::Warning);
     test(1.01F, 1.00F, Error::Status::Warning);
@@ -272,13 +279,14 @@ TEST(A3921, SlowDecayHighSideTest)
         }
     };
 
+    /// @test デューティー比が範囲内(0.00 < x < 1.00)の時に期待通りの出力になることを確認
     test(0.00F, 0.00F, Error::Status::Normal);
     test(0.01F, 0.01F, Error::Status::Normal);
     test(0.50F, 0.50F, Error::Status::Normal);
     test(0.99F, 0.99F, Error::Status::Normal);
     test(1.00F, 1.00F, Error::Status::Normal);
 
-    // デューティー比が範囲外(x < 0.00, 1.00 < x)のときに境界値になることを確認
+    /// @todo デューティー比が範囲外(x < 0.00, 1.00 < x)のときに境界値になることを確認
     test(-0.01F, 0.00F, Error::Status::Warning);
     test(-1.00F, 0.00F, Error::Status::Warning);
     test(1.01F, 1.00F, Error::Status::Warning);
@@ -291,14 +299,13 @@ TEST(A3921, SlowDecayHighSideTest)
  */
 TEST(A3921, MixedDecayTest)
 {
+    // 共通の設定
     StubDigitalOut sr;
     StubPwmOut     pwmh;
     StubPwmOut     pwml;
     StubPwmOut     phase;
     StubDigitalOut reset;
     A3921          a3921(sr, pwmh, pwml, phase, reset);
-
-    // 共通の設定
 
     // Error時に標準エラー出力に文字列が出力される
     // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
@@ -388,6 +395,7 @@ TEST(A3921, FastDecayTest)
         }
     };
 
+    /// @test デューティー比が範囲内(0.00 < x < 1.00)の時に期待通りの出力になることを確認
     test(0.00F, 0.00F, Error::Status::Normal);
     test(0.01F, 0.01F, Error::Status::Normal);
     test(0.50F, 0.50F, Error::Status::Normal);
