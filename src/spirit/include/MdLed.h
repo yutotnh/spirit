@@ -15,7 +15,7 @@ class MdLed {
 public:
     /**
      * @enum BlinkMode
-     * @brief LEDに設定する値のソースを何にするかの値
+     * @brief LEDの点滅種類を何にするかの値
      * @details 優先度は Error > Alternate = Concurrent l Normal
      */
     enum class BlinkMode {
@@ -105,7 +105,7 @@ private:
 
     /**
      * @brief LEDの点滅状態を返す
-     * @return LEDの点滅状態
+     * @return LEDの点滅状態(範囲: 0-3)
      */
     uint32_t read() const;
 
