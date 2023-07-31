@@ -1,7 +1,6 @@
 #include "spirit/include/bit.h"
 
 #include <climits>
-#include <cstdint>
 
 #include "spirit/include/Error.h"
 
@@ -10,10 +9,12 @@ namespace spirit {
 bool get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const std::size_t start,
                      const std::size_t value_size, uint32_t& value)
 {
-    if (UINT32_WIDTH < value_size) {
+    std::size_t max_value_size = sizeof(value) * CHAR_BIT;
+
+    if (max_value_size < value_size) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
                                     "value_size(%zu) is greater than the bit width (%zu) of the return type (uint32_t)",
-                                    value_size, UINT32_WIDTH);
+                                    value_size, max_value_size);
         return false;
     }
 
@@ -54,10 +55,12 @@ bool get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const
 bool set_range_value(const uint32_t value, const std::size_t start, const std::size_t value_size,
                      const std::size_t buffer_size, uint8_t* buffer)
 {
-    if (UINT32_WIDTH < value_size) {
+    std::size_t max_value_size = sizeof(value) * CHAR_BIT;
+
+    if (max_value_size < value_size) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
                                     "value_size(%zu) is greater than the bit width (%zu) of the return type (uint32_t)",
-                                    value_size, UINT32_WIDTH);
+                                    value_size, max_value_size);
         return false;
     }
 
