@@ -243,8 +243,8 @@ TEST(AdjustDutyCycle, ManualChangeLevel)
         float change_level_fall = 0.10F;
         float change_level_rise = 0.15F;
 
-        motor.change_level(Motor::ChangeLevelTarget::Fall, change_level_fall);
-        motor.change_level(Motor::ChangeLevelTarget::Rise, change_level_rise);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, change_level_fall);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, change_level_rise);
 
         Motor::State current_state;
         float        current_duty_cycle;
@@ -288,8 +288,8 @@ TEST(AdjustDutyCycle, Normal)
         motor.state(target_state);
         motor.duty_cycle(target_duty_cycle);
 
-        motor.change_level(Motor::ChangeLevelTarget::Rise, max_rise_delta);
-        motor.change_level(Motor::ChangeLevelTarget::Fall, max_fall_delta);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, max_rise_delta);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, max_fall_delta);
 
         Motor::State current_state_for_loop      = current_state;
         float        current_duty_cycle_for_loop = current_duty_cycle;

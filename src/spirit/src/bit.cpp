@@ -6,32 +6,39 @@
 
 namespace spirit {
 
-uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const std::size_t start,
-                         const std::size_t value_size)
+bool get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const std::size_t start,
+                     const std::size_t value_size, uint32_t& value)
 {
+    std::size_t max_value_size = sizeof(value) * CHAR_BIT;
+
+    if (max_value_size < value_size) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "value_size(%zu) is greater than the bit width (%zu) of the return type (uint32_t)",
+                                    value_size, max_value_size);
+        return false;
+    }
+
     if (value_size == 0) {
-        return 0;
+        value = 0;
+        return true;
     }
 
     // value_size > 1 なので、 buffer_size == 0 になると確実にバッファオーバーランするため、警告を出す
     if (buffer_size == 0) {
-        constexpr char message_format[] = "buffer_size is 0";
-        char           message[sizeof(message_format)];
-        snprintf(message, sizeof(message), message_format);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
-        return UINT32_MAX;
+        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                    "buffer_size is 0");
+        return false;
     }
 
     auto end = start + value_size - 1;
     if ((buffer_size * CHAR_BIT) - 1 < end) {
-        constexpr char message_format[] = "Range (%zu-%zu) is out of range (0-%zu)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 3];
-        snprintf(message, sizeof(message), message_format, start, end, (buffer_size * CHAR_BIT) - 1);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
-        return UINT32_MAX;
+        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                    "Range (%zu-%zu) is out of range (0-%zu)", start, end,
+                                    (buffer_size * CHAR_BIT) - 1);
+        return false;
     }
 
-    uint32_t value = 0;
+    value = 0;
 
     for (std::size_t i = start; i <= end; ++i) {
         const auto byte  = i / 8;  // 最上位バイトから数える(0〜)
@@ -41,31 +48,38 @@ uint32_t get_range_value(const uint8_t* buffer, const std::size_t buffer_size, c
         value <<= 1;
         value |= ((buffer[byte] >> shift) & 0x01);
     }
-    return value;
+
+    return true;
 }
 
 bool set_range_value(const uint32_t value, const std::size_t start, const std::size_t value_size,
                      const std::size_t buffer_size, uint8_t* buffer)
 {
+    std::size_t max_value_size = sizeof(value) * CHAR_BIT;
+
+    if (max_value_size < value_size) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "value_size(%zu) is greater than the bit width (%zu) of the return type (uint32_t)",
+                                    value_size, max_value_size);
+        return false;
+    }
+
     if (value_size == 0) {
         return true;
     }
 
     // value_size > 1 なので、 buffer_size == 0 になると確実にバッファオーバーランするため、警告を出す
     if (buffer_size == 0) {
-        constexpr char message_format[] = "buffer_size is 0";
-        char           message[sizeof(message_format)];
-        snprintf(message, sizeof(message), message_format);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                    "buffer_size is 0");
         return false;
     }
 
     auto end = start + value_size - 1;
     if ((buffer_size * CHAR_BIT) - 1 < end) {
-        constexpr char message_format[] = "Range (%zu-%zu) is out of range (0-%zu)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 3];
-        snprintf(message, sizeof(message), message_format, start, end, (buffer_size * CHAR_BIT) - 1);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                    "Range (%zu-%zu) is out of range (0-%zu)", start, end,
+                                    (buffer_size * CHAR_BIT) - 1);
         return false;
     }
 

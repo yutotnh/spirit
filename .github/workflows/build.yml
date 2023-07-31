@@ -111,4 +111,4 @@ jobs:
 
       - name: Compile sketch
         run: |
-          arduino-cli compile --fqbn ${{ matrix.fqbn }} --library . .github/workflows/build-arduino-cli
+          arduino-cli compile --fqbn ${{ matrix.fqbn }} --library . --verbose .github/workflows/build-arduino-cli

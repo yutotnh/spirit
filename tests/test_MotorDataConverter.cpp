@@ -69,12 +69,12 @@ TEST(MotorDataConverter, PwmDataDecodeTest)
  */
 TEST(MotorDataConverter, SpeedDataTest)
 {
-    auto test = [](float speed, float Kp, float Ki, Motor::State state) {
+    auto test = [](float speed, float kp, float ki, Motor::State state) {
         MotorDataConverter motor_data_converter;
         Motor              motor;
         motor.control_system(Motor::ControlSystem::Speed);
         motor.speed(speed);
-        motor.pid_gain_factor(Kp, Ki, 0.0F);
+        motor.pid_gain_factor(kp, ki, 0.0F);
         motor.state(state);
 
         constexpr std::size_t max_buffer_size = 56;
@@ -83,25 +83,25 @@ TEST(MotorDataConverter, SpeedDataTest)
 
         motor_data_converter.encode(motor, max_buffer_size, buffer, buffer_size);
 
-        // 2(ヘッダ) + 16(スピード(rps)) + 16(Kp) + 16(Ki) + 2(回転方向) = 52
+        // 2(ヘッダ) + 16(スピード(rps)) + 16(kp) + 16(ki) + 2(回転方向) = 52
         constexpr std::size_t expected_buffer_size = 52;
         EXPECT_EQ(expected_buffer_size, buffer_size);
 
         Motor decoded_motor;
         motor_data_converter.decode(buffer, max_buffer_size, decoded_motor);
 
-        // スピード, Kp, Kiは送受信中にbfloat16に変換している
+        // スピード, kp, kiは送受信中にbfloat16に変換している
         // bfloat16の仮数部は7bitなので、その分の誤差を考慮する必要がある
         auto allowable_error_margin = [](const float bfloat16) { return bfloat16 / 127.0F; };
 
         EXPECT_NEAR(speed, decoded_motor.get_speed(), allowable_error_margin(speed));
 
-        float return_Kp = 0.0F;
-        float return_Ki = 0.0F;
-        float return_Kd = 0.0F;
-        decoded_motor.get_pid_gain_factor(return_Kp, return_Ki, return_Kd);
-        EXPECT_NEAR(Kp, return_Kp, allowable_error_margin(Kp));
-        EXPECT_NEAR(Ki, return_Ki, allowable_error_margin(Ki));
+        float return_kp = 0.0F;
+        float return_ki = 0.0F;
+        float return_kd = 0.0F;
+        decoded_motor.get_pid_gain_factor(return_kp, return_ki, return_kd);
+        EXPECT_NEAR(kp, return_kp, allowable_error_margin(kp));
+        EXPECT_NEAR(ki, return_ki, allowable_error_margin(ki));
 
         EXPECT_EQ(state, decoded_motor.get_state());
     };

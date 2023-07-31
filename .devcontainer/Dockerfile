@@ -14,10 +14,25 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
 # RUN su vscode -c "${VCPKG_ROOT}/vcpkg install <your-port-name-here>"
 
 # [Optional] Uncomment this section to install additional packages.
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+# 下記のソフトウェアを使うために必要なパッケージをインストールする
+# - Doxygen
+# - ClangFormat
+# - CSpell
+RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
+    && apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends graphviz \
                                                   doxygen \
                                                   clang-format \
                                                   nodejs \
-                                                  npm \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
     && npm -g install cspell
+
+USER vscode
+
+COPY ./script/* /tmp/
+
+RUN /tmp/install-arduino-cli.sh && \
+    /tmp/install-gcc-arm-none-eabi.sh && \
+    /tmp/install-mbed-cli-1.sh && \
+    /tmp/install-mbed-cli-2.sh
