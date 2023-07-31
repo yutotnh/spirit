@@ -1,6 +1,7 @@
 #include "spirit/include/bit.h"
 
 #include <climits>
+#include <cstdint>
 
 #include "spirit/include/Error.h"
 
