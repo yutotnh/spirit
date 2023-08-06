@@ -64,7 +64,7 @@ jobs:
 
       - name: build-mbed-tools
         run: |
-          cd ..
+          cd ${GITHUB_WORKSPACE}
           mbed-tools new .
           cp spirit/.github/workflows/build-mbed/main.cpp .
           cp spirit/.github/workflows/build-mbed-tools/CMakeLists.txt .
