@@ -41,3 +41,5 @@ Issue の作成や議論後に Pull request を出しても良いですが、い
 - private なメンバ変数は先頭に `_` をつける
 - public な関数には Doxygen 形式のコメントを付ける
 - ClangFormat を使って自動整形する
+- cspell を使ってスペルチェックする
+  - 辞書に登録されていない単語は、辞書に登録する
