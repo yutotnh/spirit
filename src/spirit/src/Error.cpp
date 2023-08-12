@@ -1,6 +1,8 @@
 #include "spirit/include/Error.h"
 
-#include "cstdarg"
+#include <cstdarg>
+
+#include "spirit/include/version.h"
 
 #ifdef __MBED__
 #include "mbed.h"
@@ -94,16 +96,18 @@ void Error::print(Type type, uint32_t code, const char* filename, const char* fu
 #ifdef __MBED__
     printf(
 #else
-    std::fprintf(stderr,
+    std::fprintf(
+        stderr,
 #endif  // __MBED__
         "%s:\n"
         "\tType: %s\n"
         "\tError code: %d\n"
+        "\tVersion: %s\n"
         "\tFile: %s\n"
         "\tFunction: %s\n"
         "\tLine: %d\n"
         "\tMessage: ",
-        status_to_string(_status), type_to_string(type), code, filename, funcname, line_number);
+        status_to_string(_status), type_to_string(type), code, SPIRIT_VERSION_STRING, filename, funcname, line_number);
 
 #ifdef __MBED__
     vprintf(message, arg);
