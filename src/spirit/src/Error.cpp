@@ -107,7 +107,7 @@ void Error::print(Type type, uint32_t code, const char* filename, const char* fu
         "\tFunction: %s\n"
         "\tLine: %d\n"
         "\tMessage: ",
-        status_to_string(_status), type_to_string(type), code, SPIRIT_VERSION_STRING, filename, funcname, line_number);
+        status_to_string(_status), type_to_string(type), code, version::string, filename, funcname, line_number);
 
 #ifdef __MBED__
     vprintf(message, arg);

@@ -1,10 +1,18 @@
 #ifndef SPIRIT_VERSION_H
 #define SPIRIT_VERSION_H
 
-#define SPIRIT_VERSION_MAJOR 0
-#define SPIRIT_VERSION_MINOR 1
-#define SPIRIT_VERSION_PATCH 0
+namespace spirit {
 
-#define SPIRIT_VERSION_STRING "0.1.0"
+namespace version {
+
+constexpr uint32_t major = 0;
+constexpr uint32_t minor = 1;
+constexpr uint32_t patch = 0;
+
+constexpr char string[] = "0.1.0";
+
+}  // namespace version
+
+}  // namespace spirit
 
 #endif  //  SPIRIT_VERSION_H
