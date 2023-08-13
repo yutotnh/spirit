@@ -24,7 +24,7 @@ void A3921::sleep(const bool enabled)
     }
 }
 
-void A3921::reset(std::function<void(void)>& sleep)
+void A3921::reset(const std::function<void(void)>& sleep)
 {
     _reset.write(0);
     sleep();
