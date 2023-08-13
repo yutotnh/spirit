@@ -1,0 +1,55 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20
+    },
+    "configurePresets": [
+        {
+            "name": "Debug",
+            "displayName": "Debug",
+            "description": "Configure project for debugging",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        },
+        {
+            "name": "Release",
+            "displayName": "Release",
+            "description": "Configure project for release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Debug",
+            "displayName": "Debug",
+            "description": "Build project for debugging",
+            "configurePreset": "Debug"
+        },
+        {
+            "name": "Release",
+            "displayName": "Release",
+            "description": "Build project for release",
+            "configurePreset": "Release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "Debug",
+            "displayName": "Debug",
+            "description": "Test project in debug mode",
+            "configurePreset": "Debug"
+        },
+        {
+            "name": "Release",
+            "displayName": "Release",
+            "description": "Test project in release mode",
+            "configurePreset": "Release"
+        }
+    ]
+}
