@@ -27,3 +27,10 @@ jobs:
         uses: jidicula/clang-format-action@v4.11.0
         with:
           clang-format-version: "14"
+
+  editorconfig-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: editorconfig-checker/action-editorconfig-checker@main
+      - run: editorconfig-checker
