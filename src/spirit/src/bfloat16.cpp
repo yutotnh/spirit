@@ -25,8 +25,10 @@ float bfloat16_to_float32(const uint16_t bfloat16)
             return std::numeric_limits<float>::quiet_NaN() * sign;
         }
     } else {
-        constexpr uint32_t exponent_bias = 127 + 7;  // 128: 指数部の0x7Fのオフセット, 7: 仮数部のビット数
-        return std::ldexp(static_cast<float>(mantissa) + 128.0F, exponent - exponent_bias) * sign;
+        constexpr uint32_t exponent_bias = 127 + 7;  // 127: 指数部の0x7Fのオフセット, 7: 仮数部のビット数
+        const uint32_t actual_mantissa = mantissa + 128;  // ケチ表現で省略された最上位ビットを復元
+
+        return std::ldexp(actual_mantissa, exponent - exponent_bias) * sign;
     }
 }
 
