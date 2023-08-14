@@ -40,12 +40,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          path: spirit
 
       - name: build-mbed-cli
         run: |
           mbed new .
           mbed deploy
-          cp .github/workflows/build-mbed/main.cpp .
+          cp spirit/.github/workflows/build-mbed/main.cpp .
           mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
 
   build-cli-v2:
@@ -61,10 +63,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          path: spirit
 
       - name: build-mbed-tools
         run: |
-          cd ..
           mbed-tools new .
           cp spirit/.github/workflows/build-mbed/main.cpp .
           cp spirit/.github/workflows/build-mbed-tools/CMakeLists.txt .

@@ -8,7 +8,7 @@
 namespace spirit {
 
 bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,
-                              std::size_t& buffer_size)
+                              std::size_t& buffer_size) const
 {
     // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
     buffer_size = 20;
@@ -27,7 +27,7 @@ bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_s
     return true;
 }
 
-bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor)
+bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor) const
 {
     // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
     constexpr std::size_t required_size = 20;
@@ -46,14 +46,14 @@ bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Mo
     return true;
 }
 
-float PwmDataConverter::get_duty_cycle(const uint8_t* buffer)
+float PwmDataConverter::get_duty_cycle(const uint8_t* buffer) const
 {
     uint32_t duty_cycle_16bit = 0;
     get_range_value(buffer, 8, 2, 16, duty_cycle_16bit);
     return duty_cycle_16bit / 65535.0F;
 }
 
-void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer)
+void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer) const
 {
     /// @todo デューティー比がマイナスを取ることはないため、その場合はエラーにする
 
@@ -61,7 +61,7 @@ void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer)
     set_range_value(duty_cycle_16bit, 2, 16, 8, buffer);
 }
 
-Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
+Motor::State PwmDataConverter::get_state(const uint8_t* buffer) const
 {
     uint32_t   state_uint32_t = 0;
     const bool is_normal      = get_range_value(buffer, 8, 18, 2, state_uint32_t);
@@ -90,7 +90,7 @@ Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
     }
 }
 
-void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer)
+void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer) const
 {
     switch (state) {
         case Motor::State::Coast:
