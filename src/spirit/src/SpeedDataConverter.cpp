@@ -7,7 +7,7 @@
 namespace spirit {
 
 bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,
-                                std::size_t& buffer_size)
+                                std::size_t& buffer_size) const
 {
     // 2(ヘッダ) + 16(スピード(rps)) + 16(kp) + 16(ki) + 2(回転方向) = 52
     buffer_size = 52;
@@ -31,7 +31,7 @@ bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer
     return true;
 }
 
-bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor)
+bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor) const
 {
     if (buffer_size < 7) {
         return false;
@@ -54,21 +54,21 @@ bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, 
     return true;
 }
 
-float SpeedDataConverter::get_speed(const uint8_t* buffer)
+float SpeedDataConverter::get_speed(const uint8_t* buffer) const
 {
     uint32_t speed_16bit = 0;
     get_range_value(buffer, 8, 2, 16, speed_16bit);
     return bfloat16_to_float32(speed_16bit);
 }
 
-void SpeedDataConverter::set_speed(float speed, uint8_t* buffer)
+void SpeedDataConverter::set_speed(float speed, uint8_t* buffer) const
 {
     /// @todo speedの範囲チェック
     uint16_t speed_16bit = float32_to_bfloat16(speed);
     set_range_value(speed_16bit, 2, 16, 7, buffer);
 }
 
-void SpeedDataConverter::get_pid_gain_factor(const uint8_t* buffer, float& kp, float& ki, float& kd)
+void SpeedDataConverter::get_pid_gain_factor(const uint8_t* buffer, float& kp, float& ki, float& kd) const
 {
     // kdは送受信しないので処理しない
     (void)kd;
@@ -82,7 +82,7 @@ void SpeedDataConverter::get_pid_gain_factor(const uint8_t* buffer, float& kp, f
     ki = bfloat16_to_float32(ki_16bit);
 }
 
-void SpeedDataConverter::set_pid_gain_factor(float kp, float ki, float kd, uint8_t* buffer)
+void SpeedDataConverter::set_pid_gain_factor(float kp, float ki, float kd, uint8_t* buffer) const
 {
     // kdは送受信しないので処理しない
     (void)kd;
@@ -96,7 +96,7 @@ void SpeedDataConverter::set_pid_gain_factor(float kp, float ki, float kd, uint8
     set_range_value(ki_16bit, 34, 16, 7, buffer);
 }
 
-Motor::State SpeedDataConverter::get_state(const uint8_t* buffer)
+Motor::State SpeedDataConverter::get_state(const uint8_t* buffer) const
 {
     constexpr uint32_t start  = 50;
     constexpr uint32_t length = 2;
@@ -123,7 +123,7 @@ Motor::State SpeedDataConverter::get_state(const uint8_t* buffer)
     }
 }
 
-void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer)
+void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer) const
 {
     constexpr uint32_t start       = 50;
     constexpr uint32_t length      = 2;

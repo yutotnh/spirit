@@ -71,7 +71,7 @@ public:
      * @endcode
      *
      */
-    void reset(std::function<void(void)>& sleep);
+    void reset(const std::function<void(void)>& sleep);
 
     /**
      * @brief デューティー比を設定する
