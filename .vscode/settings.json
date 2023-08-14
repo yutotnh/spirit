@@ -3,6 +3,7 @@
         "build/": true
     },
     "cmake.configureOnOpen": true,
+    "cmake.useCMakePresets": "always",
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.doxygen.generatedStyle": "/**",

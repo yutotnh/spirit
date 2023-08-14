@@ -42,9 +42,8 @@ target_sources(spirit
     ./src/spirit/src/SpeedDataConverter.cpp
 )
 
-enable_testing()
-
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    include(CTest)
     add_subdirectory(tests)
 endif()
 
