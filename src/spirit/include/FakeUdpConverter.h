@@ -18,7 +18,7 @@ public:
      * @retval true エンコード成功
      * @retval false エンコード失敗
      */
-    bool encode(const uint8_t* payload, std::size_t payload_size, const std::size_t max_buffer_size, uint8_t* buffer,
+    bool encode(const uint8_t* payload, std::size_t payload_size, std::size_t max_buffer_size, uint8_t* buffer,
                 std::size_t& buffer_size);
 
     /**
