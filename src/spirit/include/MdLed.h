@@ -16,7 +16,7 @@ public:
     /**
      * @enum BlinkMode
      * @brief LEDの点滅種類を何にするかの値
-     * @details 優先度は Error > Alternate = Concurrent l Normal
+     * @details 優先度は Error > Alternate = Concurrent > Normal
      */
     enum class BlinkMode {
         /// Motor::Stateの値をそのままLEDに設定する
