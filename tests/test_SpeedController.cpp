@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "Error.h"
 #include "SpeedController.h"
 #include "tests/stubs.h"
 
