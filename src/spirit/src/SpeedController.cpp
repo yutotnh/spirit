@@ -2,6 +2,8 @@
 
 #include <float.h>
 
+#include "spirit/include/Error.h"
+
 namespace spirit {
 
 SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase)

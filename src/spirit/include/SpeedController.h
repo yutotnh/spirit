@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 #include "InterfaceInterruptIn.h"
-#include "spirit/include/Error.h"
 
 namespace spirit {
 
