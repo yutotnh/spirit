@@ -17,14 +17,14 @@ InterruptIn::~InterruptIn()
 {
 }
 
-void InterruptIn::rise(Callback<void()> func_rise)
+void InterruptIn::rise(Callback<void()> func)
 {
-    _interrupt_in.rise(func_rise);
+    _interrupt_in.rise(func);
 }
 
-void InterruptIn::fall(Callback<void()> func_fall)
+void InterruptIn::fall(Callback<void()> func)
 {
-    _interrupt_in.fall(func_fall);
+    _interrupt_in.fall(func);
 }
 
 uint32_t InterruptIn::read()

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "InterfaceInterruptIn.h"
+#include "spirit/include/Error.h"
 
 namespace spirit {
 
@@ -42,7 +43,8 @@ public:
      * @param kp 比例ゲイン
      * @param ki 積分ゲイン
      * @param kd 微分ゲイン
-     * @return true:ゲイン変更, false:ゲイン変更なし
+     * @retval false ゲイン変更なし
+     * @retval true  ゲイン変更あり
      */
     bool pid_gain(float kp, float ki, float kd);
 
@@ -64,18 +66,21 @@ private:
     float _ki{0.0f};
     float _kd{0.0f};
 
-    int   _ppr{200};
-    float _deg_unit{360.0f / _ppr / 4.0f};
+    static constexpr int   _ppr{200};
+    static constexpr float _deg_unit{360.0f / _ppr / 4.0f};
 
-    int64_t _angle_counter{0};
+    int _angle_counter;
 
-    const static int _angle_buff_max{10};
-    int              _angle_buff_index{0};
-    int              _angle_buff[_angle_buff_max];
+    bool first_loop;
 
-    float _sum_error{0.0f};
+    /// @note モータの最低回転速度によっては変更の余地あり(ppr=200で0.15[rps]以下が目安??)
+    static constexpr int _angle_buff_max{10};
+    int                  _angle_buff_index;
+    int                  _angle_buff[_angle_buff_max];
+
+    float _sum_error;
     float _delta_error;
-    float _last_error{0.0f};
+    float _last_error;
 
     float _high_limit{0.00f};
     float _low_limit{0.00f};

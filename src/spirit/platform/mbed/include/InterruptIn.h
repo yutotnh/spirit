@@ -27,13 +27,13 @@ public:
      * @brief 立ち上がり時に呼び出される関数を設定する
      * @param func_rise 立ち上がり時に呼び出される関数
      */
-    void rise(Callback<void()> func_rise) override;
+    void rise(Callback<void()> func) override;
 
     /**
      * @brief 立ち下がり時に呼び出される関数を設定する
-     * @param func_fall 立ち下がり時に呼び出される関数
+     * @param func 立ち下がり時に呼び出される関数
      */
-    void fall(Callback<void()> func_fall) override;
+    void fall(Callback<void()> func) override;
 
     /**
      * @brief 入力ピンの状態を返す

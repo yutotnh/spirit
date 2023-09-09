@@ -26,9 +26,9 @@ public:
 #if defined(__MBED__) && !defined(ARDUINO)
     /**
      * @brief 立ち上がり時に呼び出される関数を設定する
-     * @param func_rise 立ち上がり時に呼び出される関数
+     * @param func 立ち上がり時に呼び出される関数
      */
-    virtual void rise(Callback<void()> func_rise) = 0;
+    virtual void rise(Callback<void()> func) = 0;
 #elif defined(ARDUINO)
     // TODO: Arduinoの場合の実装を追加する
 #else
@@ -36,23 +36,23 @@ public:
      * @brief 立ち上がり時に呼び出される関数を設定する
      * @param func_rise 立ち上がり時に呼び出される関数
      */
-    virtual void rise(std::function<void(void)>& func_rise) = 0;
+    virtual void rise(std::function<void(void)>& func) = 0;
 #endif
 
 #if defined(__MBED__) && !defined(ARDUINO)
     /**
      * @brief 立ち下がり時に呼び出される関数を設定する
-     * @param func_fall 立ち下がり時に呼び出される関数
+     * @param func 立ち下がり時に呼び出される関数
      */
-    virtual void fall(Callback<void()> func_fall) = 0;
+    virtual void fall(Callback<void()> func) = 0;
 #elif defined(ARDUINO)
     // TODO: Arduinoの場合の実装を追加する
 #else
     /**
      * @brief 立ち下がり時に呼び出される関数を設定する
-     * @param func_fall 立ち下がり時に呼び出される関数
+     * @param func 立ち下がり時に呼び出される関数
      */
-    virtual void fall(std::function<void(void)>& func_fall) = 0;
+    virtual void fall(std::function<void(void)>& func) = 0;
 #endif
 
     /**

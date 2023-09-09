@@ -84,13 +84,13 @@ public:
     }
 
 private:
-    // 立ち上がり時に呼び出す関数
+    /// 立ち上がり時に呼び出す関数
     std::function<void(void)> _func_rise;
 
-    // 立ち下がり時に呼び出す関数
+    /// 立ち下がり時に呼び出す関数
     std::function<void(void)> _func_fall;
 
-    // 入力ピンの状態
+    /// 入力ピンの状態
     uint32_t _value{0};
 };
 

@@ -1,5 +1,7 @@
 #include "spirit/include/SpeedController.h"
 
+#include <float.h>
+
 namespace spirit {
 
 SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase)
@@ -20,10 +22,27 @@ SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterru
     _b_phase.rise(func_b);
     _b_phase.fall(func_b);
 #endif
+    reset();
 }
 
 float SpeedController::calculation(float target_rps, float dt)
 {
+    if (target_rps < 0.0f) {
+        Error::get_instance().error(
+            Error::Type::InvalidValue, 0,
+            "The relationship between the upper limit value and the lower limit value is strange", __FILE__, __func__,
+            __LINE__);
+        return 0.0f;
+    }
+
+    if (dt < FLT_MIN) {
+        Error::get_instance().error(
+            Error::Type::InvalidValue, 0,
+            "The relationship between the upper limit value and the lower limit value is strange", __FILE__, __func__,
+            __LINE__);
+        return 0.0f;
+    }
+
     float error = target_rps - rps(dt);
     _sum_error += error;
     _delta_error = error - _last_error;
@@ -39,34 +58,36 @@ float SpeedController::calculation(float target_rps, float dt)
 
 float SpeedController::rps(float dt)
 {
-    float angle_diff;
+    if (dt < FLT_MIN) {
+        Error::get_instance().error(
+            Error::Type::InvalidValue, 0,
+            "The relationship between the upper limit value and the lower limit value is strange", __FILE__, __func__,
+            __LINE__);
+        return 0.0f;
+    }
 
+    float rps;
     _angle_buff_index++;
 
     if (_angle_buff_index == _angle_buff_max) {
-        _angle_buff_index              = 0;
-        _angle_buff[_angle_buff_index] = _angle_counter;
-        angle_diff                     = _angle_buff[_angle_buff_index] - _angle_buff[_angle_buff_max - 1];
-    } else {
-        _angle_buff[_angle_buff_index] = _angle_counter;
-        angle_diff                     = _angle_buff[_angle_buff_index] - _angle_buff[_angle_buff_index - 1];
+        _angle_buff_index = 0;
+        first_loop        = false;
+    } else if (first_loop) {
+        rps = angle() / (dt * _angle_buff_index);
+        if (rps < 0.0f) {
+            rps *= -1;
+        }
+        return rps;
     }
 
-    /* or
-    angle_buff[angle_buff_index] = angle_counter;
+    float angle_diff               = _angle_counter - _angle_buff[_angle_buff_index];
+    _angle_buff[_angle_buff_index] = _angle_counter;
 
-    if(!angle_buff_index){
-        angle_diff = angle_buff[angle_buff_index] - angle_buff[angle_buff_max   - 1];
-    } else {
-        angle_diff = angle_buff[angle_buff_index] - angle_buff[angle_buff_index - 1];
+    rps = (angle_diff * _deg_unit) / (dt * _angle_buff_max);
+    if (rps < 0.0f) {
+        rps *= -1;
     }
-
-    if(angle_buff_index++ == angle_buff_max){
-        angle_buff_index = 0;
-    }
-    */
-
-    return angle_diff * _deg_unit / 360.0f / dt;
+    return rps;
 }
 
 void SpeedController::limit(float high_limit, float low_limit)
@@ -75,19 +96,17 @@ void SpeedController::limit(float high_limit, float low_limit)
         _high_limit = high_limit;
         _low_limit  = low_limit;
     } else {
-        _high_limit = low_limit;
-        _low_limit  = high_limit;
+        Error::get_instance().error(
+            Error::Type::InvalidValue, 0,
+            "The relationship between the upper limit value and the lower limit value is strange", __FILE__, __func__,
+            __LINE__);
     }
 }
 
 bool SpeedController::pid_gain(float kp, float ki, float kd)
 {
-    if (_kp == kp) {
-        if (_ki == ki) {
-            if (_kd == kd) {
-                return false;
-            }
-        }
+    if ((_kp == kp) && (_ki == ki) && (_kd == kd)) {
+        return false;
     }
 
     _kp = kp;
@@ -100,10 +119,13 @@ bool SpeedController::pid_gain(float kp, float ki, float kd)
 void SpeedController::reset()
 {
     _angle_counter    = 0;
-    _angle_buff[0]    = 0;
     _angle_buff_index = 0;
     _sum_error        = 0.0f;
     _last_error       = 0.0f;
+    for (int i = 0; i < _angle_buff_max; i++) {
+        _angle_buff[i] = 0;
+    }
+    first_loop = true;
 }
 
 float SpeedController::limiter(float val)
