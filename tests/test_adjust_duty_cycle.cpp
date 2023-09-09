@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "Error.h"
 #include "Motor.h"
 #include "adjust_duty_cycle.h"
 
@@ -243,8 +244,8 @@ TEST(AdjustDutyCycle, ManualChangeLevel)
         float change_level_fall = 0.10F;
         float change_level_rise = 0.15F;
 
-        motor.change_level(Motor::ChangeLevelTarget::Fall, change_level_fall);
-        motor.change_level(Motor::ChangeLevelTarget::Rise, change_level_rise);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, change_level_fall);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, change_level_rise);
 
         Motor::State current_state;
         float        current_duty_cycle;
@@ -288,8 +289,8 @@ TEST(AdjustDutyCycle, Normal)
         motor.state(target_state);
         motor.duty_cycle(target_duty_cycle);
 
-        motor.change_level(Motor::ChangeLevelTarget::Rise, max_rise_delta);
-        motor.change_level(Motor::ChangeLevelTarget::Fall, max_fall_delta);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, max_rise_delta);
+        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, max_fall_delta);
 
         Motor::State current_state_for_loop      = current_state;
         float        current_duty_cycle_for_loop = current_duty_cycle;
@@ -373,6 +374,39 @@ TEST(AdjustDutyCycle, Normal)
             }
         }
     }
+}
+TEST(adjust_duty_cycle, AnomalyTest)
+{
+    Motor::State next_state;
+    float        next_duty_cycle;
+
+    // Error時に標準エラー出力に文字列が出力される
+    // 本当のエラー時にエラー出力させたいので、異常系のテスト中は標準エラー出力をキャプチャする
+    testing::internal::CaptureStderr();
+
+    Error& error = Error::get_instance();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+
+    /// @test target_stateが範囲外の時にエラーになることのテスト
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    adjust_duty_cycle(static_cast<Motor::State>(4), 0.00F, 0.50F, 0.50F, Motor::State::Coast, 0.00F, next_state,
+                      next_duty_cycle);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    /// @test current_stateが範囲外の時にエラーになることのテスト
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    adjust_duty_cycle(Motor::State::Coast, 0.00F, 0.50F, 0.50F, static_cast<Motor::State>(4), 0.00F, next_state,
+                      next_duty_cycle);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    /// @test target_stateとcurrent_stateが範囲外の時にエラーになることのテスト
+    error.reset();
+    EXPECT_EQ(error.get_status(), Error::Status::Normal);
+    adjust_duty_cycle(static_cast<Motor::State>(4), 0.00F, 0.50F, 0.50F, static_cast<Motor::State>(4), 0.00F,
+                      next_state, next_duty_cycle);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
 }
 
 }  // namespace

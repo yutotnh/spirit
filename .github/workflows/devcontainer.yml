@@ -1,0 +1,83 @@
+# Devcontainer 用 Image を作成する
+#
+# 以下のことを行います
+# - Dev Container 用の Image を作成する
+# - 作成した Image で利用したいツールが利用できるかをテストする
+#   - Arduino CLI などのビルドツールは、ビルドできることを確認する
+#   - Doxygen などのビルド以外のためのツールは、バージョンを確認する
+# - テストに成功した場合 GitHub Container Registry に Image を Push する
+#
+name: "Dev Containers"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".devcontainer/**"
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - ".devcontainer/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and run dev container task
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/${{ github.repository }}
+          cacheFrom: ghcr.io/${{ github.repository }}
+          push: filter
+          refFilterForPush: refs/heads/main
+          runCmd: |
+            # In runCmd, processing continues except for the last command, even if the exit status is not 0.
+            set -e
+
+            # Doxygen
+            doxygen --version
+
+            # ClangFormat
+            clang-format --version
+
+            # CSpell
+            cspell --version
+
+            # Arduino CLI
+            arduino-cli compile --fqbn esp32:esp32:esp32 --library . --verbose .github/workflows/build-arduino-cli
+            arduino-cli compile --fqbn STMicroelectronics:stm32:GenF3 --library . --verbose .github/workflows/build-arduino-cli
+            arduino-cli compile --fqbn arduino:mbed:pico --library . --verbose .github/workflows/build-arduino-cli
+
+            # Mbed CLI 1
+            mkdir /tmp/mbed-cli-1
+            cd /tmp/mbed-cli-1
+            mbed new .
+            mbed deploy
+            ln -s /workspaces/spirit
+            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp .
+            mbed compile -t GCC_ARM -m NUCLEO_F303K8 --profile release
+            # Remove build directory to save disk space
+            rm -rf /tmp/mbed-cli-1
+
+            # Mbed CLI 2
+            mkdir /tmp/mbed-cli-2
+            cd /tmp/mbed-cli-2
+            mbed-tools new .
+            mbed-tools deploy
+            ln -s /workspaces/spirit
+            cp /workspaces/spirit/.github/workflows/build-mbed/main.cpp .
+            cp /workspaces/spirit/.github/workflows/build-mbed-tools/CMakeLists.txt .
+            mbed-tools compile -t GCC_ARM -m NUCLEO_F303K8 --profile release

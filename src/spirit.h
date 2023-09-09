@@ -19,6 +19,7 @@
 #include "spirit/include/bfloat16.h"
 #include "spirit/include/bit.h"
 #include "spirit/include/mutex.h"
+#include "spirit/include/version.h"
 
 #ifdef __MBED__
 #include "spirit/platform/mbed/include/DigitalOut.h"

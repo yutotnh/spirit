@@ -7,9 +7,9 @@
 namespace spirit {
 
 bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,
-                                std::size_t& buffer_size)
+                                std::size_t& buffer_size) const
 {
-    // 2(ヘッダ) + 16(スピード(rps)) + 16(Kp) + 16(Ki) + 2(回転方向) = 52
+    // 2(ヘッダ) + 16(スピード(rps)) + 16(kp) + 16(ki) + 2(回転方向) = 52
     buffer_size = 52;
 
     if (max_buffer_size < buffer_size) {
@@ -21,17 +21,17 @@ bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer
 
     set_speed(motor.get_speed(), buffer);
 
-    float Kp{0.0F}, Ki{0.0F}, Kd{0.0F};
-    motor.get_pid_gain_factor(Kp, Ki, Kd);
+    float kp{0.0F}, ki{0.0F}, kd{0.0F};
+    motor.get_pid_gain_factor(kp, ki, kd);
 
-    set_pid_gain_factor(Kp, Ki, Kd, buffer);
+    set_pid_gain_factor(kp, ki, kd, buffer);
 
     set_state(motor.get_state(), buffer);
 
     return true;
 }
 
-bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor)
+bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor) const
 {
     if (buffer_size < 7) {
         return false;
@@ -45,56 +45,64 @@ bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, 
 
     motor.speed(get_speed(buffer));
 
-    float Kp{0.0F}, Ki{0.0F}, Kd{0.0F};
-    get_pid_gain_factor(buffer, Kp, Ki, Kd);
-    motor.pid_gain_factor(Kp, Ki, Kd);
+    float kp{0.0F}, ki{0.0F}, kd{0.0F};
+    get_pid_gain_factor(buffer, kp, ki, kd);
+    motor.pid_gain_factor(kp, ki, kd);
 
     motor.state(get_state(buffer));
 
     return true;
 }
 
-float SpeedDataConverter::get_speed(const uint8_t* buffer)
+float SpeedDataConverter::get_speed(const uint8_t* buffer) const
 {
-    const uint16_t speed_16bit = get_range_value(buffer, 8, 2, 16);
+    uint32_t speed_16bit = 0;
+    get_range_value(buffer, 8, 2, 16, speed_16bit);
     return bfloat16_to_float32(speed_16bit);
 }
 
-void SpeedDataConverter::set_speed(float speed, uint8_t* buffer)
+void SpeedDataConverter::set_speed(float speed, uint8_t* buffer) const
 {
+    /// @todo speedの範囲チェック
     uint16_t speed_16bit = float32_to_bfloat16(speed);
     set_range_value(speed_16bit, 2, 16, 7, buffer);
 }
 
-void SpeedDataConverter::get_pid_gain_factor(const uint8_t* buffer, float& Kp, float& Ki, float& Kd)
+void SpeedDataConverter::get_pid_gain_factor(const uint8_t* buffer, float& kp, float& ki, float& kd) const
 {
-    // Kdは送受信しないので処理しない
-    (void)Kd;
+    // kdは送受信しないので処理しない
+    (void)kd;
 
-    const uint16_t Kp_16bit = get_range_value(buffer, 7, 18, 16);
-    Kp                      = bfloat16_to_float32(Kp_16bit);
+    uint32_t kp_16bit = 0;
+    get_range_value(buffer, 7, 18, 16, kp_16bit);
+    kp = bfloat16_to_float32(kp_16bit);
 
-    const uint16_t Ki_16bit = get_range_value(buffer, 7, 34, 16);
-    Ki                      = bfloat16_to_float32(Ki_16bit);
+    uint32_t ki_16bit = 0;
+    get_range_value(buffer, 7, 34, 16, ki_16bit);
+    ki = bfloat16_to_float32(ki_16bit);
 }
 
-void SpeedDataConverter::set_pid_gain_factor(float Kp, float Ki, float Kd, uint8_t* buffer)
+void SpeedDataConverter::set_pid_gain_factor(float kp, float ki, float kd, uint8_t* buffer) const
 {
-    // Kdは送受信しないので処理しない
-    (void)Kd;
+    // kdは送受信しないので処理しない
+    (void)kd;
 
-    uint16_t Kp_16bit = float32_to_bfloat16(Kp);
-    set_range_value(Kp_16bit, 18, 16, 7, buffer);
+    /// @todo kp, ki, kdの範囲チェック
 
-    uint16_t Ki_16bit = float32_to_bfloat16(Ki);
-    set_range_value(Ki_16bit, 34, 16, 7, buffer);
+    uint16_t kp_16bit = float32_to_bfloat16(kp);
+    set_range_value(kp_16bit, 18, 16, 7, buffer);
+
+    uint16_t ki_16bit = float32_to_bfloat16(ki);
+    set_range_value(ki_16bit, 34, 16, 7, buffer);
 }
 
-Motor::State SpeedDataConverter::get_state(const uint8_t* buffer)
+Motor::State SpeedDataConverter::get_state(const uint8_t* buffer) const
 {
     constexpr uint32_t start  = 50;
     constexpr uint32_t length = 2;
-    const uint8_t      state  = get_range_value(buffer, 7, start, length);
+    uint32_t           state  = 0;
+    get_range_value(buffer, 7, start, length, state);
+
     switch (state) {
         case 0x00:
             return Motor::State::Coast;
@@ -108,16 +116,14 @@ Motor::State SpeedDataConverter::get_state(const uint8_t* buffer)
             // default に来ることは、取得しているビット幅が2bitでありcase文0-3までで処理が決まっていてありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(state));
             return Motor::State::Brake;
             // LCOV_EXCL_STOP
     }
 }
 
-void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer)
+void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer) const
 {
     constexpr uint32_t start       = 50;
     constexpr uint32_t length      = 2;
@@ -139,11 +145,9 @@ void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer)
             // default に来ることは、state で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            break;
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(state));
+            return;
             // LCOV_EXCL_STOP
     }
 }

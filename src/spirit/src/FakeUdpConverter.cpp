@@ -11,16 +11,15 @@ bool FakeUdpConverter::encode(const uint8_t* payload, const std::size_t payload_
     // 将来処理をさせるときのために、とりあえずヘッダとして1bit(0b0)だけデータに挿入する
 
     if (payload_size == 0) {
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, "Payload size is 0", __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__, "Payload size is 0");
         return false;
     }
 
     buffer_size = payload_size + 1;
     if (max_buffer_size < buffer_size) {
-        constexpr char message_format[] = "Buffer size (%zu) is larger than the maximum buffer size (%zu)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
-        snprintf(message, sizeof(message), message_format, buffer_size, max_buffer_size);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "Buffer size (%zu) is larger than the maximum buffer size (%zu)", buffer_size,
+                                      max_buffer_size);
         return false;
     }
 
@@ -45,17 +44,16 @@ bool FakeUdpConverter::decode(const uint8_t* buffer, const std::size_t buffer_si
                               uint8_t* payload, std::size_t& payload_size)
 {
     if (buffer_size == 0) {
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, "Buffer size is 0", __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__, "Buffer size is 0");
         return false;
     }
 
     // ペイロードはbuffer_sizeよりも1小さくなるので、
     // 最大ペイロードサイズがbuffer_size - 1よりも大きい場合は、デコードできない
     if (max_payload_size < buffer_size - 1) {
-        constexpr char message_format[] = "Payload size (%zu) is larger than the maximum payload size (%zu)";
-        char           message[sizeof(message_format) + Error::max_uint32_t_length * 2];
-        snprintf(message, sizeof(message), message_format, buffer_size - 1, max_payload_size);
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+                                      "Payload size(% zu) is larger than the maximum payload size(% zu)",
+                                      buffer_size - 1, max_payload_size);
         return false;
     }
 

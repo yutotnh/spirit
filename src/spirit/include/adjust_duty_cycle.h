@@ -21,10 +21,31 @@ namespace spirit {
  * @note
  * Motor::State::Coast, Motor::State::Brake は必ずデューティー比を0として扱う
  */
-void adjust_duty_cycle(spirit::Motor::State target_state, float target_duty_cycle, float max_rise_delta,
-                       float max_fall_delta, spirit::Motor::State current_state, float current_duty_cycle,
-                       spirit::Motor::State& next_state, float& next_duty_cycle)
+void adjust_duty_cycle(Motor::State target_state, float target_duty_cycle, float max_rise_delta, float max_fall_delta,
+                       Motor::State current_state, float current_duty_cycle, Motor::State& next_state,
+                       float& next_duty_cycle)
 {
+    /**
+     * @brief stateの範囲チェック
+     * @param type チェックしたい回転方向
+     */
+    auto within_state = [](Motor::State type) {
+        switch (type) {
+            case Motor::State::Coast:
+            case Motor::State::CW:
+            case Motor::State::CCW:
+            case Motor::State::Brake:
+                break;
+            default:
+                Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                            "Unknown motor state (%d)", static_cast<uint32_t>(type));
+                return;
+        }
+    };
+
+    within_state(target_state);
+    within_state(current_state);
+
     // 回転方向がCoast or Brakeの場合は現在のデューティー比を0として扱う
     if ((target_state == Motor::State::Coast) || (target_state == Motor::State::Brake)) {
         target_duty_cycle = 0.00F;

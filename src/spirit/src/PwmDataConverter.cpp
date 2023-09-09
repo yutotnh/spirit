@@ -8,7 +8,7 @@
 namespace spirit {
 
 bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,
-                              std::size_t& buffer_size)
+                              std::size_t& buffer_size) const
 {
     // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
     buffer_size = 20;
@@ -27,7 +27,7 @@ bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_s
     return true;
 }
 
-bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor)
+bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor) const
 {
     // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
     constexpr std::size_t required_size = 20;
@@ -46,21 +46,29 @@ bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Mo
     return true;
 }
 
-float PwmDataConverter::get_duty_cycle(const uint8_t* buffer)
+float PwmDataConverter::get_duty_cycle(const uint8_t* buffer) const
 {
-    const uint16_t duty_cycle_16bit = get_range_value(buffer, 8, 2, 16);
+    uint32_t duty_cycle_16bit = 0;
+    get_range_value(buffer, 8, 2, 16, duty_cycle_16bit);
     return duty_cycle_16bit / 65535.0F;
 }
 
-void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer)
+void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer) const
 {
+    /// @todo デューティー比がマイナスを取ることはないため、その場合はエラーにする
+
     const uint16_t duty_cycle_16bit = 65535 * duty_cycle;  // 2^16 - 1 = 65535
     set_range_value(duty_cycle_16bit, 2, 16, 8, buffer);
 }
 
-Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
+Motor::State PwmDataConverter::get_state(const uint8_t* buffer) const
 {
-    const uint32_t state_uint32_t = get_range_value(buffer, 8, 18, 2);
+    uint32_t   state_uint32_t = 0;
+    const bool is_normal      = get_range_value(buffer, 8, 18, 2, state_uint32_t);
+
+    if (!is_normal) {
+        return Motor::State::Brake;
+    }
 
     switch (state_uint32_t) {
         case 0x00U:
@@ -75,39 +83,35 @@ Motor::State PwmDataConverter::get_state(const uint8_t* buffer)
             // default に来ることは、取得しているビット幅が2bitでありcase文0-3までで処理が決まっていてありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, state_uint32_t);
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", state_uint32_t);
             return Motor::State::Brake;
             // LCOV_EXCL_STOP
     }
 }
 
-void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer)
+void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer) const
 {
     switch (state) {
         case Motor::State::Coast:
             // buffer[2] |= 0x00 << 5; // 既に0で初期化されているので不要
-            break;
+            return;
         case Motor::State::CW:
             set_range_value(0x01U, 18U, 2U, 8U, buffer);
-            break;
+            return;
         case Motor::State::CCW:
             set_range_value(0x02U, 18U, 2U, 8U, buffer);
-            break;
+            return;
         case Motor::State::Brake:
             set_range_value(0x03U, 18U, 2U, 8U, buffer);
-            break;
+            return;
 
             // default に来ることは、state で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(state));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            break;
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(state));
+            return;
             // LCOV_EXCL_STOP
     }
 }

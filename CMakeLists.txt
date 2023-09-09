@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,9 +43,8 @@ target_sources(spirit
     ./src/spirit/src/SpeedController.cpp
 )
 
-enable_testing()
-
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    include(CTest)
     add_subdirectory(tests)
 endif()
 

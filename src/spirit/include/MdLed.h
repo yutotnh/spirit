@@ -15,7 +15,7 @@ class MdLed {
 public:
     /**
      * @enum BlinkMode
-     * @brief LEDに設定する値のソースを何にするかの値
+     * @brief LEDの点滅種類を何にするかの値
      * @details 優先度は Error > Alternate = Concurrent l Normal
      */
     enum class BlinkMode {
@@ -71,10 +71,8 @@ public:
     void reset_error();
 
     /**
-     * @brief 時間を1単位進める
-     * @details Errorモードなどの場合、時間経過によってLEDの数値を変化させる
-     *
-     * 例えばblinking_rate(2)の時は、coordinate()を2回呼ぶごとにLEDの数値が変わる
+     * @brief 時間を1単位進め、時間経過によってLEDの数値を変化させる
+     * @details 例えばblinking_rate(2)の時は、coordinate()を2回呼ぶごとにLEDの数値が変わる
      */
     void coordinate();
 
@@ -92,10 +90,9 @@ private:
 
     Motor::State _state{Motor::Default::state};
     BlinkMode    _mode{Default::blink_mode};
-    // Mutex  _mutex;
-    uint32_t _interval{Default::interval};
-    uint32_t _counter{0};
-    uint32_t _error{0};
+    uint32_t     _interval{Default::interval};
+    uint32_t     _counter{0};
+    uint32_t     _error{0};
 
     uint32_t _error_section{0};
     uint32_t _error_bit_width{0};
@@ -108,7 +105,7 @@ private:
 
     /**
      * @brief LEDの点滅状態を返す
-     * @return LEDの点滅状態
+     * @return LEDの点滅状態(範囲: 0-3)
      */
     uint32_t read() const;
 

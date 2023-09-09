@@ -11,10 +11,8 @@ void Motor::control_system(const ControlSystem type)
         case ControlSystem::Speed:
             break;
         default:
-            constexpr char message_format[] = "Unknown motor control system (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor control system (%d)", static_cast<uint32_t>(type));
             return;
     }
 
@@ -31,17 +29,13 @@ void Motor::duty_cycle(const float value)
     if (1.00F < value) {
         _duty_cycle = 1.00F;
 
-        constexpr char message_format[] = "Duty cycle (%1.4e) is greater than 1.00, so it will be 1.00";
-        char           message[sizeof(message_format) + Error::max_float_1_4_e_length];
-        snprintf(message, sizeof(message), message_format, value);
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                      "Duty cycle (%g) is greater than 1.00, so it will be 1.00", value);
     } else if (value < 0.00F) {
         _duty_cycle = 0.00F;
 
-        constexpr char message_format[] = "Duty cycle (%1.4e) is less than 0.00, so it will be 0.00";
-        char           message[sizeof(message_format) + Error::max_float_1_4_e_length];
-        snprintf(message, sizeof(message), message_format, value);
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
+        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                      "Duty cycle (%g) is less than 0.00, so it will be 0.00", value);
     } else {
         _duty_cycle = value;
     }
@@ -54,6 +48,12 @@ float Motor::get_duty_cycle() const
 
 void Motor::speed(const float rps)
 {
+    if (rps < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "RPS (%g) is less than 0.00", rps);
+        return;
+    }
+
     _speed = rps;
 }
 
@@ -62,18 +62,36 @@ float Motor::get_speed() const
     return _speed;
 }
 
-void Motor::pid_gain_factor(const float Kp, const float Ki, const float Kd)
+void Motor::pid_gain_factor(const float kp, const float ki, const float kd)
 {
-    _Kp = Kp;
-    _Ki = Ki;
-    _Kd = Kd;
+    if (kp < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "kp (%g) is less than 0.00", kp);
+        return;
+    }
+
+    if (ki < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "ki (%g) is less than 0.00", ki);
+        return;
+    }
+
+    if (kd < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "kd (%g) is less than 0.00", kd);
+        return;
+    }
+
+    _kp = kp;
+    _ki = ki;
+    _kd = kd;
 }
 
-void Motor::get_pid_gain_factor(float& Kp, float& Ki, float& Kd) const
+void Motor::get_pid_gain_factor(float& kp, float& ki, float& kd) const
 {
-    Kp = _Kp;
-    Ki = _Ki;
-    Kd = _Kd;
+    kp = _kp;
+    ki = _ki;
+    kd = _kd;
 }
 
 void Motor::state(const State type)
@@ -85,10 +103,8 @@ void Motor::state(const State type)
         case State::Brake:
             break;
         default:
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(type));
             return;
     }
 
@@ -110,15 +126,12 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
         case ChangeLevel::Max:
             break;
         case ChangeLevel::Manual:
-            Error::get_instance().error(Error::Type::InvalidValue, 0,
-                                        "Invalid motor change level (ChangeLevel::Manual)", __FILE__, __func__,
-                                        __LINE__);
+            Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                        "Invalid motor change level (ChangeLevel::Manual)");
             return;
         default:
-            constexpr char message_format[] = "Unknown motor change level (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(level));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor change level (%d)", static_cast<uint32_t>(level));
             return;
     }
 
@@ -130,38 +143,8 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             _fall_change_level = level;
             break;
         default:
-            constexpr char message_format[] = "Unknown motor change level target (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            return;
-    }
-}
-
-void Motor::change_level(const ChangeLevelTarget target, const float duty_cycle)
-{
-    if (duty_cycle < minimum_maximum_change_duty_cycle) {
-        constexpr char message_format[] = "Duty cycle (%1.4e) is less than minimum duty cycle (%1.4e)";
-        char           message[sizeof(message_format) + Error::max_float_1_4_e_length * 2];
-        snprintf(message, sizeof(message), message_format, duty_cycle, minimum_maximum_change_duty_cycle);
-        Error::get_instance().error(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
-        return;
-    }
-
-    switch (target) {
-        case ChangeLevelTarget::Rise:
-            _rise_change_level              = ChangeLevel::Manual;
-            _rise_maximum_change_duty_cycle = duty_cycle;
-            break;
-        case ChangeLevelTarget::Fall:
-            _fall_change_level              = ChangeLevel::Manual;
-            _fall_maximum_change_duty_cycle = duty_cycle;
-            break;
-        default:
-            constexpr char message_format[] = "Unknown motor change level target (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
             return;
     }
 }
@@ -175,11 +158,40 @@ Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
             return _fall_change_level;
 
         default:
-            constexpr char message_format[] = "Unknown motor change level target (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
             return ChangeLevel::OFF;
+    }
+}
+
+void Motor::maximum_change_duty_cycle(const ChangeLevelTarget target, float duty_cycle)
+{
+    if (2.00F < duty_cycle) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Change duty cycle (%g) is greater than 2.00", duty_cycle);
+        return;
+    }
+
+    if (duty_cycle < minimum_maximum_change_duty_cycle) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Change duty cycle (%g) is less than minimum duty cycle (%g)", duty_cycle,
+                                    minimum_maximum_change_duty_cycle);
+        return;
+    }
+
+    switch (target) {
+        case ChangeLevelTarget::Rise:
+            _rise_change_level              = ChangeLevel::Manual;
+            _rise_maximum_change_duty_cycle = duty_cycle;
+            break;
+        case ChangeLevelTarget::Fall:
+            _fall_change_level              = ChangeLevel::Manual;
+            _fall_maximum_change_duty_cycle = duty_cycle;
+            break;
+        default:
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
+            return;
     }
 }
 
@@ -198,10 +210,8 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
                 // default に来ることは、get_change_level で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
                 // LCOV_EXCL_START
             default:
-                constexpr char message_format[] = "Unknown motor change level target (%d)";
-                char           message[sizeof(message_format) + Error::max_uint32_t_length];
-                snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(target));
-                Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+                Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                            "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
                 return 0.00F;
                 // LCOV_EXCL_STOP
         }
@@ -224,10 +234,8 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
             // default に来ることは、change_level で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            constexpr char message_format[] = "Unknown motor change level (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(level));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor change level (%d)", static_cast<uint32_t>(level));
             return 0.00F;
             // LCOV_EXCL_STOP
     }
@@ -236,24 +244,19 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
 void Motor::pulse_period(const float seconds)
 {
     if (max_pulse_period < seconds) {
-        _pulse_period = max_pulse_period;
-
-        constexpr char message_format[] =
-            "Pulse period (%1.4e) is greater than max pulse period (%1.4e), so it will be max pulse period (%1.4e)";
-        char message[sizeof(message_format) + Error::max_float_1_4_e_length * 3];
-        snprintf(message, sizeof(message), message_format, seconds, max_pulse_period, max_pulse_period);
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
-    } else if (seconds < min_pulse_period) {
-        _pulse_period = min_pulse_period;
-
-        constexpr char message_format[] =
-            "Pulse period (%1.4e) is less than min pulse period (%1.4e), so it will be min pulse period (%1.4e)";
-        char message[sizeof(message_format) + Error::max_float_1_4_e_length * 3];
-        snprintf(message, sizeof(message), message_format, seconds, min_pulse_period, min_pulse_period);
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, message, __FILE__, __func__, __LINE__);
-    } else {
-        _pulse_period = seconds;
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Pulse period (%g) is greater than max pulse period (%g)", seconds,
+                                    max_pulse_period);
+        return;
     }
+
+    if (seconds < min_pulse_period) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Pulse period (%g) is less than min pulse period (%g)", seconds, min_pulse_period);
+        return;
+    }
+
+    _pulse_period = seconds;
 }
 
 float Motor::get_pulse_period() const
@@ -263,6 +266,12 @@ float Motor::get_pulse_period() const
 
 void Motor::release_time(const float seconds)
 {
+    if (seconds < 0.00F) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Seconds (%g) is less than 0.00", seconds);
+        return;
+    }
+
     _release_time = seconds;
 }
 
@@ -278,14 +287,12 @@ void Motor::decay(const Decay type)
         case Decay::Fast:
             break;
         case Decay::Mixed:
-            Error::get_instance().error(Error::Type::InvalidValue, 0, "Invalid motor decay (Decay::Mixed)", __FILE__,
-                                        __func__, __LINE__);
+            Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                        "Invalid motor decay (Decay::Mixed)");
             return;
         default:
-            constexpr char message_format[] = "Unknown motor decay (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor decay (%d)", static_cast<uint32_t>(type));
             return;
     }
 
@@ -304,10 +311,8 @@ void Motor::pwm_side(const PwmSide type)
         case PwmSide::High:
             break;
         default:
-            constexpr char message_format[] = "Unknown motor PWM side (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor PWM side (%d)", static_cast<uint32_t>(type));
             return;
     }
 

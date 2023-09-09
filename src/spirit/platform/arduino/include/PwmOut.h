@@ -29,7 +29,7 @@ public:
      *              - 0.00F = 0%, 1.00F = 100%
      *              - 範囲: 0.00F <= value <= 1.00F
      */
-    void write(const float value) override;
+    void write(float value) override;
 
     /**
      * @brief 出力デューティー比を返す(%)
@@ -43,11 +43,12 @@ public:
      * @brief PWM周期を秒単位で設定する
      * @param seconds PWM周期(s)
      */
-    void period(const float seconds) override;
+    void period(float seconds) override;
 
 private:
     uint8_t _pin;
     uint8_t _channel;
+    float   _duty_cycle{0.00F};
 };
 
 }  // namespace arduino

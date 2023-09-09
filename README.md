@@ -28,7 +28,6 @@ flowchart TB
 
 最終的にはMbed/Arduino等での利用を想定していますが、自動テストを非マイコンで行う都合上、可能な限り特定の環境への依存を減らしています
 
-
 ## 💻 Supported platforms
 
 下記の環境では多分動きます
@@ -48,10 +47,12 @@ flowchart TB
 
 リポジトリのルートディレクトリで下の手順を行うことで、ビルドからテストの実行ができます
 
+プリセットは `Debug` と `Release` の2種類があります
+
 ```shell
-cmake -S . -B build    # Configurate & Generate
-cmake --build build    # Build
-ctest --test-dir build # Test
+cmake -S . --preset Debug    # Configurate & Generate
+cmake --build --preset Debug # Build
+ctest --preset Debug         # Test
 ```
 
 テストフレームワークとして Google Test を利用しています

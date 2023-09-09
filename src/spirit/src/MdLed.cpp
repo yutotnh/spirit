@@ -36,11 +36,9 @@ void MdLed::state(const Motor::State type)
             break;
         default:
             // 未定義の値
-            constexpr char message_format[] = "Unknown motor state (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
-            break;
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(type));
+            return;
     }
 }
 
@@ -68,10 +66,8 @@ void MdLed::mode(const BlinkMode type)
         case BlinkMode::Error:
             break;
         default:
-            constexpr char message_format[] = "Unknown blink mode (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(type));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown blink mode (%d)", static_cast<uint32_t>(type));
             return;
     }
 
@@ -86,10 +82,8 @@ void MdLed::mode(const BlinkMode type)
             concurrently_blink();
             break;
         default:
-            constexpr char message_format[] = "Unknown blink mode (%d)";
-            char           message[sizeof(message_format) + Error::max_uint32_t_length];
-            snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_mode));
-            Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown blink mode (%d)", static_cast<uint32_t>(type));
             return;
     }
 }
@@ -124,10 +118,8 @@ void MdLed::coordinate()
                 // default に来ることは、MdLed::mode でチェックされていて通常の利用ではありえないため、カバレッジ計測から除外する
                 // LCOV_EXCL_START
             default:
-                constexpr char message_format[] = "Unknown blink mode (%d)";
-                char           message[sizeof(message_format) + Error::max_uint32_t_length];
-                snprintf(message, sizeof(message), message_format, static_cast<uint32_t>(_mode));
-                Error::get_instance().error(Error::Type::UnknownValue, 0, message, __FILE__, __func__, __LINE__);
+                Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                            "Unknown blink mode (%d)", static_cast<uint32_t>(_mode));
                 return;
                 // LCOV_EXCL_STOP
         }

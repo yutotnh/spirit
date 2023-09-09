@@ -3,10 +3,11 @@
         "build/": true
     },
     "cmake.configureOnOpen": true,
-    "C_Cpp.clang_format_sortIncludes": true,
+    "cmake.useCMakePresets": "always",
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.doxygen.generatedStyle": "/**",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "editor.formatOnSave": true,
     "files.encoding": "utf8"
 }
