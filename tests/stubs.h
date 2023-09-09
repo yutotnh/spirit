@@ -2,6 +2,7 @@
 #define SPIRIT_STUB_H
 
 #include "InterfaceDigitalOut.h"
+#include "InterfaceInterruptIn.h"
 #include "InterfacePwmOut.h"
 
 namespace spirit {
@@ -31,6 +32,65 @@ public:
 
 private:
     /// 出力ピンの値
+    uint32_t _value{0};
+};
+
+class StubInterruptIn : public InterfaceInterruptIn {
+public:
+    /**
+     * @brief 立ち上がり時に呼び出される関数を設定する
+     * @param func_rise 立ち上がり時に呼び出される関数
+     */
+    void rise(std::function<void(void)>& func_rise) override
+    {
+        _func_rise = func_rise;
+    }
+
+    /**
+     * @brief 立ち下がり時に呼び出される関数を設定する
+     * @param func_fall 立ち下がり時に呼び出される関数
+     */
+    void fall(std::function<void(void)>& func_fall) override
+    {
+        _func_fall = func_fall;
+    }
+
+    /**
+     * @brief 立ち上がり時に行われる関数呼び出しを再現
+     */
+    void interrupt_rise()
+    {
+        _value = 1;
+        _func_rise();
+    }
+
+    /**
+     * @brief 立ち下がり時に行われる関数呼び出しを再現
+     */
+    void interrupt_fall()
+    {
+        _value = 0;
+        _func_fall();
+    }
+
+    /**
+     * @brief 入力ピンの状態を返す
+     * @retval 0 Low
+     * @retval 1 High
+     */
+    uint32_t read() override
+    {
+        return _value;
+    }
+
+private:
+    /// 立ち上がり時に呼び出す関数
+    std::function<void(void)> _func_rise;
+
+    /// 立ち下がり時に呼び出す関数
+    std::function<void(void)> _func_fall;
+
+    /// 入力ピンの状態
     uint32_t _value{0};
 };
 
