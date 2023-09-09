@@ -30,16 +30,14 @@ SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterru
 float SpeedController::calculation(float target_rps, float dt)
 {
     if (target_rps < 0.0f) {
-        Error::get_instance().error(
-            Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-            "[target_rps = %g] value cannot be negative", target_rps);
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "[target_rps = %g] value cannot be negative", target_rps);
         return 0.0f;
     }
 
     if (dt <= 0.0f) {
-        Error::get_instance().error(
-            Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-            "[dt = %g] value cannot be less than 0", dt);
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
     }
 
@@ -59,9 +57,8 @@ float SpeedController::calculation(float target_rps, float dt)
 float SpeedController::rps(float dt)
 {
     if (dt <= 0.0f) {
-        Error::get_instance().error(
-            Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-            "[dt = %g] value cannot be less than 0", dt);
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
     }
 
@@ -95,9 +92,10 @@ void SpeedController::limit(float high_limit, float low_limit)
         _high_limit = high_limit;
         _low_limit  = low_limit;
     } else {
-        Error::get_instance().error(
-            Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-            "[high_limit = %g, low_limit = %g]The relationship between the upper limit value and the lower limit value is strange", high_limit, low_limit);
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "[high_limit = %g, low_limit = %g]The relationship between the upper limit value "
+                                    "and the lower limit value is strange",
+                                    high_limit, low_limit);
     }
 }
 
