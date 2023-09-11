@@ -41,7 +41,9 @@ float SpeedController::calculation(float target_rps, float dt)
         return 0.0f;
     }
 
-    float error = target_rps - rps(dt);
+    _rps = rps_calculation(dt);
+
+    float error = target_rps - _rps;
     _sum_error += error;
     _delta_error = error - _last_error;
 
@@ -54,7 +56,7 @@ float SpeedController::calculation(float target_rps, float dt)
     return limiter(p + i + d);
 }
 
-float SpeedController::rps(float dt)
+float SpeedController::rps_calculation(float dt)
 {
     if (dt <= 0.0f) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
@@ -69,7 +71,7 @@ float SpeedController::rps(float dt)
         _angle_buff_index = 0;
         first_loop        = false;
     } else if (first_loop) {
-        rps = angle() / (dt * _angle_buff_index);
+        rps = angle() / 360.0f / (dt * _angle_buff_index);
         if (rps < 0.0f) {
             rps *= -1;
         }
@@ -79,7 +81,7 @@ float SpeedController::rps(float dt)
     float angle_diff               = _angle_counter - _angle_buff[_angle_buff_index];
     _angle_buff[_angle_buff_index] = _angle_counter;
 
-    rps = (angle_diff * _deg_unit) / (dt * _angle_buff_max);
+    rps = (angle_diff * _deg_unit) / 360.0f / (dt * _angle_buff_max);
     if (rps < 0.0f) {
         rps *= -1;
     }
@@ -118,6 +120,7 @@ void SpeedController::reset()
     _angle_buff_index = 0;
     _sum_error        = 0.0f;
     _last_error       = 0.0f;
+    _rps              = 0.0f;
     for (int i = 0; i < _angle_buff_max; i++) {
         _angle_buff[i] = 0;
     }
@@ -155,6 +158,11 @@ void SpeedController::b_phase_interrupt()
 float SpeedController::angle()
 {
     return _angle_counter * _deg_unit;
+}
+
+float SpeedController::rps()
+{
+    return _rps;
 }
 
 }  // namespace spirit
