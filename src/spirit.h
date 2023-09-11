@@ -7,11 +7,13 @@
 #include "spirit/include/FakeUdpConverter.h"
 #include "spirit/include/Id.h"
 #include "spirit/include/InterfaceDigitalOut.h"
+#include "spirit/include/InterfaceInterruptIn.h"
 #include "spirit/include/InterfacePwmOut.h"
 #include "spirit/include/MdLed.h"
 #include "spirit/include/Motor.h"
 #include "spirit/include/MotorDataConverter.h"
 #include "spirit/include/PwmDataConverter.h"
+#include "spirit/include/SpeedController.h"
 #include "spirit/include/SpeedDataConverter.h"
 #include "spirit/include/adjust_duty_cycle.h"
 #include "spirit/include/bfloat16.h"
@@ -21,6 +23,7 @@
 
 #ifdef __MBED__
 #include "spirit/platform/mbed/include/DigitalOut.h"
+#include "spirit/platform/mbed/include/InterruptIn.h"
 #include "spirit/platform/mbed/include/PwmOut.h"
 #endif  // MBED_H
 

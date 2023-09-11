@@ -283,9 +283,9 @@ public:
         static constexpr ChangeLevel   rise_change_level         = ChangeLevel::OFF;
         static constexpr ChangeLevel   fall_change_level         = ChangeLevel::OFF;
         static constexpr float         maximum_change_duty_cycle = 0.00F;
-        static constexpr float         kp                        = 1.0F;   // 暫定
-        static constexpr float         ki                        = 0.1F;   // 暫定
-        static constexpr float         kd                        = 0.01F;  // 暫定
+        static constexpr float         kp                        = 0.30F;
+        static constexpr float         ki                        = 0.80F;
+        static constexpr float         kd                        = 0.20F;
         static constexpr float         pulse_period              = 1.0F / 5000.0F;
         static constexpr float         release_time              = 0.500F;
         static constexpr Decay         decay                     = Decay::Slow;
