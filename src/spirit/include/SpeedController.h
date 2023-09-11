@@ -24,13 +24,6 @@ public:
     float calculation(float target_rps, float dt);
 
     /**
-     * @brief rpsを算出して返す
-     * @param dt rps
-     * @return 算出されたrps
-     */
-    float rps(float dt);
-
-    /**
      * @brief 速度制御の計算結果にかける上限値と下限値を設定
      * @param high_limit 速度制御の計算結果の最大値
      * @param low_limit  速度制御の計算結果の最小値
@@ -57,6 +50,12 @@ public:
      */
     float angle();
 
+    /**
+     * @brief rpsを返す
+     * @return rps
+     */
+    float rps();
+
 private:
     InterfaceInterruptIn& _a_phase;
     InterfaceInterruptIn& _b_phase;
@@ -77,12 +76,21 @@ private:
     int                  _angle_buff_index;
     int                  _angle_buff[_angle_buff_max];
 
+    float _rps{0.00f};
+
     float _sum_error;
     float _delta_error;
     float _last_error;
 
     float _high_limit{0.00f};
     float _low_limit{0.00f};
+
+    /**
+     * @brief rpsを算出して返す
+     * @param dt rps
+     * @return 算出されたrps
+     */
+    float rps_calculation(float dt);
 
     /**
      * @brief 元の数値にリミッターをかける
