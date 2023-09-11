@@ -42,6 +42,7 @@ float SpeedController::calculation(float target_rps, float dt)
     }
 
     _rps = rps_calculation(dt);
+    
     float error = target_rps - _rps;
     _sum_error += error;
     _delta_error = error - _last_error;
