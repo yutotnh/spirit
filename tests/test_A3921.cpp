@@ -60,8 +60,7 @@ TEST(A3921, InitValueTest)
     EXPECT_TRUE(is_brake(pwmh, pwml));
 
     // Errorが発生していないことを確認
-    Error& error = Error::get_instance();
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 /**
@@ -84,8 +83,7 @@ TEST(A3921, SleepTest)
     EXPECT_EQ(reset.read(), 1);
 
     // Errorが発生していないことを確認
-    Error& error = Error::get_instance();
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 /**
@@ -121,8 +119,7 @@ TEST(A3921, ResetTest)
     EXPECT_LE(100.0e-6, elapsed_seconds.count());
 
     // Errorが発生していないことを確認
-    Error& error = Error::get_instance();
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 /**
