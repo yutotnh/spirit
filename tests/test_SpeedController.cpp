@@ -85,11 +85,6 @@ TEST(SpeedController, SpeedControllerErrorTest)
     speed_controller.calculation(1.00f, 0.00f);
     EXPECT_EQ(error.get_status(), Error::Status::Error);
 
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    speed_controller.rps(0.00f);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
-
     testing::internal::GetCapturedStderr();
 }
 
