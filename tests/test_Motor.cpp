@@ -56,7 +56,7 @@ TEST(Motor, InitValueTest)
     EXPECT_EQ(motor.get_sleep(), sleep);
 
     // Errorが発生していないことを確認
-    EXPECT_EQ(erError::get_instance().get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 /**
