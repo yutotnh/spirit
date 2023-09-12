@@ -14,9 +14,9 @@ project(spirit
 add_library(spirit STATIC)
 
 if(MSVC)
-    target_compile_options(spirit PUBLIC /W4)
+    target_compile_options(spirit PUBLIC /Wall /WX)
 else()
-    target_compile_options(spirit PUBLIC -O2 -Wall -Wextra)
+    target_compile_options(spirit PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
 endif()
 
 target_include_directories(spirit
@@ -54,9 +54,9 @@ if(DEFINED MBED_PATH)
     add_library(spirit-platform-mbed STATIC)
 
     if(MSVC)
-        target_compile_options(spirit-platform-mbed PUBLIC /W4)
+        target_compile_options(spirit-platform-mbed PUBLIC /Wall /WX)
     else()
-        target_compile_options(spirit-platform-mbed PUBLIC -O2 -Wall -Wextra)
+        target_compile_options(spirit-platform-mbed PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
     endif()
 
     target_include_directories(spirit-platform-mbed
