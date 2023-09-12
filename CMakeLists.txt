@@ -54,9 +54,9 @@ if(DEFINED MBED_PATH)
     add_library(spirit-platform-mbed STATIC)
 
     if(MSVC)
-        target_compile_options(spirit-platform-mbed PUBLIC /Wall /WX)
+        target_compile_options(spirit-platform-mbed PUBLIC /Wall)
     else()
-        target_compile_options(spirit-platform-mbed PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
+        target_compile_options(spirit-platform-mbed PUBLIC -O2 -Wall -Wextra)
     endif()
 
     target_include_directories(spirit-platform-mbed
