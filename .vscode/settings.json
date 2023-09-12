@@ -9,8 +9,5 @@
     "C_Cpp.doxygen.generatedStyle": "/**",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "editor.formatOnSave": true,
-    "files.encoding": "utf8",
-    "files.associations": {
-        "cmath": "cpp"
-    }
+    "files.encoding": "utf8"
 }
