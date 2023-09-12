@@ -78,7 +78,7 @@ float SpeedController::rps_calculation(float dt)
         return rps;
     }
 
-    float angle_diff               = _angle_counter - _angle_buff[_angle_buff_index];
+    int angle_diff                 = _angle_counter - _angle_buff[_angle_buff_index];
     _angle_buff[_angle_buff_index] = _angle_counter;
 
     rps = (angle_diff * _deg_unit) / 360.0f / (dt * _angle_buff_max);

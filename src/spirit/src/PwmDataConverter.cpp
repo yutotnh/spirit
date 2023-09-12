@@ -57,7 +57,7 @@ void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer) c
 {
     /// @todo デューティー比がマイナスを取ることはないため、その場合はエラーにする
 
-    const uint16_t duty_cycle_16bit = 65535 * duty_cycle;  // 2^16 - 1 = 65535
+    const uint16_t duty_cycle_16bit = (uint16_t)(65535 * duty_cycle);  // 2^16 - 1 = 65535
     set_range_value(duty_cycle_16bit, 2, 16, 8, buffer);
 }
 
