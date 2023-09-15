@@ -27,19 +27,19 @@ TEST(SpeedController, SpeedControllerTest)
 
     // 角度
     EXPECT_FLOAT_EQ(speed_controller.angle(), 1.80f);
-    // RPS
-    EXPECT_FLOAT_EQ(speed_controller.rps(1.00f), 1.80f);
     // PID計算(リミットなし)
-    EXPECT_FLOAT_EQ(speed_controller.calculation(1.80f, 1.00f), 2.25f);
+    EXPECT_FLOAT_EQ(speed_controller.calculation(1.005f, 1.00f), 2.5f);
+    // RPS
+    EXPECT_FLOAT_EQ(speed_controller.rps(), 0.005f);
 
     speed_controller.limit(1.00f, 0.00f);
 
     // PID計算(上限リミット)
-    EXPECT_FLOAT_EQ(speed_controller.calculation(1.80f, 1.00f), 1.00f);
+    EXPECT_FLOAT_EQ(speed_controller.calculation(1.00f, 1.00f), 1.00f);
 
     speed_controller.reset();
 
-    speed_controller.limit(1.00f, -3.00f);
+    speed_controller.limit(1.00f, -1.00f);
 
     /* エンコーダの仮想パルス生成 (-1.8°回転) */
     b_phase.interrupt_rise();
@@ -50,15 +50,15 @@ TEST(SpeedController, SpeedControllerTest)
 
     // 角度(マイナス)
     EXPECT_FLOAT_EQ(speed_controller.angle(), -1.80f);
-    // 角度(マイナスなし)
-    EXPECT_FLOAT_EQ(speed_controller.rps(1.00f), 1.80f);
     // PID計算(リミットなし)
-    EXPECT_FLOAT_EQ(speed_controller.calculation(0.00f, 1.00f), -2.25);
+    EXPECT_FLOAT_EQ(speed_controller.calculation(0.00f, 1.00f), -0.0125);
+    // RPS(マイナスなし)
+    EXPECT_FLOAT_EQ(speed_controller.rps(), 0.005f);
 
     speed_controller.limit(1.00f, 0.00f);
     // PID計算(下限リミット)
     EXPECT_FLOAT_EQ(speed_controller.calculation(0.00f, 1.00f), 0.00f);
-
+  
     // Errorが発生していないことを確認
     EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
@@ -86,11 +86,6 @@ TEST(SpeedController, SpeedControllerErrorTest)
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
     speed_controller.calculation(1.00f, 0.00f);
-    EXPECT_EQ(error.get_status(), Error::Status::Error);
-
-    error.reset();
-    EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    speed_controller.rps(0.00f);
     EXPECT_EQ(error.get_status(), Error::Status::Error);
 
     testing::internal::GetCapturedStderr();
