@@ -13,10 +13,13 @@ project(spirit
 
 add_library(spirit STATIC)
 
-if(MSVC)
-    target_compile_options(spirit PUBLIC /W4)
-else()
-    target_compile_options(spirit PUBLIC -O2 -Wall -Wextra)
+if(DEFINED MBED_PATH)
+    # mbed-os のビルドに影響を与えるため、最適化オプションを指定せず、警告をエラーにしない
+    target_compile_options(spirit PUBLIC -Wall -Wextra -pedantic)
+elseif(MSVC)
+    target_compile_options(spirit PUBLIC /W4 /WX /utf-8)
+else() # GCC or Clang
+    target_compile_options(spirit PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
 endif()
 
 target_include_directories(spirit
@@ -56,7 +59,7 @@ if(DEFINED MBED_PATH)
     if(MSVC)
         target_compile_options(spirit-platform-mbed PUBLIC /W4)
     else()
-        target_compile_options(spirit-platform-mbed PUBLIC -O2 -Wall -Wextra)
+        target_compile_options(spirit-platform-mbed PUBLIC -Wall -Wextra -pedantic)
     endif()
 
     target_include_directories(spirit-platform-mbed

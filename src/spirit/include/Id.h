@@ -17,7 +17,7 @@ static constexpr uint32_t motor_prefix = 0x1;
 static constexpr uint32_t motor_prefix_size = 2;
 
 /// spiritでCANでモーター制御に使う場合に使うIDのDIPスイッチの最大ビット幅
-static constexpr uint32_t dip_switch_size = 5;
+static constexpr uint32_t dip_switch_width = 5;
 
 /**
  * @brief CAN通信時のモーターIDを取得する

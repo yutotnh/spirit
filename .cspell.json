@@ -50,6 +50,7 @@
         "USBRX",
         "USBTX",
         "vcpkg",
+        "Werror",
         "Wextra",
         "yutotnh"
     ],

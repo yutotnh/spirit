@@ -10,15 +10,16 @@ namespace {
 
 /**
  * @brief DIPスイッチの値がビット幅を超えていないかチェックする
- * @param dip_switch_size DIPスイッチの値
+ * @param value DIPスイッチの値
+ * @param width DIPスイッチのビット幅
  * @retval true ビット幅を超えていない (正常)
  * @retval false ビット幅を超えている (異常)
  */
-bool dip_switch_is_valid(uint32_t dip_switch, std::size_t dip_switch_size)
+bool dip_switch_is_valid(uint32_t value, std::size_t width)
 {
     // DIPスイッチの値がビット幅を超えていないかチェックする
     // 例えば、DIPスイッチの値が0b1111で、ビット幅が3の場合、0b1111は3bitで表現できないため、エラーとする
-    return (dip_switch >> dip_switch_size) == 0;
+    return (value >> width) == 0;
 }
 
 /**
@@ -75,10 +76,10 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
         return 0;
     }
 
-    if (!dip_switch_is_valid(dip_switch, dip_switch_size)) {
+    if (!dip_switch_is_valid(dip_switch, dip_switch_width)) {
         Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
                                       "DIP switch value (%d) exceeds maximum bit width (%d)", dip_switch,
-                                      dip_switch_size);
+                                      dip_switch_width);
         return 0;
     }
 
@@ -95,7 +96,7 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             id |= 0x00 << (can_id_size - motor_prefix_size - motor_count_prefix_size);
 
             // DIPスイッチの値をそのままIDに反映する
-            id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - dip_switch_size);
+            id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - dip_switch_width);
 
             return id;
         case 1:
@@ -106,7 +107,7 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             id |= motor << (can_id_size - motor_prefix_size - motor_count_prefix_size - 1);
 
             // DIPスイッチの値をそのままIDに反映する
-            id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - 1 - dip_switch_size);
+            id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - 1 - dip_switch_width);
 
             return id;
         case 2:
@@ -117,7 +118,7 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             id |= motor << (can_id_size - motor_prefix_size - motor_count_prefix_size - 2);
 
             // DIPスイッチの値をそのままIDに反映する
-            id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - 2 - dip_switch_size);
+            id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - 2 - dip_switch_width);
 
             return id;
         default:

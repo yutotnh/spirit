@@ -181,11 +181,11 @@ TEST(AdjustDutyCycle, SameState)
         // 最後にデューティー比が目標値に達していることを確認する(上昇)
         current_state      = Motor::State::CW;
         current_duty_cycle = 0.60F;
-        std::size_t count  = std::ceil(fabs(motor.get_duty_cycle() - current_duty_cycle) /
-                                       motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise));
+        uint32_t count     = (uint32_t)std::ceil(fabs(motor.get_duty_cycle() - current_duty_cycle) /
+                                                 motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise));
 
         // デューティー比が目標値に達するまでループ
-        for (std::size_t i = 0; i < count; i++) {
+        for (uint32_t i = 0; i < count; i++) {
             // ほんとはループ中にデューティー比が目標値に達しているか確認するべきだが、
             // 浮動小数点の誤差があるので、最後の何回かはFAILしてしまう
             // なので、ループの最後でのみ確認する
@@ -212,8 +212,8 @@ TEST(AdjustDutyCycle, SameState)
         // 最後にデューティー比が目標値に達していることを確認する(下降)
         current_state      = Motor::State::CW;
         current_duty_cycle = 1.00F;
-        count              = fabs(motor.get_duty_cycle() - current_duty_cycle) /
-                motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise);
+        count              = (uint32_t)(fabs(motor.get_duty_cycle() - current_duty_cycle) /
+                           motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise));
         for (std::size_t i = 0; i < count; i++) {
             // ほんとはループ中にデューティー比が目標値に達しているか確認するべきだが、
             // 浮動小数点の誤差があるので、最後の何回かはFAILしてしまう
@@ -295,7 +295,7 @@ TEST(AdjustDutyCycle, Normal)
         Motor::State current_state_for_loop      = current_state;
         float        current_duty_cycle_for_loop = current_duty_cycle;
         Motor::State next_state;
-        float        next_duty_cycle;
+        float        next_duty_cycle = -1.00F;
 
         for (size_t i = 0; i < loop_count; i++) {
             adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),

@@ -7,8 +7,10 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+if(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+endif()
 
 # 親プロジェクトのコンパイラ・リンカ設定を上書きするのを防ぐ（Windowsのみ）
 if(WIN32)
@@ -23,9 +25,9 @@ function(add_gtest target_source)
     add_executable(${target} ${ARGV})
 
     if(MSVC)
-        target_compile_options(${target} PUBLIC /W4)
+        target_compile_options(${target} PUBLIC /W4 /WX)
     else()
-        target_compile_options(${target} PUBLIC -O2 -Wall -Wextra)
+        target_compile_options(${target} PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
     endif()
 
     target_include_directories(${target} PUBLIC ../src/spirit/include)

@@ -58,7 +58,7 @@ float SpeedDataConverter::get_speed(const uint8_t* buffer) const
 {
     uint32_t speed_16bit = 0;
     get_range_value(buffer, 8, 2, 16, speed_16bit);
-    return bfloat16_to_float32(speed_16bit);
+    return bfloat16_to_float32((uint16_t)speed_16bit);
 }
 
 void SpeedDataConverter::set_speed(float speed, uint8_t* buffer) const
@@ -75,11 +75,11 @@ void SpeedDataConverter::get_pid_gain_factor(const uint8_t* buffer, float& kp, f
 
     uint32_t kp_16bit = 0;
     get_range_value(buffer, 7, 18, 16, kp_16bit);
-    kp = bfloat16_to_float32(kp_16bit);
+    kp = bfloat16_to_float32((uint16_t)kp_16bit);
 
     uint32_t ki_16bit = 0;
     get_range_value(buffer, 7, 34, 16, ki_16bit);
-    ki = bfloat16_to_float32(ki_16bit);
+    ki = bfloat16_to_float32((uint16_t)ki_16bit);
 }
 
 void SpeedDataConverter::set_pid_gain_factor(float kp, float ki, float kd, uint8_t* buffer) const
