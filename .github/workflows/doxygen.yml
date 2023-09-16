@@ -26,10 +26,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Run doxygen
-        uses: mattnotmitt/doxygen-action@v1.9.1
+        uses: mattnotmitt/doxygen-action@v1.9.5
         with:
           doxyfile-path: "doxygen/Doxyfile"
       - name: Run doxygen
-        uses: mattnotmitt/doxygen-action@v1.9.1
+        uses: mattnotmitt/doxygen-action@v1.9.5
         with:
           doxyfile-path: "doxygen/Doxyfile4GeneralUsers"
