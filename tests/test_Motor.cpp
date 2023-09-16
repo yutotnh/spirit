@@ -56,8 +56,7 @@ TEST(Motor, InitValueTest)
     EXPECT_EQ(motor.get_sleep(), sleep);
 
     // Errorが発生していないことを確認
-    Error &error = Error::get_instance();
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 /**
@@ -588,8 +587,7 @@ TEST(Motor, ResetTest)
     EXPECT_EQ(motor.get_reset(), false);
 
     // Errorが発生していないことを確認
-    Error &error = Error::get_instance();
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 /**
@@ -605,8 +603,7 @@ TEST(Motor, SleepTest)
     EXPECT_EQ(motor.get_sleep(), false);
 
     // Errorが発生していないことを確認
-    Error &error = Error::get_instance();
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 }  // namespace

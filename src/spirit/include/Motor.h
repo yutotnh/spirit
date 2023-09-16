@@ -104,8 +104,8 @@ public:
      * @brief デューティー比を設定する
      * @param value
      * 設定したいデューティー比
-     * - 0.00F = 0%, 1.00F = 100%
-     * - 範囲: 0.00F <= value <= 1.00F
+     * - 0.00 = 0%, 1.00 = 100%
+     * - 範囲: 0.00 <= value <= 1.00
      * - 範囲を超えた場合は、範囲の端に設定される
      */
     void duty_cycle(float value);
@@ -113,8 +113,8 @@ public:
     /**
      * @brief デューティー比を返す
      * @param value 設定したデューティー比
-     *         - 0.00F = 0%, 1.00F = 100%
-     *         - 範囲: 0.00F <= value <= 1.00F
+     *         - 0.00 = 0%, 1.00 = 100%
+     *         - 範囲: 0.00 <= value <= 1.00
      */
     float get_duty_cycle() const;
 
@@ -283,9 +283,9 @@ public:
         static constexpr ChangeLevel   rise_change_level         = ChangeLevel::OFF;
         static constexpr ChangeLevel   fall_change_level         = ChangeLevel::OFF;
         static constexpr float         maximum_change_duty_cycle = 0.00F;
-        static constexpr float         kp                        = 1.0F;   // 暫定
-        static constexpr float         ki                        = 0.1F;   // 暫定
-        static constexpr float         kd                        = 0.01F;  // 暫定
+        static constexpr float         kp                        = 0.30F;
+        static constexpr float         ki                        = 0.80F;
+        static constexpr float         kd                        = 0.20F;
         static constexpr float         pulse_period              = 1.0F / 5000.0F;
         static constexpr float         release_time              = 0.500F;
         static constexpr Decay         decay                     = Decay::Slow;
