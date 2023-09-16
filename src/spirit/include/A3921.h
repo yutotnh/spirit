@@ -78,7 +78,7 @@ public:
      * @remark run() が実行されるまで、 duty_cycle() で設定した値はモーターに対して影響しない
      * @param value
      * 設定したいデューティー比
-     * - 範囲: 0.00f <= value <= 1.00F
+     * - 範囲: 0.00 <= value <= 1.00
      */
     void duty_cycle(float value);
 
