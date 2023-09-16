@@ -51,13 +51,18 @@ TEST(SpeedController, SpeedControllerTest)
     // 角度(マイナス)
     EXPECT_FLOAT_EQ(speed_controller.angle(), -1.80f);
     // PID計算(リミットなし)
+
     EXPECT_FLOAT_EQ(speed_controller.calculation(0.00f, 1.00f), -0.0125f);
+
     // RPS(マイナスなし)
     EXPECT_FLOAT_EQ(speed_controller.rps(), 0.005f);
 
     speed_controller.limit(1.00f, 0.00f);
     // PID計算(下限リミット)
     EXPECT_FLOAT_EQ(speed_controller.calculation(0.00f, 1.00f), 0.00f);
+
+    // Errorが発生していないことを確認
+    EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);
 }
 
 TEST(SpeedController, SpeedControllerErrorTest)
