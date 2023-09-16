@@ -140,9 +140,9 @@ public:
 
     /**
      * @brief PID制御のゲイン係数を返す
-     * @param kp 比例ゲイン係数
-     * @param ki 積分ゲイン係数
-     * @param kd 微分ゲイン係数
+     * @param [out] kp 比例ゲイン係数
+     * @param [out] ki 積分ゲイン係数
+     * @param [out] kd 微分ゲイン係数
      */
     void get_pid_gain_factor(float& kp, float& ki, float& kd) const;
 

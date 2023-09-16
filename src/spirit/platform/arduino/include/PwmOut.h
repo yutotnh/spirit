@@ -15,6 +15,7 @@ public:
     /**
      * @brief Constructor
      * @param pin PwmOut pin to connect to
+     * @param channel PwmOut channel to connect to
      */
     PwmOut(uint8_t pin, uint8_t channel);
 

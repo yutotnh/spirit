@@ -11,13 +11,29 @@
 
 namespace spirit {
 
+/**
+ * @brief ミューテックス
+ */
 class mutex {
 public:
-    mutex()  = default;
+    /**
+     * @brief コンストラクタ
+     */
+    mutex() = default;
+
+    /**
+     * @brief デストラクタ
+     */
     ~mutex() = default;
 
+    /**
+     * @brief ロックする
+     */
     void lock();
 
+    /**
+     * @brief ロックを解除する
+     */
     void unlock();
 
 private:
