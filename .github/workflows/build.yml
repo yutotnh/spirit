@@ -39,7 +39,7 @@ jobs:
         profile: [release, debug, develop]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: spirit
 
@@ -62,7 +62,7 @@ jobs:
         profile: [release, debug, develop]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: spirit
 
@@ -83,7 +83,7 @@ jobs:
         fqbn: ['esp32:esp32:esp32', 'STMicroelectronics:stm32:GenF3', 'STMicroelectronics:stm32:GenL0', 'arduino:mbed:pico', 'arduino:mbed:envie_m7', 'arduino:mbed:nano33ble']
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Arduino CLI
         uses: arduino/setup-arduino-cli@v1
