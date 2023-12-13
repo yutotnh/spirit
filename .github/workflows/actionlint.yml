@@ -2,10 +2,6 @@ name: Actionlint
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - ".github/workflows/*.ya?ml"
-  pull_request:
     paths:
       - ".github/workflows/*.ya?ml"
   workflow_dispatch:
