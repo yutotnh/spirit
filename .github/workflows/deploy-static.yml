@@ -35,11 +35,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Run doxygen
-        uses: mattnotmitt/doxygen-action@v1.9.5
+        uses: mattnotmitt/doxygen-action@v1.9.8
         with:
           doxyfile-path: "doxygen/Doxyfile"
       - name: Run doxygen
-        uses: mattnotmitt/doxygen-action@v1.9.5
+        uses: mattnotmitt/doxygen-action@v1.9.8
         with:
           doxyfile-path: "doxygen/Doxyfile4GeneralUsers"
       - name: Upload artifact
