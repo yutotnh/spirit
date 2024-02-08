@@ -8,6 +8,7 @@
 
 [![Dependency Review](https://github.com/yutotnh/spirit/actions/workflows/dependency-review.yml/badge.svg?=branch=main)](https://github.com/yutotnh/spirit/actions/workflows/dependency-review.yml)
 [![Deploy static content to Pages](https://github.com/yutotnh/spirit/actions/workflows/deploy-static.yml/badge.svg?=branch=main)](https://github.com/yutotnh/spirit/actions/workflows/deploy-static.yml)
+[![CodeFactor](https://www.codefactor.io/repository/github/yutotnh/spirit/badge)](https://www.codefactor.io/repository/github/yutotnh/spirit)
 
 </div>
 
