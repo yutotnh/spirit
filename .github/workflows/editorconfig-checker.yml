@@ -1,0 +1,18 @@
+# EditorConfig の設定に従っているかをチェックする
+#
+name: EditorConfig Checker
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  editorconfig:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: editorconfig-checker/action-editorconfig-checker@main
+
+      # .gitmodules は自動生成されてインデントスタイルが EditorConfig に従わないため除外
+      # インデントサイズは ClangFormat を使用すると1行が長くなり複数行に分割されたときに改行位置が EditorConfig に従わないため除外
+      - run: editorconfig-checker -disable-indent-size -exclude '.gitmodules'
