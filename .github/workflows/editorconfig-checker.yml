@@ -10,7 +10,7 @@ jobs:
   editorconfig:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: editorconfig-checker/action-editorconfig-checker@main
 
       # .gitmodules は自動生成されてインデントスタイルが EditorConfig に従わないため除外
