@@ -33,7 +33,7 @@ jobs:
         with:
           submodules: true
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
       - name: Run doxygen
         uses: mattnotmitt/doxygen-action@v1.9.8
         with:
