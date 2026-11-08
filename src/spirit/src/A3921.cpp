@@ -26,10 +26,10 @@ void A3921::sleep(const bool enabled)
     }
 }
 
-void A3921::reset(const std::function<void(void)>& sleep)
+void A3921::reset(InterfaceDelay& delay)
 {
     _reset.write(0);
-    sleep();
+    delay.delay_us(reset_pulse_us);
     _reset.write(1);
 }
 
@@ -261,5 +261,10 @@ bool A3921::pulse_period(const float seconds)
 
     return true;
 }
+
+// C++14 では、 static constexpr メンバーを参照渡しなどで使う(odr-use)と、クラス外の定義が必要になる (C++17 以降は不要)
+#if __cplusplus < 201703L
+constexpr uint32_t A3921::reset_pulse_us;
+#endif
 
 }  // namespace spirit

@@ -6,6 +6,7 @@
 #include "spirit/include/CANMessage.h"
 #include "spirit/include/Error.h"
 #include "spirit/include/Id.h"
+#include "spirit/include/InterfaceDelay.h"
 #include "spirit/include/InterfaceDigitalOut.h"
 #include "spirit/include/InterfaceInterruptIn.h"
 #include "spirit/include/InterfacePwmOut.h"
@@ -17,17 +18,19 @@
 #include "spirit/include/adjust_duty_cycle.h"
 #include "spirit/include/bfloat16.h"
 #include "spirit/include/bit.h"
-#include "spirit/include/mutex.h"
 #include "spirit/include/version.h"
 
 #ifdef __MBED__
+#include "spirit/platform/mbed/include/Delay.h"
 #include "spirit/platform/mbed/include/DigitalOut.h"
 #include "spirit/platform/mbed/include/InterruptIn.h"
 #include "spirit/platform/mbed/include/PwmOut.h"
 #endif  // MBED_H
 
 #ifdef ARDUINO
+#include "spirit/platform/arduino/include/Delay.h"
 #include "spirit/platform/arduino/include/DigitalOut.h"
+#include "spirit/platform/arduino/include/InterruptIn.h"
 #include "spirit/platform/arduino/include/PwmOut.h"
 #endif  // ARDUINO
 

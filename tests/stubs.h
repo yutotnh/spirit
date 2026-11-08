@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Error.h"
+#include "InterfaceDelay.h"
 #include "InterfaceDigitalOut.h"
 #include "InterfaceInterruptIn.h"
 #include "InterfacePwmOut.h"
@@ -42,39 +43,43 @@ private:
 class StubInterruptIn : public InterfaceInterruptIn {
 public:
     /**
-     * @brief 立ち上がり時に呼び出される関数を設定する
-     * @param func_rise 立ち上がり時に呼び出される関数
+     * @brief 立ち上がり時に呼び出す処理を設定する
+     * @param handler 立ち上がり時に呼び出す処理 (nullptr の場合は解除する)
      */
-    void rise(std::function<void(void)>& func_rise) override
+    void rise(InterruptHandler* handler) override
     {
-        _func_rise = func_rise;
+        _rise_handler = handler;
     }
 
     /**
-     * @brief 立ち下がり時に呼び出される関数を設定する
-     * @param func_fall 立ち下がり時に呼び出される関数
+     * @brief 立ち下がり時に呼び出す処理を設定する
+     * @param handler 立ち下がり時に呼び出す処理 (nullptr の場合は解除する)
      */
-    void fall(std::function<void(void)>& func_fall) override
+    void fall(InterruptHandler* handler) override
     {
-        _func_fall = func_fall;
+        _fall_handler = handler;
     }
 
     /**
-     * @brief 立ち上がり時に行われる関数呼び出しを再現
+     * @brief 立ち上がり時に行われる割り込みを再現
      */
     void interrupt_rise()
     {
         _value = 1;
-        _func_rise();
+        if (_rise_handler != nullptr) {
+            _rise_handler->on_interrupt();
+        }
     }
 
     /**
-     * @brief 立ち下がり時に行われる関数呼び出しを再現
+     * @brief 立ち下がり時に行われる割り込みを再現
      */
     void interrupt_fall()
     {
         _value = 0;
-        _func_fall();
+        if (_fall_handler != nullptr) {
+            _fall_handler->on_interrupt();
+        }
     }
 
     /**
@@ -87,15 +92,38 @@ public:
         return _value;
     }
 
-private:
-    /// 立ち上がり時に呼び出す関数
-    std::function<void(void)> _func_rise;
+    /// 設定されている立ち上がり時の処理
+    InterruptHandler* rise_handler() const
+    {
+        return _rise_handler;
+    }
 
-    /// 立ち下がり時に呼び出す関数
-    std::function<void(void)> _func_fall;
+    /// 設定されている立ち下がり時の処理
+    InterruptHandler* fall_handler() const
+    {
+        return _fall_handler;
+    }
+
+private:
+    /// 立ち上がり時に呼び出す処理
+    InterruptHandler* _rise_handler{nullptr};
+
+    /// 立ち下がり時に呼び出す処理
+    InterruptHandler* _fall_handler{nullptr};
 
     /// 入力ピンの状態
     uint32_t _value{0};
+};
+
+/// 待った時間を記録する InterfaceDelay
+class StubDelay : public InterfaceDelay {
+public:
+    void delay_us(const uint32_t microseconds) override
+    {
+        calls.push_back(microseconds);
+    }
+
+    std::vector<uint32_t> calls;
 };
 
 class StubPwmOut : public InterfacePwmOut {

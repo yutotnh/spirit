@@ -90,12 +90,30 @@ TEST(A3921, SleepTest)
  * @brief リセット機能のテスト
  * @details テスト内容 @n
  * - A3921::reset() 前後で、 RESETピンが High になっていること
- * - A3921::reset() の実行時間が 3.5us 以上であること
- * @note 0.1us <= rest time <= 3.5us だが、(おそらく)マイコンでないとその範囲におさまらない @n
- * そのため、テストでは与えた関数が実行されて待ち時間が発生していることを検証する
+ * - A3921::reset() の間に、 RESETピンが Low になり、 Reset Pulse の幅(0.1us 以上 3.5us 以下)だけ待つこと
  */
 TEST(A3921, ResetTest)
 {
+    /// 待っている間の RESET ピンの状態を記録する InterfaceDelay
+    class ObservingDelay : public InterfaceDelay {
+    public:
+        explicit ObservingDelay(StubDigitalOut& reset) : _reset(reset)
+        {
+        }
+
+        void delay_us(const uint32_t microseconds) override
+        {
+            waited_us.push_back(microseconds);
+            reset_during_wait.push_back(_reset.read());
+        }
+
+        std::vector<uint32_t> waited_us;
+        std::vector<uint32_t> reset_during_wait;
+
+    private:
+        StubDigitalOut& _reset;
+    };
+
     StubDigitalOut sr;
     StubPwmOut     pwmh;
     StubPwmOut     pwml;
@@ -105,18 +123,16 @@ TEST(A3921, ResetTest)
 
     EXPECT_EQ(reset.read(), 1);
 
-    // 前述の理由で Reset Pulse Time の測定は 100us 待つ関数を与えて、 100us <= 経過時間 になることを確認
+    ObservingDelay delay(reset);
+    a3921.reset(delay);
 
-    std::function<void(void)> sleep = []() { std::this_thread::sleep_for(std::chrono::microseconds(100)); };
-
-    auto start = std::chrono::system_clock::now();
-    a3921.reset(sleep);
-    auto end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    // 1回だけ、 RESET が Low の間に、 Reset Pulse の幅(2us)だけ待つ
+    ASSERT_EQ(delay.waited_us.size(), 1U);
+    EXPECT_EQ(delay.reset_during_wait[0], 0U);
+    EXPECT_GE(delay.waited_us[0], 1U);  // 1us (整数のus) 以上
+    EXPECT_LE(delay.waited_us[0], 3U);  // 3.5us 以下
 
     EXPECT_EQ(reset.read(), 1);
-    EXPECT_LE(100.0e-6, elapsed_seconds.count());
 
     // Errorが発生していないことを確認
     EXPECT_EQ(Error::get_instance().get_status(), spirit::Error::Status::Normal);

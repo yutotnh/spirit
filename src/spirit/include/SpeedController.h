@@ -22,6 +22,14 @@ public:
     SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase,
                     int pulses_per_revolution = default_pulses_per_revolution);
 
+    /**
+     * @brief デストラクタ (A相とB相に登録した割り込みの処理を解除する)
+     */
+    ~SpeedController();
+
+    SpeedController(const SpeedController&)            = delete;
+    SpeedController& operator=(const SpeedController&) = delete;
+
     /// ロータリーエンコーダの1回転あたりのパルス数の既定値
     static constexpr int default_pulses_per_revolution = 200;
 
@@ -69,23 +77,26 @@ public:
      */
     float rps();
 
-    /**
-     * @brief ロータリーエンコーダのA相が変化した際の処理を行う @n
-     *        Mbed とそれ以外(テスト用のスタブ)ではコンストラクタが割り込みに登録するので、呼び出す必要はない @n
-     *        Arduino の attachInterrupt() は呼び出し先にインスタンスを渡せないため、 @n
-     *        A相の立ち上がり・立ち下がりの割り込みハンドラから、この関数を呼び出す
-     */
-    void a_phase_interrupt();
-
-    /**
-     * @brief ロータリーエンコーダのB相が変化した際の処理を行う @n
-     *        A相と同様に、Arduino ではB相の割り込みハンドラから、この関数を呼び出す
-     */
-    void b_phase_interrupt();
-
 private:
+    /// ロータリーエンコーダの A相・B相の変化で呼び出される処理
+    class PhaseHandler : public InterruptHandler {
+    public:
+        PhaseHandler(SpeedController& controller, bool is_a_phase) : _controller(controller), _is_a_phase(is_a_phase)
+        {
+        }
+
+        void on_interrupt() override;
+
+    private:
+        SpeedController& _controller;
+        bool             _is_a_phase;
+    };
+
     InterfaceInterruptIn& _a_phase;
     InterfaceInterruptIn& _b_phase;
+
+    PhaseHandler _a_handler{*this, true};
+    PhaseHandler _b_handler{*this, false};
 
     float _kp{0.0f};
     float _ki{0.0f};

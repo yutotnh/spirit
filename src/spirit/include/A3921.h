@@ -3,6 +3,7 @@
 
 #include <functional>
 
+#include "InterfaceDelay.h"
 #include "InterfaceDigitalOut.h"
 #include "InterfacePwmOut.h"
 #include "Motor.h"
@@ -60,18 +61,15 @@ public:
      */
     void sleep(bool enabled);
 
+    /// リセットパルスの幅(us) (A3921 の仕様: 最小 0.1us、最大 3.5us)
+    static constexpr uint32_t reset_pulse_us = 2;
+
     /**
      * @brief A3921 のリセット機能を実行する
-     * @param sleep 実行時にReset Pulse 時間分(最小: 0.1us, 最大3.5us)だけ待つ関数
-     * @code {.cpp}
-     * std::function<void(void)> sleep = []() { std::this_thread::sleep_for(std::chrono::microseconds(1)); }; // C++11
-     * std::function<void(void)> sleep = []() { wait_us(1); }; // Mbed OS 6
-     *
-     * a3921.reset(sleep);
-     * @endcode
-     *
+     * @param delay リセットパルスの幅(reset_pulse_us)だけ待つために使う InterfaceDelay
+     * @details RESET ピンを Low にして、 reset_pulse_us だけ待ってから、 High に戻す
      */
-    void reset(const std::function<void(void)>& sleep);
+    void reset(InterfaceDelay& delay);
 
     /**
      * @brief デューティー比を設定する

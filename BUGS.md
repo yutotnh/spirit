@@ -20,7 +20,7 @@
 | #7 bfloat16 の極小値 | 修正済み。2^-126 未満は符号付きの 0 にする。非正規化数のデコードも修正 |
 | #8 積分の巻き上がり | 修正済み。積分項が上限・下限に達したら誤差を蓄積しない |
 | 仕様と実装の食い違い | `Motor.h` のドキュメントを実装に合わせて修正。`kd` は受信で上書きせず、Motor の値を維持するよう変更 |
-| Arduino: `SpeedController` の割り込み | 修正済み（API 追加）。Arduino は `attachInterrupt()` にインスタンスを渡せないため、`a_phase_interrupt()` / `b_phase_interrupt()` を public にし、ハンドラから呼ぶ形にした |
+| Arduino: `SpeedController` の割り込み | 修正済み。`InterfaceInterruptIn` を、`InterruptHandler` を渡す形に統一し、Arduino 用のアダプター（`arduino::InterruptIn`）が、`attachInterrupt()` のトランポリン関数（最大8個）で受ける。`SpeedController` は、コンストラクタで登録し、デストラクタで解除する |
 | Arduino: `PwmOut` | 修正済み。ESP32 は `dacWrite`（DAC）をやめ、LEDC（ハードウェア PWM）を使う。Arduino core 2.x（チャンネル指定）と 3.x（ピン指定）の両方に対応し、`period()` で周波数を変更できる。それ以外のボードは `analogWrite()` のままで、周期は変更できない。範囲外の値はクランプしてから変換する |
 | NaN が通る箇所 | 修正済み。`Motor` の各設定、`A3921::duty_cycle`、`SpeedController::calculation` が NaN を拒否する |
 | デューティー比の16bit化 | 修正済み。切り捨てから四捨五入にした（誤差は最大 約7.6e-6 で、以前の約1.5e-5 の半分） |
@@ -177,13 +177,12 @@ Peripheral の受信バッファが固定長配列なら、切れたフレーム
 | `get_status()` と `reset()` がロックなし（データ競合） | 修正済み。状態を `std::atomic` にした（ThreadSanitizer で確認）。状態は、リセットされるまで最も重いもの（Error > Warning）を保つ |
 | `code` 引数が全65か所で 0 | 修正済み。引数と `get_code()` を削除した |
 | 出力先が `stderr`/`printf` に固定 | 修正済み。`ErrorHandler`（DI）を `Error::set_handler()` で差し替えられる。`SPIRIT_ERROR_DEFAULT_HANDLER=0` でビルドすると、既定の出力と標準入出力が不要になる（記号が消えることを確認）。`tests/stubs.h` に、内容を記録する `RecordingErrorHandler` がある |
-| `spirit::mutex` が STM32/Mbed 版の Arduino で空 | `Error` の状態更新からミューテックスを外した。残るのは、既定の出力ハンドラ（出力が混ざらないようにする用途）だけ。割り込みから通知する場合は、別の `ErrorHandler` を設定すること（`Error.h` に記載） |
+| `spirit::mutex` が STM32/Mbed 版の Arduino で空 | 修正済み。`Error` からミューテックスを外し、既定の出力ハンドラも、出力を1つの文字列にして1回で出す形にした。`spirit::mutex` クラスは削除した |
 | C++14 の ODR | 修正済み。`Motor`、`CANMessage`、`MdLed`、`SpeedController` にクラス外の定義を追加し、`tests/test_odr.cpp` で参照渡しでもリンクできることを確認 |
 | `CANMessage` のバッファ溢れと `nullptr` | 修正済み。`get_data(buffer, buffer_size)` に変更し、`data` が `nullptr` なら長さ0のメッセージにする |
 | `SpeedController` の `limit()` 未設定で出力 0、PPR 固定 | 修正済み。既定の上下限を 1.0 / 0.0 にし、PPR をコンストラクタの引数にした。割り込みと共有するカウンターは `std::atomic`（`volatile` は C++20 で非推奨のため） |
 | バージョンの重複 | 食い違いを検出するテストを追加（`tests/test_version.cpp`）。3か所の手書きは残したまま |
-| プラットフォームの抽象化（`__MBED__`/`ARDUINO` の分岐、`InterfaceInterruptIn`） | **未対応**（設計が必要） |
-| `std::function`（`A3921::reset()` など） | **未対応** |
-| `Error` の `spirit::mutex` 自体（STM32/Mbed 版の Arduino で空） | **未対応**（`Error` は使わなくなったが、`mutex` クラスは残っている） |
+| プラットフォームの抽象化（`__MBED__`/`ARDUINO` の分岐、`InterfaceInterruptIn`） | 修正済み。ライブラリ本体から分岐を全て除き、プラットフォームごとの処理を `platform/{mbed,arduino}/` のアダプターに閉じ込めた。`InterfaceInterruptIn` はプラットフォームに依らず1つの形（`InterruptHandler`）。`InterfaceDelay` を追加した。アダプターは、スタブでホスト上でテストしている（`tests/test_mbed.cpp`、`tests/test_arduino.cpp`） |
+| `std::function`（`A3921::reset()` など） | 修正済み。`A3921::reset(InterfaceDelay&)` にした（リセットパルスの幅は `reset_pulse_us` = 2us）。ライブラリ本体から `std::function` を除いた |
 
 ライブラリは、C++14・17・20 のいずれでも、`-Wall -Wextra -pedantic -Werror` で警告なくコンパイルできることを確認しました（g++ 15）。

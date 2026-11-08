@@ -69,6 +69,7 @@ if(DEFINED MBED_PATH)
 
     target_sources(spirit-platform-mbed
         PUBLIC
+        ./src/spirit/platform/mbed/source/Delay.cpp
         ./src/spirit/platform/mbed/source/DigitalOut.cpp
         ./src/spirit/platform/mbed/source/InterruptIn.cpp
         ./src/spirit/platform/mbed/source/PwmOut.cpp

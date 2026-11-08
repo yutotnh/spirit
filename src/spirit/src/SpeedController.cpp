@@ -17,23 +17,21 @@ SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterru
         _deg_unit = 360.0f / static_cast<float>(pulses_per_revolution) / 4.0f;
     }
 
-#if defined(__MBED__) && !defined(ARDUINO)
-    _a_phase.rise(mbed::callback(this, &SpeedController::a_phase_interrupt));
-    _a_phase.fall(mbed::callback(this, &SpeedController::a_phase_interrupt));
-    _b_phase.rise(mbed::callback(this, &SpeedController::b_phase_interrupt));
-    _b_phase.fall(mbed::callback(this, &SpeedController::b_phase_interrupt));
-#elif defined(ARDUINO)
-    // Arduino の attachInterrupt() は呼び出し先にインスタンスを渡せないので、ここでは登録しない
-    // 呼び出し側が A相・B相の割り込みハンドラから a_phase_interrupt() / b_phase_interrupt() を呼ぶ
-#else
-    std::function<void(void)> func_a = std::bind(&SpeedController::a_phase_interrupt, this);
-    std::function<void(void)> func_b = std::bind(&SpeedController::b_phase_interrupt, this);
-    _a_phase.rise(func_a);
-    _a_phase.fall(func_a);
-    _b_phase.rise(func_b);
-    _b_phase.fall(func_b);
-#endif
+    // A相・B相のどちらも、立ち上がりと立ち下がりの両方で、カウンターを更新する
+    _a_phase.rise(&_a_handler);
+    _a_phase.fall(&_a_handler);
+    _b_phase.rise(&_b_handler);
+    _b_phase.fall(&_b_handler);
     reset();
+}
+
+SpeedController::~SpeedController()
+{
+    // このインスタンスが無くなった後に、割り込みが無効なポインタを呼び出さないようにする
+    _a_phase.rise(nullptr);
+    _a_phase.fall(nullptr);
+    _b_phase.rise(nullptr);
+    _b_phase.fall(nullptr);
 }
 
 float SpeedController::calculation(float target_rps, float dt)
@@ -175,22 +173,14 @@ void SpeedController::add_angle_counter(const int delta)
     _angle_counter.store(_angle_counter.load(std::memory_order_relaxed) + delta, std::memory_order_relaxed);
 }
 
-void SpeedController::a_phase_interrupt()
+void SpeedController::PhaseHandler::on_interrupt()
 {
-    if (_a_phase.read() != _b_phase.read()) {
-        add_angle_counter(1);
-    } else {
-        add_angle_counter(-1);
-    }
-}
+    const bool same = _controller._a_phase.read() == _controller._b_phase.read();
 
-void SpeedController::b_phase_interrupt()
-{
-    if (_a_phase.read() == _b_phase.read()) {
-        add_angle_counter(1);
-    } else {
-        add_angle_counter(-1);
-    }
+    // A相の変化では A と B が異なれば正転、 B相の変化では A と B が同じなら正転 (A相が先行する向きを正転とする)
+    const bool forward = _is_a_phase ? !same : same;
+
+    _controller.add_angle_counter(forward ? 1 : -1);
 }
 
 float SpeedController::angle()

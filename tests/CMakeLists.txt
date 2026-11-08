@@ -60,27 +60,26 @@ add_gtest(test_version.cpp)
 target_compile_definitions(test_version PRIVATE SPIRIT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
 # Arduino 用のコードを、 Arduino.h のスタブを使ってホスト上でテストする
-# ARDUINO を定義するとライブラリ全体のヘッダの内容が変わるため、ライブラリ(spirit)とはリンクせず、必要なソースを直接ビルドする
+# ライブラリ本体(spirit)はプラットフォームに依存しないので、そのままリンクできる (ARDUINO を定義するのは、アダプターだけ)
 function(add_arduino_gtest target)
     add_executable(${target}
         test_arduino.cpp
         ../src/spirit/platform/arduino/src/DigitalOut.cpp
         ../src/spirit/platform/arduino/src/PwmOut.cpp
-        ../src/spirit/src/Error.cpp
-        ../src/spirit/src/mutex.cpp
-        ../src/spirit/src/SpeedController.cpp
+        ../src/spirit/platform/arduino/src/InterruptIn.cpp
+        ../src/spirit/platform/arduino/src/Delay.cpp
     )
 
-    # ライブラリ(spirit)とはリンクしないので、 spirit が PUBLIC に設定している /utf-8 を引き継がない
+    # ライブラリ(spirit)が PUBLIC に設定しているコンパイルオプション(MSVC の /utf-8 を含む)を引き継ぐので、 add_gtest と同様に警告の設定だけ足す
     if(MSVC)
-        target_compile_options(${target} PUBLIC /W4 /WX /utf-8)
+        target_compile_options(${target} PUBLIC /W4 /WX)
     else()
         target_compile_options(${target} PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
     endif()
 
     target_compile_definitions(${target} PRIVATE ARDUINO=10819 ${ARGN})
     target_include_directories(${target} PRIVATE arduino_stub ../src ../src/spirit/include)
-    target_link_libraries(${target} PRIVATE gtest_main)
+    target_link_libraries(${target} PRIVATE gtest_main spirit)
     gtest_discover_tests(${target})
 endfunction()
 
@@ -105,3 +104,23 @@ target_compile_definitions(test_error_no_default_handler PRIVATE SPIRIT_ERROR_DE
 target_include_directories(test_error_no_default_handler PRIVATE ../src ../src/spirit/include .)
 target_link_libraries(test_error_no_default_handler PRIVATE gtest_main)
 gtest_discover_tests(test_error_no_default_handler)
+
+# Mbed 用のコードを、 mbed.h のスタブを使ってホスト上でテストする
+add_executable(test_mbed
+    test_mbed.cpp
+    ../src/spirit/platform/mbed/source/Delay.cpp
+    ../src/spirit/platform/mbed/source/DigitalOut.cpp
+    ../src/spirit/platform/mbed/source/InterruptIn.cpp
+    ../src/spirit/platform/mbed/source/PwmOut.cpp
+)
+
+if(MSVC)
+    target_compile_options(test_mbed PUBLIC /W4 /WX)
+else()
+    target_compile_options(test_mbed PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
+endif()
+
+target_compile_definitions(test_mbed PRIVATE __MBED__)
+target_include_directories(test_mbed PRIVATE mbed_stub ../src ../src/spirit/include)
+target_link_libraries(test_mbed PRIVATE gtest_main spirit)
+gtest_discover_tests(test_mbed)

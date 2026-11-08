@@ -12,11 +12,15 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
+#include <vector>
 
 #include "Arduino.h"
 #include "Error.h"
 #include "SpeedController.h"
+#include "spirit/platform/arduino/include/Delay.h"
 #include "spirit/platform/arduino/include/DigitalOut.h"
+#include "spirit/platform/arduino/include/InterruptIn.h"
 #include "spirit/platform/arduino/include/PwmOut.h"
 
 namespace {
@@ -28,7 +32,8 @@ protected:
     void SetUp() override
     {
         arduino_stub::calls().clear();
-        arduino_stub::digital_read_value() = LOW;
+        arduino_stub::digital_read_values().clear();
+        arduino_stub::interrupts().clear();
     }
 
     static bool called(const std::string& call)
@@ -56,7 +61,7 @@ TEST_F(ArduinoTest, DigitalOut)
     out.write(7);
     EXPECT_EQ(last_call(), "digitalWrite(5,1,0)");
 
-    arduino_stub::digital_read_value() = HIGH;
+    arduino_stub::digital_read_values()[5] = HIGH;
     EXPECT_EQ(out.read(), 1U);
 }
 
@@ -182,44 +187,121 @@ TEST_F(ArduinoTest, AnalogWrite)
 
 #endif  // ESP32
 
-/// Arduino では割り込みの登録をライブラリではできないので、ハンドラから呼ぶ関数でエンコーダーの回転を数えられることの確認
-class FakePin : public InterfaceInterruptIn {
+/// 割り込みの処理の呼び出しを数える InterruptHandler
+class CountingHandler : public InterruptHandler {
 public:
-    uint32_t read() override
+    void on_interrupt() override
     {
-        return value;
+        count++;
     }
-    uint32_t value{0};
+
+    int count{0};
 };
 
-TEST_F(ArduinoTest, SpeedControllerCountsWithoutInterruptRegistration)
+TEST_F(ArduinoTest, Delay)
 {
-    FakePin         a;
-    FakePin         b;
-    SpeedController controller(a, b);
+    arduino::Delay delay;
+    delay.delay_us(2);
+    EXPECT_EQ(last_call(), "delayMicroseconds(2,0,0)");
+}
+
+TEST_F(ArduinoTest, InterruptInAttachesAccordingToHandlers)
+{
+    arduino::InterruptIn pin(2);
+    CountingHandler      rise, fall;
+
+    // 何も登録していないときは、 attachInterrupt() を呼ばない
+    EXPECT_TRUE(arduino_stub::interrupts().empty());
+
+    pin.rise(&rise);
+    ASSERT_EQ(arduino_stub::interrupts().count(2), 1U);
+    EXPECT_EQ(arduino_stub::interrupts()[2].mode, RISING);
+
+    pin.fall(&fall);
+    EXPECT_EQ(arduino_stub::interrupts()[2].mode, CHANGE);
+
+    pin.rise(nullptr);
+    EXPECT_EQ(arduino_stub::interrupts()[2].mode, FALLING);
+
+    pin.fall(nullptr);
+    EXPECT_TRUE(arduino_stub::interrupts().empty());
+    EXPECT_TRUE(called("detachInterrupt(2,0,0)"));
+}
+
+TEST_F(ArduinoTest, InterruptInDispatchesToTheOwnHandler)
+{
+    arduino::InterruptIn pin_a(2);
+    arduino::InterruptIn pin_b(3);
+    CountingHandler      rise_a, fall_a, rise_b;
+
+    pin_a.rise(&rise_a);
+    pin_a.fall(&fall_a);
+    pin_b.rise(&rise_b);
+
+    // CHANGE のピンは、立ち上がりか立ち下がりかを、ピンの状態で判断する
+    arduino_stub::digital_read_values()[2] = HIGH;
+    EXPECT_TRUE(arduino_stub::fire_interrupt(2));
+    arduino_stub::digital_read_values()[2] = LOW;
+    EXPECT_TRUE(arduino_stub::fire_interrupt(2));
+    EXPECT_TRUE(arduino_stub::fire_interrupt(3));
+
+    EXPECT_EQ(rise_a.count, 1);
+    EXPECT_EQ(fall_a.count, 1);
+    EXPECT_EQ(rise_b.count, 1);  // ピン3 は、ピン2 の割り込みの影響を受けない
+}
+
+TEST_F(ArduinoTest, InterruptInReleasesSlotOnDestruction)
+{
+    // スロットは max_instances 個まで。破棄すると、再利用できる
+    std::vector<std::unique_ptr<arduino::InterruptIn>> pins;
+    for (uint8_t i = 0; i < arduino::InterruptIn::max_instances; i++) {
+        pins.emplace_back(new arduino::InterruptIn(static_cast<uint8_t>(10 + i)));
+    }
+
+    testing::internal::CaptureStderr();
+    Error::get_instance().reset();
+    arduino::InterruptIn overflow(30);
+    EXPECT_EQ(Error::get_instance().get_status(), Error::Status::Error);
+    testing::internal::GetCapturedStderr();
+
+    CountingHandler handler;
+    overflow.rise(&handler);  // スロットがないので、何も登録されない
+    EXPECT_TRUE(arduino_stub::interrupts().empty());
+
+    pins.pop_back();
+    arduino::InterruptIn reuse(31);
+    Error::get_instance().reset();
+    reuse.rise(&handler);
+    EXPECT_EQ(arduino_stub::interrupts().count(31), 1U);
+    EXPECT_EQ(Error::get_instance().get_status(), Error::Status::Normal);
+}
+
+/// Arduino のアダプターで、エンコーダーのパルスをカウントして、速度制御ができることの確認 (SpeedController が割り込みを登録する)
+TEST_F(ArduinoTest, SpeedControllerCountsThroughAdapter)
+{
+    arduino::InterruptIn a(2);
+    arduino::InterruptIn b(3);
+    SpeedController      controller(a, b);
     controller.limit(1000.0F, -1000.0F);
+
+    auto change = [](int pin, int value) {
+        arduino_stub::digital_read_values()[pin] = value;
+        EXPECT_TRUE(arduino_stub::fire_interrupt(pin));
+    };
 
     // 正転(A相が先行): A↑ B↑ A↓ B↓ で 1.8° (4逓倍)
     auto forward = [&]() {
-        a.value = 1;
-        controller.a_phase_interrupt();
-        b.value = 1;
-        controller.b_phase_interrupt();
-        a.value = 0;
-        controller.a_phase_interrupt();
-        b.value = 0;
-        controller.b_phase_interrupt();
+        change(2, 1);
+        change(3, 1);
+        change(2, 0);
+        change(3, 0);
     };
     // 逆転(B相が先行)
     auto backward = [&]() {
-        b.value = 1;
-        controller.b_phase_interrupt();
-        a.value = 1;
-        controller.a_phase_interrupt();
-        b.value = 0;
-        controller.b_phase_interrupt();
-        a.value = 0;
-        controller.a_phase_interrupt();
+        change(3, 1);
+        change(2, 1);
+        change(3, 0);
+        change(2, 0);
     };
 
     forward();

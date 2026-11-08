@@ -29,6 +29,7 @@
         "gitmodules",
         "gitsubmodule",
         "googletest",
+        "IRAM",
         "gtest",
         "INTERRUPTIN",
         "jidicula",

@@ -169,4 +169,51 @@ TEST(SpeedController, PulsesPerRevolution)
     Error::get_instance().reset();
 }
 
+/// SpeedController が割り込みの処理を登録し、破棄されると解除することの確認
+TEST(SpeedController, RegistersAndUnregistersHandlers)
+{
+    StubInterruptIn a_phase;
+    StubInterruptIn b_phase;
+
+    {
+        SpeedController speed_controller(a_phase, b_phase);
+        EXPECT_NE(a_phase.rise_handler(), nullptr);
+        EXPECT_EQ(a_phase.rise_handler(), a_phase.fall_handler());  // 立ち上がりと立ち下がりで同じ処理
+        EXPECT_NE(b_phase.rise_handler(), nullptr);
+        EXPECT_EQ(b_phase.rise_handler(), b_phase.fall_handler());
+        EXPECT_NE(a_phase.rise_handler(), b_phase.rise_handler());
+    }
+
+    // 破棄された後は、割り込みが発生しても、何も呼び出されない(無効なポインタを使わない)
+    EXPECT_EQ(a_phase.rise_handler(), nullptr);
+    EXPECT_EQ(a_phase.fall_handler(), nullptr);
+    EXPECT_EQ(b_phase.rise_handler(), nullptr);
+    EXPECT_EQ(b_phase.fall_handler(), nullptr);
+    a_phase.interrupt_rise();
+    b_phase.interrupt_fall();
+}
+
+/// 正転(A相が先行)と逆転(B相が先行)で、カウントの向きが逆になることの確認
+TEST(SpeedController, DirectionFromPhaseOrder)
+{
+    StubInterruptIn a_phase;
+    StubInterruptIn b_phase;
+    SpeedController speed_controller(a_phase, b_phase);
+
+    // 正転: A↑ B↑ A↓ B↓
+    a_phase.interrupt_rise();
+    EXPECT_FLOAT_EQ(speed_controller.angle(), 0.45f);
+    b_phase.interrupt_rise();
+    a_phase.interrupt_fall();
+    b_phase.interrupt_fall();
+    EXPECT_FLOAT_EQ(speed_controller.angle(), 1.8f);
+
+    // 逆転: B↑ A↑ B↓ A↓
+    b_phase.interrupt_rise();
+    a_phase.interrupt_rise();
+    b_phase.interrupt_fall();
+    a_phase.interrupt_fall();
+    EXPECT_FLOAT_EQ(speed_controller.angle(), 0.0f);
+}
+
 }  // namespace

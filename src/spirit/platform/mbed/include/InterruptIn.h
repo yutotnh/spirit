@@ -1,6 +1,7 @@
 #ifndef SPIRIT_MBED_INTERRUPTIN_H
 #define SPIRIT_MBED_INTERRUPTIN_H
 
+// ArduinoのMbedではCallbackが使えないので、定義しない
 #if !defined(ARDUINO)
 
 #include "mbed.h"
@@ -10,6 +11,10 @@ namespace spirit {
 
 namespace mbed {
 
+/**
+ * @brief Mbed の InterruptIn を使った InterfaceInterruptIn
+ * @details Mbed の Callback は、ヒープを使わずにメンバー関数を保持できるので、 InterruptHandler をそのまま登録する
+ */
 class InterruptIn : public InterfaceInterruptIn {
 public:
     /**
@@ -19,27 +24,14 @@ public:
     InterruptIn(PinName pin);
 
     /**
-     * @brief Destructor
+     * @brief Destructor (割り込みを解除する)
      */
     ~InterruptIn();
 
-    /**
-     * @brief 立ち上がり時に呼び出される関数を設定する
-     * @param func_rise 立ち上がり時に呼び出される関数
-     */
-    void rise(Callback<void()> func) override;
+    void rise(InterruptHandler* handler) override;
 
-    /**
-     * @brief 立ち下がり時に呼び出される関数を設定する
-     * @param func 立ち下がり時に呼び出される関数
-     */
-    void fall(Callback<void()> func) override;
+    void fall(InterruptHandler* handler) override;
 
-    /**
-     * @brief 入力ピンの状態を返す
-     * @retval 0 Low
-     * @retval 1 High
-     */
     uint32_t read() override;
 
 private:

@@ -2,12 +2,7 @@
 
 #include <cstdio>
 
-#include "spirit/include/mutex.h"
 #include "spirit/include/version.h"
-
-#ifdef __MBED__
-#include "mbed.h"
-#endif
 
 namespace spirit {
 
@@ -52,35 +47,31 @@ public:
             }
         };
 
-        // 複数のスレッドから呼び出されても、出力が混ざらないようにする
-        // (Mbed では Mutex を使うので、割り込みの中では呼び出せない。割り込みから通知する場合は、別の ErrorHandler を設定すること)
-        _mutex.lock();
+        // 出力が混ざらないように(ミューテックスを使わなくて済むように)、全体を1つの文字列にして、1回で出力する
+        char text[max_text_length];
+        std::snprintf(text, sizeof(text),
+                      "%s:\n"
+                      "\tType: %s\n"
+                      "\tVersion: %s\n"
+                      "\tFile: %s\n"
+                      "\tFunction: %s\n"
+                      "\tLine: %u\n"
+                      "\tMessage: %s\n\n",
+                      status_to_string(info.status), type_to_string(info.type), version::string, info.filename,
+                      info.funcname, static_cast<unsigned int>(info.line_number), info.message);
 
+        // Mbed は、標準出力がコンソールになる
 #ifdef __MBED__
-        printf(
+        std::fputs(text, stdout);
 #else
-        std::fprintf(
-            stderr,
-#endif
-            "%s:\n"
-            "\tType: %s\n"
-            "\tVersion: %s\n"
-            "\tFile: %s\n"
-            "\tFunction: %s\n"
-            "\tLine: %u\n"
-            "\tMessage: %s\n\n",
-            status_to_string(info.status), type_to_string(info.type), version::string, info.filename, info.funcname,
-            static_cast<unsigned int>(info.line_number), info.message);
-
-#ifndef __MBED__
+        std::fputs(text, stderr);
         std::fflush(stderr);
 #endif
-
-        _mutex.unlock();
     }
 
 private:
-    spirit::mutex _mutex;
+    /// 出力する文字列の最大バッファサイズ (メッセージ + ファイル名などの付加情報)
+    static constexpr std::size_t max_text_length = Error::max_message_length + 320;
 };
 
 DefaultErrorHandler& default_error_handler()
