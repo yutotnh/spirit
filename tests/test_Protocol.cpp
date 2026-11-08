@@ -654,7 +654,9 @@ TEST(Protocol, InvalidItemValuesAreRejected)
 TEST(Protocol, InvalidGainsAreRejected)
 {
     // 負、 +inf、 NaN の bfloat16
-    for (const uint16_t bad : {0xBF80 /* -1.0 */, 0x7F80, 0x7FC0}) {
+    // (初期化リストの要素の型は int になり、 uint16_t への変換が MSVC の警告(C4244)になるので、配列にする)
+    const uint16_t invalid_gains[] = {0xBF80 /* -1.0 */, 0x7F80, 0x7FC0};
+    for (const uint16_t bad : invalid_gains) {
         for (int position = 0; position < 3; position++) {
             uint8_t   buffer[8];
             BitWriter writer(buffer, sizeof(buffer));
