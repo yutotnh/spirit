@@ -159,3 +159,10 @@ Peripheral の受信バッファが固定長配列なら、切れたフレーム
 - **`kd` は送られない:** 速度制御のパケットは 52bit で、`kd`（16bit）を足すと CAN の 64bit を超えます。プロトコルの変更が必要なため、受信側の Motor が持つ値を維持する動作のままです。
 - **`ChangeLevel` の時間（0.1 / 0.5 / 1 / 3 秒）と PID のゲイン:** 目安です。実機で調整してください。
 - **Mbed で割り込みコンテキストから `Error::error()` を呼ばないこと:** `Mutex` と `printf` を使うため。ライブラリ自身の割り込みハンドラは `Error` を呼びません。
+
+## 追記: プロトコルの再設計
+
+上の #0、#3 と、`kd` が送れない問題は、プロトコルの再設計（`PROTOCOL.md`）で、問題のあったコンバーターごと置き換えました。
+`PwmDataConverter`、`SpeedDataConverter`、`MotorDataConverter`、`FakeUdpConverter` は削除し、`protocol::encode_control()`、`encode_config()`、`decode()` に置き換えています。
+`kd` を含む `Motor` の全設定が送れるようになり、未知の項目・型や壊れたデータは、`Motor` を変更せずに拒否します。
+旧テストの `integration_test` には、速度の確認が受信側ではなく送信側の `Motor` を参照している誤りがありました（新しいテストでは受信側と比較しています）。

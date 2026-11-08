@@ -1,149 +1,209 @@
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include "spirit.h"
 
 namespace {
 
-struct CANMessage {
+/// 実際の CAN のフレーム (8バイトまで)
+struct CANFrame {
     uint32_t    id;
     uint8_t     data[8];
     std::size_t len;
 };
 
-/**
- * @brief 簡易的な結合テスト(デューティー比とモータの状態を送信し、受信側でモータの状態とデューティー比を比較する)
- */
-TEST(IntegrationTest, 1)
+constexpr uint32_t dip_switch = 0x05;
+
+/// 送信側 (Controller): Motor から CAN のフレームを作る
+CANFrame controller_control(const spirit::Motor& motor)
 {
-    constexpr uint32_t dip_sw = 0x00;
+    CANFrame frame{};
+    EXPECT_TRUE(spirit::can::get_motor_id(2, 1, dip_switch, frame.id));
+    EXPECT_TRUE(spirit::protocol::encode_control(motor, frame.data, sizeof(frame.data), frame.len));
+    return frame;
+}
 
-    /// 送信側
-    auto controller = [=](const spirit::Motor &motor) {
-        spirit::FakeUdpConverter   fake_udp;
-        spirit::MotorDataConverter motor_data;
-        uint32_t                   can_id = 0;
-        EXPECT_TRUE(spirit::can::get_motor_id(1, 0, dip_sw, can_id));
+/// 送信側 (Controller): 全設定を1周分のフレームにする
+std::vector<CANFrame> controller_config(const spirit::Motor& motor)
+{
+    std::vector<CANFrame> frames;
+    std::size_t           index = 0;
+    do {
+        CANFrame    frame{};
+        std::size_t next_index = 0;
+        EXPECT_TRUE(spirit::can::get_motor_id(2, 1, dip_switch, frame.id));
+        EXPECT_TRUE(
+            spirit::protocol::encode_config(motor, index, frame.data, sizeof(frame.data), frame.len, next_index));
+        frames.push_back(frame);
+        index = next_index;
+    } while ((index != 0) && (frames.size() < 10));
+    return frames;
+}
 
-        constexpr std::size_t max_motor_data_buffer_size = 64;
-        uint8_t               motor_data_buffer[8]       = {};
-        std::size_t           motor_data_buffer_size;
+/// 受信側 (Peripheral): 自分宛てのフレームを受け取って、 Motor を更新する
+spirit::protocol::DecodeResult peripheral(const CANFrame& frame, spirit::Motor& motor)
+{
+    uint32_t id = 0;
+    EXPECT_TRUE(spirit::can::get_motor_id(2, 1, dip_switch, id));
+    EXPECT_EQ(frame.id, id);
 
-        constexpr std::size_t max_fake_udp_buffer_size = 64;
-        uint8_t               fake_udp_buffer[8]       = {};
-        std::size_t           fake_udp_buffer_size;
+    return spirit::protocol::decode(frame.data, frame.len, motor);
+}
 
-        motor_data.encode(motor, max_motor_data_buffer_size, motor_data_buffer, motor_data_buffer_size);
+/// CANMessage (MbedのCANMessageを模したクラス) を経由しても、データが変わらないことの確認
+CANFrame through_can_message(const CANFrame& frame)
+{
+    const spirit::CANMessage message(static_cast<uint16_t>(frame.id), frame.data, static_cast<uint8_t>(frame.len));
 
-        fake_udp.encode(motor_data_buffer, motor_data_buffer_size, max_fake_udp_buffer_size, fake_udp_buffer,
-                        fake_udp_buffer_size);
+    CANFrame result{};
+    result.id  = message.get_id();
+    result.len = message.get_length();
+    message.get_data(result.data);
+    return result;
+}
 
-        ::CANMessage message;
-        message.id = can_id;
-        if (fake_udp_buffer_size % 8) {
-            message.len = (fake_udp_buffer_size / 8) + 1;
-        } else {
-            message.len = fake_udp_buffer_size / 8;
+/**
+ * @brief 結合テスト: Controller の Motor を、制御パケットと設定パケットで送り、 Peripheral の Motor と比較する
+ */
+TEST(IntegrationTest, PwmControl)
+{
+    spirit::Error::get_instance().reset();
+
+    for (const auto state : {spirit::Motor::State::Coast, spirit::Motor::State::Brake, spirit::Motor::State::CW,
+                             spirit::Motor::State::CCW}) {
+        for (const float duty_cycle : {0.0F, 0.2F, 0.5F, 0.75F, 1.0F}) {
+            spirit::Motor controller_motor;
+            controller_motor.control_system(spirit::Motor::ControlSystem::PWM);
+            controller_motor.state(state);
+            controller_motor.duty_cycle(duty_cycle);
+
+            spirit::Motor received;
+            const auto    result = peripheral(through_can_message(controller_control(controller_motor)), received);
+
+            EXPECT_EQ(result.status, spirit::protocol::DecodeStatus::Applied);
+            EXPECT_TRUE(result.is_control());
+            EXPECT_EQ(received.get_control_system(), spirit::Motor::ControlSystem::PWM);
+            EXPECT_EQ(received.get_state(), state);
+            // デューティー比は16bitで表現しているため、量子化の幅の半分の誤差を許容する
+            EXPECT_NEAR(received.get_duty_cycle(), duty_cycle, 0.5F / 65535.0F + 1e-7F);
         }
+    }
 
-        memmove(message.data, fake_udp_buffer, 8);
+    EXPECT_EQ(spirit::Error::get_instance().get_status(), spirit::Error::Status::Normal);
+}
 
-        return message;
-    };
+TEST(IntegrationTest, SpeedControl)
+{
+    spirit::Error::get_instance().reset();
 
-    /// 受信側
-    auto peripheral = [=](const ::CANMessage &message) {
-        spirit::FakeUdpConverter   fake_udp;
-        spirit::MotorDataConverter motor_data;
+    for (const auto state : {spirit::Motor::State::Coast, spirit::Motor::State::Brake, spirit::Motor::State::CW,
+                             spirit::Motor::State::CCW}) {
+        for (const float speed : {0.2F, 0.75F, 1.0F, 12.5F}) {
+            spirit::Motor controller_motor;
+            controller_motor.control_system(spirit::Motor::ControlSystem::Speed);
+            controller_motor.state(state);
+            controller_motor.speed(speed);
 
-        uint32_t can_id = 0;
-        EXPECT_TRUE(spirit::can::get_motor_id(1, 0, dip_sw, can_id));
+            spirit::Motor received;
+            const auto    result = peripheral(through_can_message(controller_control(controller_motor)), received);
 
-        EXPECT_EQ(message.id, can_id);
+            EXPECT_EQ(result.status, spirit::protocol::DecodeStatus::Applied);
+            EXPECT_EQ(received.get_control_system(), spirit::Motor::ControlSystem::Speed);
+            EXPECT_EQ(received.get_state(), state);
+            // bfloat16 の仮数部は7bitなので、その分の誤差を許容する (受信側の値と比較する)
+            EXPECT_NEAR(received.get_speed(), speed, speed / 127.0F);
+        }
+    }
 
-        constexpr std::size_t max_payload_size = 64;
-        uint8_t               payload[8]       = {};
-        std::size_t           payload_size;
-        fake_udp.decode(message.data, message.len * 8, max_payload_size, payload, payload_size);
+    EXPECT_EQ(spirit::Error::get_instance().get_status(), spirit::Error::Status::Normal);
+}
 
-        spirit::Motor motor;
-        motor_data.decode(payload, payload_size, motor);
+/// 設定を送ると、 kd を含む全ての設定が Peripheral に届く
+TEST(IntegrationTest, Config)
+{
+    spirit::Error::get_instance().reset();
 
-        return motor;
-    };
+    spirit::Motor controller_motor;
+    controller_motor.pid_gain_factor(0.5F, 0.25F, 1.5F);
+    controller_motor.pulse_period(1.0F / 30000.0F);
+    controller_motor.release_time(1.0F);
+    controller_motor.decay(spirit::Motor::Decay::Fast);
+    controller_motor.pwm_side(spirit::Motor::PwmSide::High);
+    controller_motor.change_level(spirit::Motor::ChangeLevelTarget::Rise, spirit::Motor::ChangeLevel::Middle);
+    controller_motor.full_scale_time(spirit::Motor::ChangeLevelTarget::Fall, 2.0F);
 
-    /// PWM制御
-    auto pwm_test = [&controller, &peripheral](const spirit::Motor::State state, const float duty_cycle) {
-        spirit::Motor motor;
-        motor.control_system(spirit::Motor::ControlSystem::PWM);
-        motor.duty_cycle(duty_cycle);
-        motor.state(state);
+    spirit::Motor received;
+    for (const auto& frame : controller_config(controller_motor)) {
+        EXPECT_EQ(peripheral(through_can_message(frame), received).status, spirit::protocol::DecodeStatus::Applied);
+    }
 
-        ::CANMessage  message        = controller(motor);
-        spirit::Motor received_motor = peripheral(message);
+    float kp, ki, kd;
+    received.get_pid_gain_factor(kp, ki, kd);
+    EXPECT_FLOAT_EQ(kp, 0.5F);
+    EXPECT_FLOAT_EQ(ki, 0.25F);
+    EXPECT_FLOAT_EQ(kd, 1.5F);
+    EXPECT_FLOAT_EQ(received.get_pulse_period(), 1.0F / 30000.0F);
+    EXPECT_FLOAT_EQ(received.get_release_time(), 1.0F);
+    EXPECT_EQ(received.get_decay(), spirit::Motor::Decay::Fast);
+    EXPECT_EQ(received.get_pwm_side(), spirit::Motor::PwmSide::High);
+    EXPECT_EQ(received.get_change_level(spirit::Motor::ChangeLevelTarget::Rise), spirit::Motor::ChangeLevel::Middle);
+    EXPECT_EQ(received.get_change_level(spirit::Motor::ChangeLevelTarget::Fall), spirit::Motor::ChangeLevel::Manual);
+    EXPECT_FLOAT_EQ(received.get_full_scale_time(spirit::Motor::ChangeLevelTarget::Fall), 2.0F);
 
-        // デューティー比は16bitで表現しているため、1/65535の誤差を許容する
-        constexpr float allowable_error_margin = 1.0F / 65535.0F;
-        EXPECT_EQ(spirit::Motor::ControlSystem::PWM, received_motor.get_control_system());
-        EXPECT_EQ(state, received_motor.get_state());
-        EXPECT_NEAR(duty_cycle, received_motor.get_duty_cycle(), allowable_error_margin);
-    };
+    EXPECT_EQ(spirit::Error::get_instance().get_status(), spirit::Error::Status::Normal);
+}
 
-    auto speed_test = [&controller, &peripheral](const spirit::Motor::State state, const float speed, const float kp,
-                                                 const float ki, const float kd) {
-        spirit::Motor motor;
-        motor.control_system(spirit::Motor::ControlSystem::Speed);
-        motor.state(state);
-        motor.speed(speed);
-        motor.pid_gain_factor(kp, ki, kd);
+/// 設定のフレームを1つ落としても、次の周期の再送で正しい状態に戻る
+TEST(IntegrationTest, LostConfigFrameIsRecoveredByResend)
+{
+    spirit::Motor controller_motor;
+    controller_motor.pid_gain_factor(1.0F, 2.0F, 0.5F);
+    controller_motor.release_time(1.0F);
+    controller_motor.decay(spirit::Motor::Decay::Fast);
+    controller_motor.sleep(true);
 
-        ::CANMessage  message        = controller(motor);
-        spirit::Motor received_motor = peripheral(message);
+    const std::vector<CANFrame> frames = controller_config(controller_motor);
+    ASSERT_GE(frames.size(), 3U);
 
-        // スピード, kp, kiは送受信中にbfloat16に変換している
-        // bfloat16の仮数部は7bitなので、その分の誤差を考慮する必要がある
-        auto allowable_error_margin = [](const float bfloat16) { return bfloat16 / 127.0F; };
+    // 1周目: 2番目のフレーム(pwm_frequency と release_time)を落とす
+    spirit::Motor received;
+    for (std::size_t i = 0; i < frames.size(); i++) {
+        if (i != 1) {
+            peripheral(frames[i], received);
+        }
+    }
+    EXPECT_NE(received.get_release_time(), controller_motor.get_release_time());  // 落としたので、まだ既定値
 
-        EXPECT_EQ(spirit::Motor::ControlSystem::Speed, received_motor.get_control_system());
-        EXPECT_EQ(state, received_motor.get_state());
-        EXPECT_NEAR(speed, motor.get_speed(), allowable_error_margin(speed));
+    // 2周目: 全てそろう
+    for (const auto& frame : frames) {
+        peripheral(frame, received);
+    }
+    EXPECT_FLOAT_EQ(received.get_release_time(), controller_motor.get_release_time());
+    EXPECT_EQ(received.get_decay(), spirit::Motor::Decay::Fast);
+    EXPECT_TRUE(received.get_sleep());
+}
 
-        float return_kp, return_ki, return_kd;
-        received_motor.get_pid_gain_factor(return_kp, return_ki, return_kd);
-        EXPECT_NEAR(kp, return_kp, allowable_error_margin(kp));
-        EXPECT_NEAR(ki, return_ki, allowable_error_margin(ki));
-    };
+/// 制御パケットと設定パケットが混ざっても、それぞれ正しく適用される
+TEST(IntegrationTest, ControlAndConfigInterleaved)
+{
+    spirit::Motor controller_motor;
+    controller_motor.control_system(spirit::Motor::ControlSystem::PWM);
+    controller_motor.state(spirit::Motor::State::CW);
+    controller_motor.duty_cycle(1.0F);
+    controller_motor.decay(spirit::Motor::Decay::Fast);
 
-    spirit::Error &error = spirit::Error::get_instance();
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    spirit::Motor received;
+    const auto    config = controller_config(controller_motor);
+    for (const auto& frame : config) {
+        peripheral(frame, received);
+        const auto result = peripheral(controller_control(controller_motor), received);
+        EXPECT_TRUE(result.is_control());
+    }
 
-    // PWM制御のテスト
-
-    /// @test state = Brake, doty_cycle = 0.75
-    pwm_test(spirit::Motor::State::Coast, 0.75F);
-
-    /// @test state = Brake, doty_cycle = 0.2
-    pwm_test(spirit::Motor::State::Brake, 0.2F);
-
-    /// @test state = CW, doty_cycle = 0.5
-    pwm_test(spirit::Motor::State::CW, 0.5F);
-
-    /// @test state = CCW, doty_cycle = 1.0
-    pwm_test(spirit::Motor::State::CCW, 1.0F);
-
-    // 速度制御(通信の都合上kdの値は無視される)
-    /// @test state = Brake, speed = 0.75, kp = 0.2, ki = 0.5, kd = 1.0
-    speed_test(spirit::Motor::State::Coast, 0.75F, 0.2F, 0.5F, 1.0F);
-
-    /// @test state = Brake, speed = 0.2, kp = 0.5, ki = 1.0, kd = 0.2
-    speed_test(spirit::Motor::State::Brake, 0.2F, 0.5F, 1.0F, 0.2F);
-
-    /// @test state = CW, speed = 0.5, kp = 1.0, ki = 0.2, kd = 0.5
-    speed_test(spirit::Motor::State::CW, 0.5F, 1.0F, 0.2F, 0.5F);
-
-    /// @test state = CCW, speed = 1.0, kp = 0.2, ki = 0.5, kd = 1.0
-    speed_test(spirit::Motor::State::CCW, 1.0F, 0.2F, 0.5F, 1.0F);
-
-    EXPECT_EQ(error.get_status(), spirit::Error::Status::Normal);
+    EXPECT_EQ(received.get_state(), spirit::Motor::State::CW);
+    EXPECT_FLOAT_EQ(received.get_duty_cycle(), 1.0F);
+    EXPECT_EQ(received.get_decay(), spirit::Motor::Decay::Fast);
 }
 
 }  // namespace

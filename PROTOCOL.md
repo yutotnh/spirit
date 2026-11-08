@@ -1,7 +1,9 @@
 # spirit CAN プロトコル仕様（第2版・設計案）
 
 対象: Controller（マイコン）→ Peripheral（モータードライバー基板）の CAN 通信。
-状態: 設計案。まだ実装していない。現行の実装（`PwmDataConverter` などを使う方式。以下「現行」）との後方互換はない。
+状態: 第1段階（BitStream、制御パケット、設定パケット、受信規則、全項目）を実装済み（`src/spirit/include/Protocol.h`、`BitStream.h`）。以前の実装（`PwmDataConverter` などを使う方式。以下「現行」。現在は削除済み）との後方互換はない。分割転送、設定世代、逆方向の通知は予約のみ。
+
+実装での補足: 全設定を1周送るときの bfloat16 の量子化により、既定のゲイン（kp=0.3 など）は受信側で 0.2988 のように約 0.4% ずれる。bfloat16 で誤差なく表せる値（0.5、0.25 など）は一致する。
 
 ---
 
@@ -439,6 +441,8 @@ python3 の参照エンコーダ（リポジトリの外）で生成し、下の
 | `C2 60 00` | pid_gain（種類 1）の長さが 3（R8） | Malformed |
 | `C8 48` | decay=1（Mixed）（R9） | InvalidValue |
 | `C8 50 CC` | 詰め物が 0xCC で、項目として読むと途中で切れる（R5/R7） | Malformed |
+| `C8 51` | 末尾の詰め物 3bit に 1 が含まれ、項目として読むと途中で切れる（R5） | Malformed |
+| `30 00 01` | PWM の後ろの詰め物 5bit に 1 が含まれる（R5） | Malformed |
 | `E0` | 型 `1110`（R2） | UnknownType |
 | `A7 F8 00` | Speed、CCW、速度が +∞（0x7F80）（R4） | InvalidValue |
 ---

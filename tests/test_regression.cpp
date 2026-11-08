@@ -12,91 +12,6 @@ namespace {
 
 using namespace spirit;
 
-/// 出力バッファを使い回しても、Coast が前回の回転方向に化けないことの確認
-TEST(Regression, CoastOverwritesPreviousStateInReusedBuffer)
-{
-    for (const auto system : {Motor::ControlSystem::PWM, Motor::ControlSystem::Speed}) {
-        for (const auto previous : {Motor::State::CW, Motor::State::CCW, Motor::State::Brake}) {
-            Motor motor;
-            motor.control_system(system);
-            motor.duty_cycle(0.5F);
-            motor.speed(5.0F);
-
-            MotorDataConverter converter;
-            uint8_t            buffer[8] = {};
-            std::size_t        size      = 0;
-
-            motor.state(previous);
-            ASSERT_TRUE(converter.encode(motor, 64, buffer, size));
-
-            motor.state(Motor::State::Coast);
-            ASSERT_TRUE(converter.encode(motor, 64, buffer, size));
-
-            Motor received;
-            ASSERT_TRUE(converter.decode(buffer, size, received));
-            EXPECT_EQ(received.get_state(), Motor::State::Coast);
-        }
-    }
-}
-
-/// 初期化されていないバッファ(全ビット1)に Coast を encode しても Coast になることの確認
-TEST(Regression, CoastInDirtyBuffer)
-{
-    for (const auto system : {Motor::ControlSystem::PWM, Motor::ControlSystem::Speed}) {
-        Motor motor;
-        motor.control_system(system);
-        motor.state(Motor::State::Coast);
-
-        MotorDataConverter converter;
-        uint8_t            buffer[8];
-        std::memset(buffer, 0xFF, sizeof(buffer));
-        std::size_t size = 0;
-        ASSERT_TRUE(converter.encode(motor, 64, buffer, size));
-
-        Motor received;
-        ASSERT_TRUE(converter.decode(buffer, size, received));
-        EXPECT_EQ(received.get_control_system(), system);
-        EXPECT_EQ(received.get_state(), Motor::State::Coast);
-    }
-}
-
-/// Speed のバッファがビット幅(52bit)に満たない場合は、デコードを拒否することの確認
-TEST(Regression, SpeedDecodeRejectsShortBuffer)
-{
-    Error::get_instance().reset();
-    uint8_t buffer[8] = {0x40};
-    Motor   motor;
-    EXPECT_FALSE(SpeedDataConverter().decode(buffer, 7, motor));
-    EXPECT_FALSE(SpeedDataConverter().decode(buffer, 51, motor));
-    EXPECT_TRUE(SpeedDataConverter().decode(buffer, 52, motor));
-}
-
-/// 空のバッファは MotorDataConverter でデコードを拒否することの確認
-TEST(Regression, MotorDecodeRejectsEmptyBuffer)
-{
-    Motor motor;
-    EXPECT_FALSE(MotorDataConverter().decode(nullptr, 0, motor));
-    uint8_t buffer[1] = {0x40};
-    EXPECT_FALSE(MotorDataConverter().decode(buffer, 0, motor));
-}
-
-/// 不正な速度(負)を含むデータは、モーターを一切変更せずに false を返すことの確認
-TEST(Regression, SpeedDecodeIsAtomicOnInvalidValue)
-{
-    uint8_t buffer[8] = {0x40};
-    set_range_value(float32_to_bfloat16(-2.0F), 2, 16, 7, buffer);
-
-    testing::internal::CaptureStderr();
-    Motor motor;
-    motor.speed(5.0F);
-    EXPECT_FALSE(SpeedDataConverter().decode(buffer, 52, motor));
-    testing::internal::GetCapturedStderr();
-
-    const Motor::ControlSystem default_system = Motor::Default::control_system;
-    EXPECT_EQ(motor.get_control_system(), default_system);
-    EXPECT_FLOAT_EQ(motor.get_speed(), 5.0F);
-}
-
 /// 一定速度で回している間、rps は最初の周期から一定であることの確認
 TEST(Regression, SpeedControllerRpsIsStableAfterReset)
 {
@@ -278,23 +193,6 @@ TEST(Regression, A3921AndSpeedControllerRejectNaN)
     EXPECT_EQ(error.get_status(), Error::Status::Error);
 
     testing::internal::GetCapturedStderr();
-}
-
-/// デューティー比の16bit化が四捨五入で、往復の誤差が量子化幅の半分以内であることの確認
-TEST(Regression, PwmDutyCycleIsRounded)
-{
-    constexpr float half_step = 0.5F / 65535.0F + 1e-7F;
-    for (int i = 0; i <= 1000; i++) {
-        const float duty_cycle = static_cast<float>(i) / 1000.0F;
-        Motor       motor;
-        motor.duty_cycle(duty_cycle);
-        uint8_t     buffer[8] = {};
-        std::size_t size      = 0;
-        ASSERT_TRUE(PwmDataConverter().encode(motor, 64, buffer, size));
-        Motor received;
-        ASSERT_TRUE(PwmDataConverter().decode(buffer, size, received));
-        EXPECT_NEAR(received.get_duty_cycle(), duty_cycle, half_step) << "duty_cycle: " << duty_cycle;
-    }
 }
 
 /// 目標値を急に変えても、微分項が(目標値の変化で)跳ね上がらないことの確認

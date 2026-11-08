@@ -16,14 +16,17 @@ Controller 側が `Motor` の設定をエンコードして送り、Peripheral �
 ## データの流れ
 
 ```
-Motor ──MotorDataConverter──> PwmDataConverter / SpeedDataConverter ──FakeUdpConverter──> CANMessage (ID は can::get_motor_id)
+Motor ──protocol::encode_control()/encode_config()──> CAN のデータ部 (CANMessage, ID は can::get_motor_id)
 ```
 
-受信側は逆順にデコードします。
+受信側は `protocol::decode()` で Motor を更新します。仕様は `PROTOCOL.md`（型のプレフィックス符号、制御パケットと設定の分離、TLV の設定、前方互換の規則、ゴールデンベクタ）です。
 
-- 先頭 2bit が制御方式（`00`: PWM、`01`: Speed）
-- PWM は 20bit、Speed は 52bit。FakeUdp が先頭に 1bit 付けるので 21bit と 53bit になる
-- 単位は引数名で区別している。コンバーターと FakeUdp は `*_bits`（ビット）、`bit.h` の `get_range_value` / `set_range_value` は `buffer_bytes`（バイト）。混同しやすいので注意する
+- 型は可変長のプレフィックス符号: `0`=PWM（19bit）、`10`=Speed（20bit）、`110`=Config、`1110`=分割転送の予約、`1111…`=拡張型。どちらの制御パケットも3バイト
+- 毎周期送る制御パケットに入れるのは、状態と指令値（デューティー比または速度）だけ。kp/ki/kd と `Motor` のその他の設定は、Config で送る。Controller が全設定を約100msごとに再送する（`encode_config()` の `index` と `next_index` で、1周分を何フレームかに分ける。CAN 2.0 では最大4フレーム）
+- 項目は「種類・長さ(bit)・値」で、種類と長さは4bit単位の可変長整数（EVI）。未知の項目は読み飛ばし、未知の型は捨てる。長さの不整合や予約値は、フレーム全体を拒否して Motor を一切変更しない
+- `decode()` は `Error` を呼ばず、結果コード（`DecodeStatus`）を返す。CAN の受信割り込みから呼べるようにするため
+- release_time のタイマーをリセットしてよいのは `DecodeResult::is_control()` が true のときだけ（設定の再送ではリセットしない）
+- ビット列の読み書きは `BitReader` / `BitWriter`（`BitStream.h`）。`BitWriter` はコンストラクタでバッファを 0 クリアする。`bit.h` の `get_range_value` / `set_range_value` は、範囲外のときに Error を通知するため、直接は使わない。単位は `bit.h` がバイト、プロトコルの API はバイト数（DLC）で受け取る
 - `can::get_motor_id()` は `bool` を返し、ID は出力引数で受け取る（失敗時は出力を変更しない。0 は正当な ID ではないが、失敗の通知には使わない）
 - `adjust_duty_cycle`（Peripheral 側）が `Motor::State` とデューティー比の急変を抑え、`A3921` が実際のピンを操作する
   - 変化の速さは「全開までの時間(s)」で設定する（`Motor::change_level()` / `full_scale_time()`）。1回あたりの最大変化幅は `Motor::get_maximum_change_duty_cycle(target, dt)` が `dt`（`adjust_duty_cycle` を呼ぶ間隔）から計算する
@@ -50,8 +53,8 @@ g++ -std=c++14 -g -O1 -fsanitize=address,undefined -I. -Isrc -Isrc/spirit/includ
 ./test_Motor --gtest_filter='Motor.DutyCycleTest'   # 1テストずつ実行する
 ```
 
-2026-11 時点で、97テストが ASan/UBSan 付きで全て通る。
-`tests/test_regression.cpp` は過去に見つかった不具合の再現テスト、`test_multiple_translation_units_*.cpp` は `spirit.h` を複数の .cpp から include してもリンクできることの確認（2つの .cpp を1つの実行ファイルにする）。
+2026-11 時点で、117テストが ASan/UBSan 付きで全て通る。
+`tests/test_regression.cpp` は過去に見つかった不具合の再現テスト、`tests/test_Protocol.cpp` はゴールデンベクタ・往復・前方互換・壊れたデータ・ファズ（10万回）、`test_multiple_translation_units_*.cpp` は `spirit.h` を複数の .cpp から include してもリンクできることの確認（2つの .cpp を1つの実行ファイルにする）。
 
 ## コーディング規約（CONTRIBUTING.md の要約）
 

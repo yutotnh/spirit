@@ -15,7 +15,7 @@ constexpr uint32_t minor = 1;
 constexpr uint32_t patch = 0;
 
 /// バージョン番号の文字列
-constexpr char string[] = "0.1.0";
+constexpr char string[] = "0.2.0";
 
 }  // namespace version
 
