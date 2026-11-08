@@ -96,12 +96,17 @@ Error& Error::get_instance()
 
 void Error::reset()
 {
-    _status.store(Status::Normal, std::memory_order_relaxed);
+    _warning.store(false, std::memory_order_relaxed);
+    _error.store(false, std::memory_order_relaxed);
 }
 
 Error::Status Error::get_status() const
 {
-    return _status.load(std::memory_order_relaxed);
+    if (_error.load(std::memory_order_relaxed)) {
+        return Status::Error;
+    }
+
+    return _warning.load(std::memory_order_relaxed) ? Status::Warning : Status::Normal;
 }
 
 void Error::set_handler(ErrorHandler* handler)
@@ -143,10 +148,11 @@ void Error::error(Type type, const char* filename, const char* funcname, uint32_
 void Error::notify(Status status, Type type, const char* filename, const char* funcname, uint32_t line_number,
                    const char* message, va_list arg)
 {
-    // 状態は、重い方(Error > Warning > Normal)に更新する。エラーの後に警告が通知されても、 Error のままにする
-    Status current = _status.load(std::memory_order_relaxed);
-    while (static_cast<int>(current) < static_cast<int>(status) &&
-           !_status.compare_exchange_weak(current, status, std::memory_order_relaxed)) {
+    // 状態は、リセットされるまで重い方を保つ (Error のフラグが立っていれば、警告が通知されても Error のまま)
+    if (status == Status::Error) {
+        _error.store(true, std::memory_order_relaxed);
+    } else {
+        _warning.store(true, std::memory_order_relaxed);
     }
 
     ErrorHandler* handler = get_handler();

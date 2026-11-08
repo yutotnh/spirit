@@ -6,10 +6,15 @@ namespace protocol {
 
 Receiver::Receiver(const Motor& initial) : _state(initial)
 {
-    for (auto& slot : _slots) {
-        slot.motor           = initial;
-        slot.control_packets = 0;
+    for (auto& pair : _slots) {
+        for (auto& slot : pair) {
+            slot.motor           = initial;
+            slot.control_packets = 0;
+        }
     }
+
+    _slot_index[0].store(0);
+    _slot_index[1].store(0);
 }
 
 DecodeResult Receiver::receive(const uint8_t* buffer, const std::size_t bytes)
@@ -22,14 +27,16 @@ DecodeResult Receiver::receive(const uint8_t* buffer, const std::size_t bytes)
                 _control_packets++;
             }
 
-            // 書き込み用の1枚に、最新の状態を書いてから、受け渡し用の1枚と入れ替える
-            _slots[_write_index].motor           = _state;
-            _slots[_write_index].control_packets = _control_packets;
+            // Simpson の四スロット方式 (書き手)
+            // 読み手が使っていないペアを選び、そのペアで最後に書いていない方のスロットに書き込んでから、公開する
+            const uint8_t pair  = static_cast<uint8_t>(_reading.load() ^ 1U);
+            const uint8_t index = static_cast<uint8_t>(_slot_index[pair].load() ^ 1U);
 
-            // 書き込みを終えた後に公開する (release)。以前に公開されていて、読み手が取り込んでいない1枚は、次の書き込み用になる
-            const uint8_t previous =
-                _middle.exchange(static_cast<uint8_t>(_write_index | new_flag), std::memory_order_acq_rel);
-            _write_index = static_cast<uint8_t>(previous & ~new_flag);
+            _slots[pair][index].motor           = _state;
+            _slots[pair][index].control_packets = _control_packets;
+
+            _slot_index[pair].store(index);
+            _latest.store(pair);
             break;
         }
         case DecodeStatus::UnknownType:
@@ -47,13 +54,13 @@ DecodeResult Receiver::receive(const uint8_t* buffer, const std::size_t bytes)
 
 Receiver::Snapshot Receiver::snapshot()
 {
-    // 新しい状態が公開されていれば、読み込み用の1枚と入れ替えて取り込む
-    if ((_middle.load(std::memory_order_relaxed) & new_flag) != 0) {
-        const uint8_t published = _middle.exchange(_read_index, std::memory_order_acq_rel);
-        _read_index             = static_cast<uint8_t>(published & ~new_flag);
-    }
+    // Simpson の四スロット方式 (読み手)
+    // 最後に書き込まれたペアを使うと宣言してから、そのペアで最後に書き込まれたスロットを読む
+    const uint8_t pair = _latest.load();
+    _reading.store(pair);
+    const uint8_t index = _slot_index[pair].load();
 
-    return _slots[_read_index];
+    return _slots[pair][index];
 }
 
 uint32_t Receiver::rejected_packets() const

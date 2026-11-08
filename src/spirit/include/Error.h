@@ -94,7 +94,7 @@ public:
     /**
      * @brief エラー状態を取得する
      * @details 状態は、リセットされるまで、通知された中で最も重い状態(Normal < Warning < Error)を保つ @n
-     *          (エラーの後に警告を通知しても、 Error のまま)
+     *          (エラーの後に警告を通知しても、 Error のまま)。ロックも、アトミックな交換(CAS)も使わない
      * @return エラー状態
      */
     Status get_status() const;
@@ -148,7 +148,10 @@ private:
     void notify(Status status, Type type, const char* filename, const char* funcname, uint32_t line_number,
                 const char* message, va_list arg);
 
-    std::atomic<Status>        _status{Status::Normal};
+    // 警告とエラーのフラグを別々に持つ (それぞれ true を書き込むだけなので、アトミックな交換(CAS)が要らない)
+    // Cortex-M0/M0+ など、アトミックな交換の命令がないマイコンでも、ロックやライブラリなしで動く
+    std::atomic<bool>          _warning{false};
+    std::atomic<bool>          _error{false};
     std::atomic<ErrorHandler*> _handler;
 };
 

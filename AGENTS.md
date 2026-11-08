@@ -24,7 +24,7 @@ Motor ──protocol::encode_control()/encode_config()──> CAN のデータ�
 - 型は可変長のプレフィックス符号: `0`=PWM（19bit）、`10`=Speed（20bit）、`110`=Config、`1110`=分割転送の予約、`1111…`=拡張型。どちらの制御パケットも3バイト
 - 毎周期送る制御パケットに入れるのは、状態と指令値（デューティー比または速度）だけ。kp/ki/kd と `Motor` のその他の設定は、Config で送る。Controller が全設定を約100msごとに再送する（`encode_config()` の `index` と `next_index` で、1周分を何フレームかに分ける。CAN 2.0 では最大4フレーム）
 - 項目は「種類・長さ(bit)・値」で、種類と長さは4bit単位の可変長整数（EVI）。未知の項目は読み飛ばし、未知の型は捨てる。長さの不整合や予約値は、フレーム全体を拒否して Motor を一切変更しない
-- `decode()` は `Error` を呼ばず、結果コード（`DecodeStatus`）を返す。CAN の受信割り込みから呼べるようにするため。ただし Motor を複数の値ごと更新するので、割り込みとメインループで同じ Motor を共有してはいけない。受け渡しには `protocol::Receiver`（`Receiver.h`）を使う（割り込みで `receive()`、メインループで `snapshot()`。三重バッファでロックなし。書き手と読み手は、それぞれ1つのコンテキストだけ。`tests/test_Receiver.cpp` に2スレッドの負荷テストがあり、ThreadSanitizer でも確認済み）
+- `decode()` は `Error` を呼ばず、結果コード（`DecodeStatus`）を返す。CAN の受信割り込みから呼べるようにするため。ただし Motor を複数の値ごと更新するので、割り込みとメインループで同じ Motor を共有してはいけない。受け渡しには `protocol::Receiver`（`Receiver.h`）を使う（割り込みで `receive()`、メインループで `snapshot()`。Simpson の四スロット方式で、ロックもアトミックな交換(CAS)も使わない。書き手と読み手は、それぞれ1つのコンテキストだけ。`tests/test_Receiver.cpp` に2スレッドの負荷テストがあり、ThreadSanitizer でも確認済み）
 - `Motor::speed()` と `pid_gain_factor()` は、無限大も拒否する（通信で送れず、受信側が拒否するため。拒否しないと、制御パケットが全て拒否されて release_time で止まる）
 - release_time のタイマーをリセットしてよいのは `DecodeResult::is_control()` が true のときだけ（設定の再送ではリセットしない）
 - ビット列の読み書きは `BitReader` / `BitWriter`（`BitStream.h`）。`BitWriter` はコンストラクタでバッファを 0 クリアする。`bit.h` の `get_range_value` / `set_range_value` は、範囲外のときに Error を通知するため、直接は使わない。単位は `bit.h` がバイト、プロトコルの API はバイト数（DLC）で受け取る
@@ -67,6 +67,7 @@ g++ -std=c++14 -g -O1 -fsanitize=address,undefined -I. -Isrc -Isrc/spirit/includ
 - コメントとドキュメントは日本語
 - コンパイラ警告は `-Wall -Wextra -pedantic-errors -Werror`。警告を残さない
 - 異常値は `Error::get_instance().error(...)` / `warning(...)` で通知し、例外は使わない（マイコンで動かすため）。通知は `ErrorHandler`（`Error::set_handler()`）に渡され、既定では標準エラー出力に出る。テストでは `RecordingErrorHandler`（`tests/stubs.h`）で内容を検査できる。`Error` の状態は `std::atomic` で、どのスレッドからも読める。設定関数（`Motor::speed()` など）は、設定できたかどうかを `bool` で返す
+- **アトミックな交換（CAS、`exchange`、`fetch_add`）は使わない。** Cortex-M0/M0+（RP2040 など）には、その命令がなく、リンク時に `__atomic_*` が未定義になる。`std::atomic` は、読み書き（`load`/`store`）だけで使う（`Error` の状態、`SpeedController` のカウンター、`Receiver`）。CI の `arduino:mbed:pico` が M0+ のコンパイルを確認する（リンクは確認しない）
 - ライブラリは C++14・17・20 の全てで警告なくビルドできる。C++14 では `static constexpr` メンバーを参照渡しするとクラス外の定義が必要になるので、新しく足すときは `.cpp` に定義を書く（`tests/test_odr.cpp`）
 
 ## 注意点

@@ -12,15 +12,13 @@ namespace spirit {
 
 namespace protocol {
 
-// 以下のアトミック変数がロックなしで動作しないターゲットでは、割り込みから安全に呼び出せない
-static_assert(ATOMIC_INT_LOCK_FREE == 2, "std::atomic<int> must be lock-free to be used from interrupts");
-
 /**
  * @brief 受信したデータを Motor に反映し、別のコンテキストから整合した Motor を取り出すためのクラス
  * @details
  * CAN の受信割り込み(書き手)で receive() を呼び、メインループ(読み手)で snapshot() を呼ぶ使い方を想定している @n
- * 三重バッファでロックなしに受け渡すので、割り込みの禁止やミューテックスは要らず、 @n
  * snapshot() は、ある時点の全ての設定がそろった(更新途中でない) Motor を返す @n
+ * ロックも、アトミックな交換(CAS)も使わず、アトミックな読み書き(load/store)だけで受け渡す(Simpson の四スロット方式) @n
+ * そのため、割り込みの禁止やミューテックスは要らず、 Cortex-M0/M0+ のようにアトミックな交換の命令がないマイコンでも動く @n
  * 割り込みの中で呼び出しても Error を通知せず、ブロックもしない
  * @attention 書き手(receive())と読み手(snapshot())は、それぞれ1つのコンテキストだけに限る @n
  *            (複数の割り込みから receive() を呼ぶ、複数のスレッドから snapshot() を呼ぶことはできない)
@@ -66,22 +64,21 @@ public:
     uint32_t unknown_type_packets() const;
 
 private:
-    /// 書き込み側が公開した、新しい状態があることを示すビット
-    static constexpr uint8_t new_flag = 0x4;
+    /// 四スロット: [ペア][ペア内の番号]。書き手は、読み手が使っていないペアの、最後に書いていない方に書く
+    Snapshot _slots[2][2];
 
-    /// 三重バッファの1枚
-    Snapshot _slots[3];
+    /// 各ペアで、最後に書き込んだスロットの番号
+    std::atomic<uint8_t> _slot_index[2];
+
+    /// 最後に書き込んだペアの番号
+    std::atomic<uint8_t> _latest{0};
+
+    /// 読み手が読んでいるペアの番号
+    std::atomic<uint8_t> _reading{0};
 
     /// 書き手だけが使う、最新の状態 (受信するたびに、前の状態に重ねて反映する)
     Motor    _state;
     uint32_t _control_packets{0};
-
-    /// 書き手が次に書き込む枚数の番号
-    uint8_t _write_index{0};
-    /// 読み手が今読んでいる枚数の番号
-    uint8_t _read_index{2};
-    /// 受け渡し用の枚数の番号 (new_flag が付いていれば、読み手が取り込んでいない新しい状態)
-    std::atomic<uint8_t> _middle{1};
 
     std::atomic<uint32_t> _rejected_packets{0};
     std::atomic<uint32_t> _unknown_type_packets{0};

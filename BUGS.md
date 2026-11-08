@@ -174,7 +174,7 @@ Peripheral の受信バッファが固定長配列なら、切れたフレーム
 | 項目 | 状態 |
 | --- | --- |
 | `Error` のシングルトンで、どの呼び出しが失敗したか分からない | 修正済み。`Motor`、`A3921`、`MdLed`、`SpeedController::limit` の設定関数が `bool` を返す（設定できたかどうか）。`Error` はグローバルな診断のまま残す |
-| `get_status()` と `reset()` がロックなし（データ競合） | 修正済み。状態を `std::atomic` にした（ThreadSanitizer で確認）。状態は、リセットされるまで最も重いもの（Error > Warning）を保つ |
+| `get_status()` と `reset()` がロックなし（データ競合） | 修正済み。警告とエラーの2つのフラグ（`std::atomic<bool>`）にした（ThreadSanitizer で確認。アトミックな交換を使わないので、Cortex-M0/M0+ でも動く）。状態は、リセットされるまで最も重いもの（Error > Warning）を保つ |
 | `code` 引数が全65か所で 0 | 修正済み。引数と `get_code()` を削除した |
 | 出力先が `stderr`/`printf` に固定 | 修正済み。`ErrorHandler`（DI）を `Error::set_handler()` で差し替えられる。`SPIRIT_ERROR_DEFAULT_HANDLER=0` でビルドすると、既定の出力と標準入出力が不要になる（記号が消えることを確認）。`tests/stubs.h` に、内容を記録する `RecordingErrorHandler` がある |
 | `spirit::mutex` が STM32/Mbed 版の Arduino で空 | 修正済み。`Error` からミューテックスを外し、既定の出力ハンドラも、出力を1つの文字列にして1回で出す形にした。`spirit::mutex` クラスは削除した |
@@ -188,3 +188,10 @@ Peripheral の受信バッファが固定長配列なら、切れたフレーム
 Mbed のビルド環境を、Mbed OS 6（保守終了）から Mbed CE に切り替えた（CI、ルートの `CMakeLists.txt`、devcontainer、README）。ターゲットの `NUCLEO_F303K8` と `LPC1768` は、Mbed CE のターゲット一覧にあることを確認した。Mbed CE の実ビルドは、この環境では未確認（CI で確認すること）。
 
 ライブラリは、C++14・17・20 のいずれでも、`-Wall -Wextra -pedantic -Werror` で警告なくコンパイルできることを確認しました（g++ 15）。
+
+## 追記: Cortex-M0/M0+ (RP2040) への対応
+
+CI の `arduino:mbed:pico`（RP2040）で、`Receiver.h` の `static_assert`（`std::atomic<int>` がロックなしであること）が失敗しました。
+Cortex-M0/M0+ には、アトミックな交換の命令がないためです。同様に、`Error` の状態更新の CAS ループも、リンク時に `__atomic_compare_exchange` が未定義になる恐れがありました。
+アトミックな交換を使わない形に作り直しました（`Receiver` は Simpson の四スロット方式、`Error` は警告とエラーの2つのフラグ）。2スレッドの負荷テスト（ASan 30回、TSan 10回）で確認しています。
+アトミックな読み書き（`load`/`store`）が、実際の Cortex-M0+ のツールチェーンでリンクできるか（`__sync_synchronize` などのライブラリが必要にならないか）は、未確認です。
