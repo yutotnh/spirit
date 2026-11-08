@@ -48,7 +48,6 @@ target_sources(spirit
     ./src/spirit/src/Id.cpp
     ./src/spirit/src/MdLed.cpp
     ./src/spirit/src/Motor.cpp
-    ./src/spirit/src/mutex.cpp
     ./src/spirit/src/Protocol.cpp
     ./src/spirit/src/Receiver.cpp
     ./src/spirit/src/SpeedController.cpp
