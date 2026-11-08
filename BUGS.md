@@ -185,4 +185,6 @@ Peripheral の受信バッファが固定長配列なら、切れたフレーム
 | プラットフォームの抽象化（`__MBED__`/`ARDUINO` の分岐、`InterfaceInterruptIn`） | 修正済み。ライブラリ本体から分岐を全て除き、プラットフォームごとの処理を `platform/{mbed,arduino}/` のアダプターに閉じ込めた。`InterfaceInterruptIn` はプラットフォームに依らず1つの形（`InterruptHandler`）。`InterfaceDelay` を追加した。アダプターは、スタブでホスト上でテストしている（`tests/test_mbed.cpp`、`tests/test_arduino.cpp`） |
 | `std::function`（`A3921::reset()` など） | 修正済み。`A3921::reset(InterfaceDelay&)` にした（リセットパルスの幅は `reset_pulse_us` = 2us）。ライブラリ本体から `std::function` を除いた |
 
+Mbed のビルド環境を、Mbed OS 6（保守終了）から Mbed CE に切り替えた（CI、ルートの `CMakeLists.txt`、devcontainer、README）。ターゲットの `NUCLEO_F303K8` と `LPC1768` は、Mbed CE のターゲット一覧にあることを確認した。Mbed CE の実ビルドは、この環境では未確認（CI で確認すること）。
+
 ライブラリは、C++14・17・20 のいずれでも、`-Wall -Wextra -pedantic -Werror` で警告なくコンパイルできることを確認しました（g++ 15）。

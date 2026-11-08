@@ -76,7 +76,10 @@ g++ -std=c++14 -g -O1 -fsanitize=address,undefined -I. -Isrc -Isrc/spirit/includ
 - **プラットフォームの設計（ポートとアダプター）:** ライブラリ本体（`src/spirit/include`、`src/spirit/src`）は、`__MBED__`/`ARDUINO` の分岐も `std::function`・ミューテックスも持たない。ハードウェアは小さなインターフェースだけで受ける（`InterfaceDigitalOut`、`InterfacePwmOut`、`InterfaceInterruptIn`（割り込みは `InterruptHandler` を渡す。`nullptr` で解除）、`InterfaceDelay`）。プラットフォーム固有の処理は `src/spirit/platform/{mbed,arduino}/` のアダプターに閉じ込める。例外は、`spirit.h` がプラットフォームごとにアダプターを include する部分と、`Error.cpp` の既定の出力先（Mbed は標準出力）だけ
 - アダプターは `tests/test_arduino.cpp`（`tests/arduino_stub/Arduino.h`）と `tests/test_mbed.cpp`（`tests/mbed_stub/mbed.h`）で、スタブを使ってホスト上でテストしている。ライブラリ本体はプラットフォームに依存しないので、`spirit` をそのままリンクできる（アダプターのソースだけ `ARDUINO`/`__MBED__` を定義してビルドする）。Arduino は3構成（`ARDUINO` のみ、ESP32 + core 2.x、ESP32 + core 3.x）。実機の挙動（ピンの対応、LEDC、割り込みの遅延）は確認できない
 - Arduino の `attachInterrupt()` は関数ポインタしか受け取れないので、`arduino::InterruptIn` が最大8個のトランポリン関数を割り当てる
-- Mbed OS は Arm が保守を終了した（2026年7月）。後継の community fork が Mbed CE。アダプターが使う API（`InterruptIn`、`PwmOut`、`DigitalOut`、`Callback`、`wait_us`）は共通のはずだが、実機・実ビルドでの確認はしていない
+- Mbed は **Mbed CE**（Mbed OS のコミュニティ版）を対象にする。Arm の Mbed OS は、2026年7月に保守が終了した。CI（`.github/workflows/build.yml` の `build-mbed-ce`）は、公式のビルド環境（`ghcr.io/mbed-ce/mbed-ce-env`）で、`NUCLEO_F303K8` と `LPC1768`（どちらも Mbed CE のターゲット一覧にある）を、Release/Debug/Develop でビルドする。アプリケーションのプロジェクトは `.github/workflows/build-mbed/`（`CMakeLists.txt`、`main.cpp`、`mbed_app.json5`）で、`main.cpp` がアダプターと `SpeedController`、`Receiver` を、コンパイルとリンクして確認する（実行はしない）
+- Mbed CE のプロジェクトから使うときは、`mbed-os` を先に `add_subdirectory()` してから `spirit` を追加する。ルートの `CMakeLists.txt` は、`mbed-core-flags` ターゲットがあれば Mbed 用のビルドとして、`mbed-os` ではなく `mbed-core-flags` にリンクする（Mbed CE の規則: ライブラリは `mbed-core-flags` にリンクし、`mbed-os` は実行ファイルにだけリンクする）
+- Mbed CE のツールチェーンは、Arm の公式の GNU toolchain を使う。Ubuntu の `gcc-arm-none-eabi` パッケージは、Mbed OS を正しくビルドできないと、Mbed CE の手順書に書かれている
+- Mbed CE の実ビルドと実機は、この環境では確認していない（CMake と Mbed CE の取得ができないため）。CI の結果で確認すること
 - 修正を入れるときは、現象を再現するテストを `tests/` に先に追加する
 - 調査で見つかった不具合と修正状況は `BUGS.md` にまとめている（未修正: Arduino 関連）
 - C++14 を維持する（Mbed OS 6 / Arduino のツールチェーンが C++20 に未対応）。C++14 では `static constexpr` メンバーを参照渡しすると未定義参照になるので、gtest の `EXPECT_EQ` に直接渡さずローカル変数にコピーする

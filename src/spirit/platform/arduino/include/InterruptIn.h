@@ -62,8 +62,14 @@ private:
     /// 割り当てられたスロット (割り当てられなかった場合は -1)
     int8_t _slot{-1};
 
-    /// attachInterrupt() に渡している割り込みのモード (解除している場合は 0)
-    int _mode{0};
+    /// attachInterrupt() に渡す割り込みのモードの型 (core によって、整数のマクロか、 PinStatus 型の列挙子になる)
+    using InterruptMode = decltype(CHANGE);
+
+    /// attachInterrupt() している場合は true
+    bool _attached{false};
+
+    /// attachInterrupt() に渡している割り込みのモード (_attached が true の場合だけ有効)
+    InterruptMode _mode{CHANGE};
 
     InterruptHandler* _rise_handler{nullptr};
     InterruptHandler* _fall_handler{nullptr};

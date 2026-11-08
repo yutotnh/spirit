@@ -19,17 +19,29 @@ namespace {
 InterruptIn* instances[InterruptIn::max_instances] = {};
 
 /// attachInterrupt() に渡す、スロットごとの関数 (インスタンスを渡せないので、スロットごとに用意する)
-template <uint8_t Slot>
-void IRAM_ATTR trampoline()
-{
-    InterruptIn::dispatch(Slot);
-}
+/// (IRAM_ATTR は、テンプレート関数ではなく、通常の関数に付ける)
+#define SPIRIT_TRAMPOLINE(slot)        \
+    void IRAM_ATTR trampoline_##slot() \
+    {                                  \
+        InterruptIn::dispatch(slot);   \
+    }
+
+SPIRIT_TRAMPOLINE(0)
+SPIRIT_TRAMPOLINE(1)
+SPIRIT_TRAMPOLINE(2)
+SPIRIT_TRAMPOLINE(3)
+SPIRIT_TRAMPOLINE(4)
+SPIRIT_TRAMPOLINE(5)
+SPIRIT_TRAMPOLINE(6)
+SPIRIT_TRAMPOLINE(7)
+
+#undef SPIRIT_TRAMPOLINE
 
 using TrampolineFunction = void (*)();
 
 const TrampolineFunction trampolines[InterruptIn::max_instances] = {
-    &trampoline<0>, &trampoline<1>, &trampoline<2>, &trampoline<3>,
-    &trampoline<4>, &trampoline<5>, &trampoline<6>, &trampoline<7>,
+    &trampoline_0, &trampoline_1, &trampoline_2, &trampoline_3,
+    &trampoline_4, &trampoline_5, &trampoline_6, &trampoline_7,
 };
 
 }  // namespace
@@ -89,6 +101,10 @@ void IRAM_ATTR InterruptIn::dispatch(const uint8_t slot)
         return;
     }
 
+    if (!self->_attached) {
+        return;
+    }
+
     InterruptHandler* handler = nullptr;
     switch (self->_mode) {
         case RISING:
@@ -116,26 +132,25 @@ void InterruptIn::update_attachment()
         return;
     }
 
-    int mode = 0;
-    if ((_rise_handler != nullptr) && (_fall_handler != nullptr)) {
-        mode = CHANGE;
-    } else if (_rise_handler != nullptr) {
-        mode = RISING;
-    } else if (_fall_handler != nullptr) {
-        mode = FALLING;
-    }
+    const bool has_rise = (_rise_handler != nullptr);
+    const bool has_fall = (_fall_handler != nullptr);
 
-    if (mode == _mode) {
+    if (!has_rise && !has_fall) {
+        if (_attached) {
+            detachInterrupt(digitalPinToInterrupt(_pin));
+            _attached = false;
+        }
         return;
     }
 
-    if (mode == 0) {
-        detachInterrupt(digitalPinToInterrupt(_pin));
-    } else {
-        attachInterrupt(digitalPinToInterrupt(_pin), trampolines[_slot], mode);
+    const InterruptMode mode = (has_rise && has_fall) ? CHANGE : (has_rise ? RISING : FALLING);
+    if (_attached && (mode == _mode)) {
+        return;
     }
 
-    _mode = mode;
+    attachInterrupt(digitalPinToInterrupt(_pin), trampolines[_slot], mode);
+    _mode     = mode;
+    _attached = true;
 }
 
 // C++14 では、 static constexpr メンバーを参照渡しなどで使う(odr-use)と、クラス外の定義が必要になる (C++17 以降は不要)

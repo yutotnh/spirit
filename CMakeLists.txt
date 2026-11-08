@@ -13,7 +13,16 @@ project(spirit
 
 add_library(spirit STATIC)
 
-if(DEFINED MBED_PATH)
+# Mbed CE (Mbed OS のコミュニティ版) のプロジェクトから add_subdirectory() された場合は、
+# mbed-os のサブディレクトリが先に追加されていて、 mbed-core-flags というターゲットが存在する
+# (ライブラリは、 mbed-os ではなく mbed-core-flags にリンクする: https://github.com/mbed-ce/mbed-os/wiki/New-Project-Setup-Guide)
+if(TARGET mbed-core-flags)
+    set(SPIRIT_BUILD_FOR_MBED TRUE)
+else()
+    set(SPIRIT_BUILD_FOR_MBED FALSE)
+endif()
+
+if(SPIRIT_BUILD_FOR_MBED)
     # mbed-os のビルドに影響を与えるため、最適化オプションを指定せず、警告をエラーにしない
     target_compile_options(spirit PUBLIC -Wall -Wextra -pedantic)
 elseif(MSVC)
@@ -50,8 +59,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_subdirectory(tests)
 endif()
 
-if(DEFINED MBED_PATH)
-    target_link_libraries(spirit mbed-os)
+if(SPIRIT_BUILD_FOR_MBED)
+    target_link_libraries(spirit mbed-core-flags)
 
     add_library(spirit-platform-mbed STATIC)
 
@@ -75,5 +84,5 @@ if(DEFINED MBED_PATH)
         ./src/spirit/platform/mbed/source/PwmOut.cpp
     )
 
-    target_link_libraries(spirit-platform-mbed spirit mbed-os)
+    target_link_libraries(spirit-platform-mbed spirit mbed-core-flags)
 endif()

@@ -18,11 +18,13 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
 # - Doxygen
 # - ClangFormat
 # - CSpell
+# - Ninja (Mbed CE のビルドに必要)
 RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends graphviz \
                                                   doxygen \
                                                   clang-format \
+                                                  ninja-build \
                                                   nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -33,6 +35,4 @@ USER vscode
 COPY ./script/* /tmp/
 
 RUN /tmp/install-arduino-cli.sh && \
-    /tmp/install-gcc-arm-none-eabi.sh && \
-    /tmp/install-mbed-cli-1.sh && \
-    /tmp/install-mbed-cli-2.sh
+    /tmp/install-gcc-arm-none-eabi.sh
