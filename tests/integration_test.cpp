@@ -59,7 +59,7 @@ CANFrame through_can_message(const CANFrame& frame)
     CANFrame result{};
     result.id  = message.get_id();
     result.len = message.get_length();
-    message.get_data(result.data);
+    message.get_data(result.data, sizeof(result.data));
     return result;
 }
 

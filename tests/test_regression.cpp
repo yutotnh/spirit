@@ -227,4 +227,67 @@ TEST(Regression, SpeedControllerNoDerivativeKick)
     EXPECT_LT(controller.calculation(10.0F, 0.01F), 0.0F);
 }
 
+/// 設定関数が、設定できたかどうかを返すことの確認
+TEST(Regression, SettersReturnWhetherAccepted)
+{
+    testing::internal::CaptureStderr();
+
+    Motor motor;
+    EXPECT_TRUE(motor.speed(1.0F));
+    EXPECT_FALSE(motor.speed(-1.0F));
+    EXPECT_FLOAT_EQ(motor.get_speed(), 1.0F);
+    EXPECT_TRUE(motor.duty_cycle(0.5F));
+    EXPECT_TRUE(motor.duty_cycle(2.0F));  // 範囲を超えた場合は、端に収めて(警告を通知して)設定する
+    EXPECT_FLOAT_EQ(motor.get_duty_cycle(), 1.0F);
+    EXPECT_FALSE(motor.duty_cycle(std::numeric_limits<float>::quiet_NaN()));
+    EXPECT_TRUE(motor.pid_gain_factor(1.0F, 2.0F, 3.0F));
+    EXPECT_FALSE(motor.pid_gain_factor(1.0F, -2.0F, 3.0F));
+    EXPECT_TRUE(motor.state(Motor::State::CW));
+    EXPECT_FALSE(motor.state(static_cast<Motor::State>(9)));
+    EXPECT_EQ(motor.get_state(), Motor::State::CW);
+    EXPECT_TRUE(motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Low));
+    EXPECT_FALSE(motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Manual));
+    EXPECT_TRUE(motor.full_scale_time(Motor::ChangeLevelTarget::Fall, 1.0F));
+    EXPECT_FALSE(motor.full_scale_time(Motor::ChangeLevelTarget::Fall, -1.0F));
+    EXPECT_TRUE(motor.pulse_period(1.0F / 1000.0F));
+    EXPECT_FALSE(motor.pulse_period(1.0F));
+    EXPECT_TRUE(motor.release_time(1.0F));
+    EXPECT_FALSE(motor.release_time(-1.0F));
+    EXPECT_TRUE(motor.decay(Motor::Decay::Fast));
+    EXPECT_FALSE(motor.decay(Motor::Decay::Mixed));
+    EXPECT_TRUE(motor.pwm_side(Motor::PwmSide::High));
+    EXPECT_FALSE(motor.pwm_side(static_cast<Motor::PwmSide>(5)));
+    EXPECT_TRUE(motor.control_system(Motor::ControlSystem::Speed));
+    EXPECT_FALSE(motor.control_system(static_cast<Motor::ControlSystem>(7)));
+
+    StubDigitalOut led0, led1;
+    MdLed          led(led0, led1);
+    EXPECT_TRUE(led.state(Motor::State::CW));
+    EXPECT_FALSE(led.state(static_cast<Motor::State>(9)));
+    EXPECT_TRUE(led.mode(MdLed::BlinkMode::Alternate));
+    EXPECT_TRUE(led.mode(MdLed::BlinkMode::Alternate));  // 既に同じモード
+    EXPECT_FALSE(led.mode(MdLed::BlinkMode::Error));
+
+    StubDigitalOut sr, reset;
+    StubPwmOut     pwmh, pwml, phase;
+    A3921          a3921(sr, pwmh, pwml, phase, reset);
+    EXPECT_TRUE(a3921.duty_cycle(0.5F));
+    EXPECT_FALSE(a3921.duty_cycle(std::numeric_limits<float>::quiet_NaN()));
+    EXPECT_TRUE(a3921.state(Motor::State::CW));
+    EXPECT_FALSE(a3921.state(static_cast<Motor::State>(9)));
+    EXPECT_TRUE(a3921.decay(Motor::Decay::Fast));
+    EXPECT_FALSE(a3921.decay(Motor::Decay::Mixed));
+    EXPECT_TRUE(a3921.pwm_side(Motor::PwmSide::High));
+    EXPECT_FALSE(a3921.pwm_side(static_cast<Motor::PwmSide>(5)));
+    EXPECT_TRUE(a3921.pulse_period(1.0F / 1000.0F));
+    EXPECT_FALSE(a3921.pulse_period(1.0F));
+
+    StubInterruptIn a, b;
+    SpeedController controller(a, b);
+    EXPECT_TRUE(controller.limit(1.0F, -1.0F));
+    EXPECT_FALSE(controller.limit(-1.0F, 1.0F));
+
+    testing::internal::GetCapturedStderr();
+}
+
 }  // namespace

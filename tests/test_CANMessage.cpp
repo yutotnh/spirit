@@ -23,7 +23,7 @@ TEST(CANMessage, ConstructorTest1)
     EXPECT_EQ(message.get_length(), length);
 
     uint8_t return_data[length];
-    message.get_data(return_data);
+    message.get_data(return_data, sizeof(return_data));
     EXPECT_EQ(memcmp(data, return_data, length), 0);
 }
 
@@ -45,7 +45,7 @@ TEST(CANMessage, IdTest)
         EXPECT_EQ(message.get_length(), length);
 
         uint8_t return_data[length];
-        message.get_data(return_data);
+        message.get_data(return_data, sizeof(return_data));
         EXPECT_EQ(memcmp(data, return_data, length), 0);
     };
 
@@ -92,7 +92,7 @@ TEST(CANMessage, DataTest)
         CANMessage message(id, data, length);
 
         uint8_t return_data[length];
-        message.get_data(return_data);
+        message.get_data(return_data, sizeof(return_data));
         EXPECT_EQ(memcmp(data, return_data, length), 0);
 
         // いろんな値のデータが来てもIDとデータ長は変わらないことのテスト
@@ -131,7 +131,7 @@ TEST(CANMessage, LengthTest)
         EXPECT_EQ(message.get_id(), id);
 
         uint8_t return_data[CANMessage::max_data_length];
-        message.get_data(return_data);
+        message.get_data(return_data, sizeof(return_data));
         EXPECT_EQ(memcmp(data, return_data, expected_length), 0);
     };
 
@@ -157,6 +157,38 @@ TEST(CANMessage, LengthTest)
     // 入力:   最大値 + 1
     // 期待値: 最大値
     compare_can_massage_length(CANMessage::max_data_length + 1, CANMessage::max_data_length);
+}
+
+/// data が nullptr の場合は、長さ0のメッセージになることの確認
+TEST(CANMessage, NullDataTest)
+{
+    CANMessage message(0x100, nullptr, 8);
+    EXPECT_EQ(message.get_id(), 0x100);
+    EXPECT_EQ(message.get_length(), 0);
+
+    uint8_t buffer[8] = {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
+    EXPECT_EQ(message.get_data(buffer, sizeof(buffer)), 0U);
+    EXPECT_EQ(buffer[0], 0xAA);
+}
+
+/// 出力先のバッファが小さい場合は、入る分だけコピーし、溢れないことの確認
+TEST(CANMessage, SmallBufferTest)
+{
+    const uint8_t data[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    CANMessage    message(0x100, data, 8);
+
+    // バッファの直後に番兵を置いて、書き込みが溢れていないことを確認する
+    uint8_t buffer[5] = {0, 0, 0, 0, 0xEE};
+    EXPECT_EQ(message.get_data(buffer, 4), 4U);
+    EXPECT_EQ(buffer[0], 1);
+    EXPECT_EQ(buffer[3], 4);
+    EXPECT_EQ(buffer[4], 0xEE);
+
+    EXPECT_EQ(message.get_data(nullptr, 8), 0U);
+    EXPECT_EQ(message.get_data(buffer, 0), 0U);
+
+    uint8_t large[16];
+    EXPECT_EQ(message.get_data(large, sizeof(large)), 8U);
 }
 
 }  // namespace

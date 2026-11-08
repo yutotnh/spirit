@@ -79,29 +79,37 @@ public:
      * @param value
      * 設定したいデューティー比
      * - 範囲: 0.00 <= value <= 1.00
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void duty_cycle(float value);
+    bool duty_cycle(float value);
 
     /**
      * @brief 回転方向を設定する
      * @remark run() が実行されるまで、 state() で設定した値はモーターに対して影響しない
      * @param type Motor::State::Coast, Motor::State::CW, Motor::State::CCW, Motor::State::Brake のいずれかの設定したい回転方向
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void state(Motor::State type);
+    bool state(Motor::State type);
 
     /**
      * @brief Decayを設定する
      * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
      * @param type Decay::Slow, Decay::Fast のいずれか
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void decay(Motor::Decay type);
+    bool decay(Motor::Decay type);
 
     /**
      * @brief Slow DecayのPWM sideを設定する
      * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
      * @param type PwmSide::Low, PwmSide::High のいずれか
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void pwm_side(Motor::PwmSide type);
+    bool pwm_side(Motor::PwmSide type);
 
     /**
      * @brief モーターを設定したデューティー比と回転方向で動かす
@@ -114,8 +122,10 @@ public:
      * @param seconds
      * 設定したいパルス周期(s)
      * - 範囲: 0.1s <= seconds <= 1.6666e-5s
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void pulse_period(float seconds);
+    bool pulse_period(float seconds);
 
 private:
     InterfaceDigitalOut& _sr;

@@ -6,19 +6,21 @@
 
 namespace spirit {
 
-void Motor::control_system(const ControlSystem type)
+bool Motor::control_system(const ControlSystem type)
 {
     switch (type) {
         case ControlSystem::PWM:
         case ControlSystem::Speed:
             break;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor control system (%d)", static_cast<uint32_t>(type));
-            return;
+            return false;
     }
 
     _control_system = type;
+
+    return true;
 }
 
 Motor::ControlSystem Motor::get_control_system() const
@@ -26,26 +28,28 @@ Motor::ControlSystem Motor::get_control_system() const
     return _control_system;
 }
 
-void Motor::duty_cycle(const float value)
+bool Motor::duty_cycle(const float value)
 {
     if (std::isnan(value)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__, "Duty cycle is NaN");
-        return;
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__, "Duty cycle is NaN");
+        return false;
     }
 
     if (1.00F < value) {
         _duty_cycle = 1.00F;
 
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                       "Duty cycle (%g) is greater than 1.00, so it will be 1.00", value);
     } else if (value < 0.00F) {
         _duty_cycle = 0.00F;
 
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                       "Duty cycle (%g) is less than 0.00, so it will be 0.00", value);
     } else {
         _duty_cycle = value;
     }
+
+    return true;
 }
 
 float Motor::get_duty_cycle() const
@@ -53,16 +57,18 @@ float Motor::get_duty_cycle() const
     return _duty_cycle;
 }
 
-void Motor::speed(const float rps)
+bool Motor::speed(const float rps)
 {
     // NaN も弾くため、否定の形で比較する。無限大は、通信で送れない(受信側が拒否する)ので設定できない
     if (!(0.00F <= rps) || std::isinf(rps)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "RPS (%g) is less than 0.00, NaN or infinity", rps);
-        return;
+        return false;
     }
 
     _speed = rps;
+
+    return true;
 }
 
 float Motor::get_speed() const
@@ -70,29 +76,31 @@ float Motor::get_speed() const
     return _speed;
 }
 
-void Motor::pid_gain_factor(const float kp, const float ki, const float kd)
+bool Motor::pid_gain_factor(const float kp, const float ki, const float kd)
 {
     if (!(0.00F <= kp) || std::isinf(kp)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "kp (%g) is less than 0.00, NaN or infinity", kp);
-        return;
+        return false;
     }
 
     if (!(0.00F <= ki) || std::isinf(ki)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "ki (%g) is less than 0.00, NaN or infinity", ki);
-        return;
+        return false;
     }
 
     if (!(0.00F <= kd) || std::isinf(kd)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "kd (%g) is less than 0.00, NaN or infinity", kd);
-        return;
+        return false;
     }
 
     _kp = kp;
     _ki = ki;
     _kd = kd;
+
+    return true;
 }
 
 void Motor::get_pid_gain_factor(float& kp, float& ki, float& kd) const
@@ -102,7 +110,7 @@ void Motor::get_pid_gain_factor(float& kp, float& ki, float& kd) const
     kd = _kd;
 }
 
-void Motor::state(const State type)
+bool Motor::state(const State type)
 {
     switch (type) {
         case State::Coast:
@@ -111,12 +119,14 @@ void Motor::state(const State type)
         case State::Brake:
             break;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor state (%d)", static_cast<uint32_t>(type));
-            return;
+            return false;
     }
 
     _state = type;
+
+    return true;
 }
 
 Motor::State Motor::get_state() const
@@ -124,7 +134,7 @@ Motor::State Motor::get_state() const
     return _state;
 }
 
-void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level)
+bool Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level)
 {
     switch (level) {
         case ChangeLevel::OFF:
@@ -134,13 +144,13 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
         case ChangeLevel::Max:
             break;
         case ChangeLevel::Manual:
-            Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                         "Invalid motor change level (ChangeLevel::Manual)");
-            return;
+            return false;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor change level (%d)", static_cast<uint32_t>(level));
-            return;
+            return false;
     }
 
     switch (target) {
@@ -151,10 +161,12 @@ void Motor::change_level(const ChangeLevelTarget target, const ChangeLevel level
             _fall_change_level = level;
             break;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
-            return;
+            return false;
     }
+
+    return true;
 }
 
 Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
@@ -166,19 +178,19 @@ Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
             return _fall_change_level;
 
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
             return ChangeLevel::OFF;
     }
 }
 
-void Motor::full_scale_time(const ChangeLevelTarget target, const float seconds)
+bool Motor::full_scale_time(const ChangeLevelTarget target, const float seconds)
 {
     // NaN も弾くため、否定の形で比較する
     if (!(0.00F <= seconds)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "Full scale time (%g) is less than 0.00", seconds);
-        return;
+        return false;
     }
 
     switch (target) {
@@ -191,10 +203,12 @@ void Motor::full_scale_time(const ChangeLevelTarget target, const float seconds)
             _fall_full_scale_time = seconds;
             break;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
-            return;
+            return false;
     }
+
+    return true;
 }
 
 float Motor::get_full_scale_time(const ChangeLevelTarget target) const
@@ -218,7 +232,7 @@ float Motor::get_full_scale_time(const ChangeLevelTarget target) const
             // default に来ることは、change_level で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor change level (%d)", static_cast<uint32_t>(level));
             return 0.00F;
             // LCOV_EXCL_STOP
@@ -228,7 +242,7 @@ float Motor::get_full_scale_time(const ChangeLevelTarget target) const
 float Motor::get_maximum_change_duty_cycle(const ChangeLevelTarget target, const float dt) const
 {
     if (!(0.00F < dt)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "Control period (%g) is not greater than 0.00", dt);
         return 0.00F;
     }
@@ -243,23 +257,25 @@ float Motor::get_maximum_change_duty_cycle(const ChangeLevelTarget target, const
     return dt / seconds;
 }
 
-void Motor::pulse_period(const float seconds)
+bool Motor::pulse_period(const float seconds)
 {
     // NaN も弾くため、否定の形で比較する
     if (!(seconds <= max_pulse_period)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "Pulse period (%g) is greater than max pulse period (%g)", seconds,
                                     max_pulse_period);
-        return;
+        return false;
     }
 
     if (!(min_pulse_period <= seconds)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "Pulse period (%g) is less than min pulse period (%g)", seconds, min_pulse_period);
-        return;
+        return false;
     }
 
     _pulse_period = seconds;
+
+    return true;
 }
 
 float Motor::get_pulse_period() const
@@ -267,15 +283,17 @@ float Motor::get_pulse_period() const
     return _pulse_period;
 }
 
-void Motor::release_time(const float seconds)
+bool Motor::release_time(const float seconds)
 {
     if (!(0.00F <= seconds)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "Seconds (%g) is less than 0.00 or NaN", seconds);
-        return;
+        return false;
     }
 
     _release_time = seconds;
+
+    return true;
 }
 
 float Motor::get_release_time() const
@@ -283,23 +301,25 @@ float Motor::get_release_time() const
     return _release_time;
 }
 
-void Motor::decay(const Decay type)
+bool Motor::decay(const Decay type)
 {
     switch (type) {
         case Decay::Slow:
         case Decay::Fast:
             break;
         case Decay::Mixed:
-            Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                         "Invalid motor decay (Decay::Mixed)");
-            return;
+            return false;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor decay (%d)", static_cast<uint32_t>(type));
-            return;
+            return false;
     }
 
     _decay = type;
+
+    return true;
 }
 
 Motor::Decay Motor::get_decay() const
@@ -307,19 +327,21 @@ Motor::Decay Motor::get_decay() const
     return _decay;
 }
 
-void Motor::pwm_side(const PwmSide type)
+bool Motor::pwm_side(const PwmSide type)
 {
     switch (type) {
         case PwmSide::Low:
         case PwmSide::High:
             break;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor PWM side (%d)", static_cast<uint32_t>(type));
-            return;
+            return false;
     }
 
     _pwm_side = type;
+
+    return true;
 }
 
 Motor::PwmSide Motor::get_pwm_side() const
@@ -346,5 +368,25 @@ bool Motor::get_sleep() const
 {
     return _sleep;
 }
+
+// C++14 では、 static constexpr メンバーを参照渡しなどで使う(odr-use)と、クラス外の定義が必要になる (C++17 以降は不要)
+#if __cplusplus < 201703L
+constexpr Motor::ControlSystem Motor::Default::control_system;
+constexpr Motor::State         Motor::Default::state;
+constexpr Motor::ChangeLevel   Motor::Default::rise_change_level;
+constexpr Motor::ChangeLevel   Motor::Default::fall_change_level;
+constexpr float                Motor::Default::full_scale_time;
+constexpr float                Motor::Default::kp;
+constexpr float                Motor::Default::ki;
+constexpr float                Motor::Default::kd;
+constexpr float                Motor::Default::pulse_period;
+constexpr float                Motor::Default::release_time;
+constexpr Motor::Decay         Motor::Default::decay;
+constexpr Motor::PwmSide       Motor::Default::pwm_side;
+constexpr bool                 Motor::Default::reset;
+constexpr bool                 Motor::Default::sleep;
+constexpr float                Motor::min_pulse_period;
+constexpr float                Motor::max_pulse_period;
+#endif
 
 }  // namespace spirit

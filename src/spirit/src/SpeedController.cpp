@@ -6,9 +6,17 @@
 
 namespace spirit {
 
-SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase)
+SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase,
+                                 const int pulses_per_revolution)
     : _a_phase(a_phase), _b_phase(b_phase)
 {
+    if (pulses_per_revolution <= 0) {
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
+                                    "[pulses_per_revolution = %d] value must be greater than 0", pulses_per_revolution);
+    } else {
+        _deg_unit = 360.0f / static_cast<float>(pulses_per_revolution) / 4.0f;
+    }
+
 #if defined(__MBED__) && !defined(ARDUINO)
     _a_phase.rise(mbed::callback(this, &SpeedController::a_phase_interrupt));
     _a_phase.fall(mbed::callback(this, &SpeedController::a_phase_interrupt));
@@ -32,13 +40,13 @@ float SpeedController::calculation(float target_rps, float dt)
 {
     // NaN も弾くため、否定の形で比較する
     if (!(0.0f <= target_rps)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "[target_rps = %g] value cannot be negative or NaN", target_rps);
         return 0.0f;
     }
 
     if (!(0.0f < dt)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
     }
@@ -75,7 +83,7 @@ float SpeedController::calculation(float target_rps, float dt)
 float SpeedController::rps_calculation(float dt)
 {
     if (!(0.0f < dt)) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
     }
@@ -89,7 +97,7 @@ float SpeedController::rps_calculation(float dt)
     } else if (first_loop) {
         // 最初の一周の間も角度を記録しておく
         // (記録しないと、二周目の差分がリセット後の総回転量になり、rps が実際より大きく出る)
-        _angle_buff[_angle_buff_index] = _angle_counter;
+        _angle_buff[_angle_buff_index] = _angle_counter.load(std::memory_order_relaxed);
 
         rps = angle() / 360.0f / (dt * _angle_buff_index);
         if (rps < 0.0f) {
@@ -98,8 +106,9 @@ float SpeedController::rps_calculation(float dt)
         return rps;
     }
 
-    int angle_diff                 = _angle_counter - _angle_buff[_angle_buff_index];
-    _angle_buff[_angle_buff_index] = _angle_counter;
+    const int angle_counter        = _angle_counter.load(std::memory_order_relaxed);
+    int       angle_diff           = angle_counter - _angle_buff[_angle_buff_index];
+    _angle_buff[_angle_buff_index] = angle_counter;
 
     rps = (angle_diff * _deg_unit) / 360.0f / (dt * _angle_buff_max);
     if (rps < 0.0f) {
@@ -108,17 +117,20 @@ float SpeedController::rps_calculation(float dt)
     return rps;
 }
 
-void SpeedController::limit(float high_limit, float low_limit)
+bool SpeedController::limit(float high_limit, float low_limit)
 {
     if (high_limit > low_limit) {
         _high_limit = high_limit;
         _low_limit  = low_limit;
     } else {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "[high_limit = %g, low_limit = %g]The relationship between the upper limit value "
                                     "and the lower limit value is strange",
                                     high_limit, low_limit);
+        return false;
     }
+
+    return true;
 }
 
 bool SpeedController::pid_gain(float kp, float ki, float kd)
@@ -136,7 +148,7 @@ bool SpeedController::pid_gain(float kp, float ki, float kd)
 
 void SpeedController::reset()
 {
-    _angle_counter    = 0;
+    _angle_counter.store(0, std::memory_order_relaxed);
     _angle_buff_index = 0;
     _sum_error        = 0.0f;
     _last_rps         = 0.0f;
@@ -157,32 +169,43 @@ float SpeedController::limiter(float val)
     return val;
 }
 
+void SpeedController::add_angle_counter(const int delta)
+{
+    // 書き込むのは割り込みだけなので、ロックのない load と store で足せる (fetch_add は、コアによっては追加のライブラリが必要になる)
+    _angle_counter.store(_angle_counter.load(std::memory_order_relaxed) + delta, std::memory_order_relaxed);
+}
+
 void SpeedController::a_phase_interrupt()
 {
     if (_a_phase.read() != _b_phase.read()) {
-        _angle_counter++;
+        add_angle_counter(1);
     } else {
-        _angle_counter--;
+        add_angle_counter(-1);
     }
 }
 
 void SpeedController::b_phase_interrupt()
 {
     if (_a_phase.read() == _b_phase.read()) {
-        _angle_counter++;
+        add_angle_counter(1);
     } else {
-        _angle_counter--;
+        add_angle_counter(-1);
     }
 }
 
 float SpeedController::angle()
 {
-    return _angle_counter * _deg_unit;
+    return static_cast<float>(_angle_counter.load(std::memory_order_relaxed)) * _deg_unit;
 }
 
 float SpeedController::rps()
 {
     return _rps;
 }
+
+// C++14 では、 static constexpr メンバーを参照渡しなどで使う(odr-use)と、クラス外の定義が必要になる (C++17 以降は不要)
+#if __cplusplus < 201703L
+constexpr int SpeedController::default_pulses_per_revolution;
+#endif
 
 }  // namespace spirit

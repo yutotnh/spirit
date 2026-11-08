@@ -79,7 +79,7 @@ uint32_t seconds_to_milliseconds(const float seconds)
     const float milliseconds = std::floor(seconds * 1000.0F + 0.5F);
 
     if (!(milliseconds <= static_cast<float>(max_uint16))) {
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                       "Time (%g s) exceeds the maximum value (65.535 s), so it will be 65.535 s",
                                       seconds);
         return max_uint16;
@@ -431,7 +431,7 @@ DecodeStatus parse_items(BitReader& reader, Motor& next, DecodeResult& result)
 bool encode_control(const Motor& motor, uint8_t* buffer, const std::size_t max_bytes, std::size_t& bytes)
 {
     if ((buffer == nullptr) || (max_bytes < control_bytes)) {
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::IllegalCombination, __FILE__, __func__, __LINE__,
                                       "Buffer size (%zu bytes) is less than the control packet size (%zu bytes)",
                                       max_bytes, control_bytes);
         return false;
@@ -439,7 +439,7 @@ bool encode_control(const Motor& motor, uint8_t* buffer, const std::size_t max_b
 
     uint32_t state = 0;
     if (!state_to_wire(motor.get_state(), state)) {
-        Error::get_instance().warning(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                       "Unknown motor state (%d)", static_cast<uint32_t>(motor.get_state()));
         return false;
     }
@@ -468,7 +468,7 @@ bool encode_control(const Motor& motor, uint8_t* buffer, const std::size_t max_b
             writer.write(float32_to_bfloat16(motor.get_speed()), 16);
             break;
         default:
-            Error::get_instance().warning(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().warning(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                           "Unknown motor control system (%d)",
                                           static_cast<uint32_t>(motor.get_control_system()));
             return false;
@@ -482,7 +482,7 @@ bool encode_config(const Motor& motor, const std::size_t index, uint8_t* buffer,
                    std::size_t& bytes, std::size_t& next_index)
 {
     if ((buffer == nullptr) || (max_bytes == 0) || (config_item_count <= index)) {
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::IllegalCombination, __FILE__, __func__, __LINE__,
                                       "Invalid arguments (index = %zu, max_bytes = %zu)", index, max_bytes);
         return false;
     }
@@ -494,7 +494,7 @@ bool encode_config(const Motor& motor, const std::size_t index, uint8_t* buffer,
     while (slot < config_item_count) {
         Item item;
         if (!make_item(motor, slot, item)) {
-            Error::get_instance().warning(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().warning(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                           "Unknown motor setting (slot = %zu)", slot);
             return false;
         }
@@ -509,7 +509,7 @@ bool encode_config(const Motor& motor, const std::size_t index, uint8_t* buffer,
     }
 
     if (slot == index) {
-        Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::IllegalCombination, __FILE__, __func__, __LINE__,
                                       "Buffer size (%zu bytes) is too small for a setting", max_bytes);
         return false;
     }

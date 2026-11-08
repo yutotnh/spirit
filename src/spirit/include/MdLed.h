@@ -41,16 +41,20 @@ public:
      * @param type 設定したい値
      * @details Error中は設定値が反映されない @n
      *          Alternate や Concurrent 中は回転方向を保持するだけで、点滅は止まらない(Normal に戻したときに反映される)
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void state(Motor::State type);
+    bool state(Motor::State type);
 
     /**
      * @brief LEDのモードを設定する
      * @param type 設定したいLEDのモード
      * @details BlinkMode::Error は error() で設定するため、この関数に指定するとエラーになる @n
      *          BlinkMode::Normal を設定すると、最後に state() で設定した回転方向を表示する
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void mode(BlinkMode type);
+    bool mode(BlinkMode type);
 
     /**
      * @brief LEDをError状態にする

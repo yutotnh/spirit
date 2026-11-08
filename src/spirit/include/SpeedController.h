@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <atomic>
+
 #include "InterfaceInterruptIn.h"
 
 namespace spirit {
@@ -13,8 +15,15 @@ public:
      * @brief コンストラクタ
      * @param a_phase RotaryEncoder A phase pin
      * @param b_phase RotaryEncoder B phase pin
+     * @param pulses_per_revolution ロータリーエンコーダの1回転あたりのパルス数(1相あたり。 PPR) @n
+     *                              A相とB相の両方の立ち上がり・立ち下がりを数える(4逓倍)ので、1回転で4倍のカウントになる @n
+     *                              0以下の場合は、エラーとなり、既定値を使う
      */
-    SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase);
+    SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase,
+                    int pulses_per_revolution = default_pulses_per_revolution);
+
+    /// ロータリーエンコーダの1回転あたりのパルス数の既定値
+    static constexpr int default_pulses_per_revolution = 200;
 
     /**
      * @brief 目標rpsを与えると速度制御の計算結果を返す @n
@@ -26,11 +35,13 @@ public:
 
     /**
      * @brief 速度制御の計算結果にかける上限値と下限値を設定
-     * @attention 初期値は上限・下限とも 0 なので、この関数を呼ぶまで calculation() は 0 を返す
+     * @note 初期値は、上限 1.0、下限 0.0 (デューティー比の範囲)
      * @param high_limit 速度制御の計算結果の最大値
      * @param low_limit  速度制御の計算結果の最小値
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void limit(float high_limit, float low_limit);
+    bool limit(float high_limit, float low_limit);
 
     /**
      * @brief PID制御のゲイン係数を設定
@@ -80,11 +91,11 @@ private:
     float _ki{0.0f};
     float _kd{0.0f};
 
-    static constexpr int   _ppr{200};
-    static constexpr float _deg_unit{360.0f / _ppr / 4.0f};
+    /// 1カウントあたりの角度(度)
+    float _deg_unit{360.0f / default_pulses_per_revolution / 4.0f};
 
-    /// 割り込みと calculation() の両方からアクセスされる
-    volatile int _angle_counter;
+    /// 割り込みと calculation() の両方からアクセスされる。書き込むのは割り込みだけ(reset() を除く)なので、 load と store の組み合わせで更新する
+    std::atomic<int> _angle_counter{0};
 
     bool first_loop;
 
@@ -99,7 +110,7 @@ private:
     /// 前回の rps (微分項の計算用)
     float _last_rps;
 
-    float _high_limit{0.00f};
+    float _high_limit{1.00f};
     float _low_limit{0.00f};
 
     /**
@@ -115,6 +126,12 @@ private:
      * @return リミッターをかけた数値
      */
     float limiter(float val);
+
+    /**
+     * @brief エンコーダーの角度のカウンターに値を足す
+     * @param delta 足す値
+     */
+    void add_angle_counter(int delta);
 };
 
 }  // namespace spirit

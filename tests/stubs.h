@@ -1,6 +1,10 @@
 #ifndef SPIRIT_STUB_H
 #define SPIRIT_STUB_H
 
+#include <string>
+#include <vector>
+
+#include "Error.h"
 #include "InterfaceDigitalOut.h"
 #include "InterfaceInterruptIn.h"
 #include "InterfacePwmOut.h"
@@ -142,6 +146,26 @@ private:
 
     /// PWM周期(s)
     float _period{0.00F};
+};
+
+/// エラー(警告)の情報を記録する ErrorHandler (標準エラー出力をキャプチャせずに、エラーの内容を検査できる)
+class RecordingErrorHandler : public ErrorHandler {
+public:
+    struct Record {
+        Error::Status status;
+        Error::Type   type;
+        std::string   filename;
+        std::string   funcname;
+        uint32_t      line_number;
+        std::string   message;
+    };
+
+    void handle(const Error::Info& info) override
+    {
+        records.push_back({info.status, info.type, info.filename, info.funcname, info.line_number, info.message});
+    }
+
+    std::vector<Record> records;
 };
 
 }  // namespace spirit

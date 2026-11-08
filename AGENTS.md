@@ -66,7 +66,8 @@ g++ -std=c++14 -g -O1 -fsanitize=address,undefined -I. -Isrc -Isrc/spirit/includ
 - スペルチェックは cspell（`.cspell.json`）。未登録の単語は辞書に追加する
 - コメントとドキュメントは日本語
 - コンパイラ警告は `-Wall -Wextra -pedantic-errors -Werror`。警告を残さない
-- 異常値は `Error::get_instance().error(...)` / `warning(...)` で通知し、例外は使わない（マイコンで動かすため）
+- 異常値は `Error::get_instance().error(...)` / `warning(...)` で通知し、例外は使わない（マイコンで動かすため）。通知は `ErrorHandler`（`Error::set_handler()`）に渡され、既定では標準エラー出力に出る。テストでは `RecordingErrorHandler`（`tests/stubs.h`）で内容を検査できる。`Error` の状態は `std::atomic` で、どのスレッドからも読める。設定関数（`Motor::speed()` など）は、設定できたかどうかを `bool` で返す
+- ライブラリは C++14・17・20 の全てで警告なくビルドできる。C++14 では `static constexpr` メンバーを参照渡しするとクラス外の定義が必要になるので、新しく足すときは `.cpp` に定義を書く（`tests/test_odr.cpp`）
 
 ## 注意点
 

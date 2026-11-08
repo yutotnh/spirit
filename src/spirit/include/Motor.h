@@ -91,8 +91,10 @@ public:
     /**
      * @brief 制御方式を設定する
      * @param type ControlSystem::PWM, ControlSystem::Speed のいずれかの設定したい制御
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void control_system(ControlSystem type);
+    bool control_system(ControlSystem type);
 
     /**
      * @brief 制御方式を返す
@@ -107,8 +109,10 @@ public:
      * - 0.00 = 0%, 1.00 = 100%
      * - 範囲: 0.00 <= value <= 1.00
      * - 範囲を超えた場合は、範囲の端に設定される
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void duty_cycle(float value);
+    bool duty_cycle(float value);
 
     /**
      * @brief デューティー比を返す
@@ -121,8 +125,10 @@ public:
     /**
      * @brief 速度(rps)を設定する
      * @param rps 設定したい速度(rps)
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void speed(float rps);
+    bool speed(float rps);
 
     /**
      * @brief 速度を返す
@@ -135,8 +141,10 @@ public:
      * @param kp 比例ゲイン係数
      * @param ki 積分ゲイン係数
      * @param kd 微分ゲイン係数
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void pid_gain_factor(float kp, float ki, float kd);
+    bool pid_gain_factor(float kp, float ki, float kd);
 
     /**
      * @brief PID制御のゲイン係数を返す
@@ -149,8 +157,10 @@ public:
     /**
      * @brief 回転方向を設定する
      * @param type State::Coast, State::CW, State::CCW, State::Brake のいずれかの設定したい回転方向
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void state(State type);
+    bool state(State type);
 
     /**
      * @brief 回転方向を返す
@@ -165,8 +175,10 @@ public:
      *              (ChangeLevel::Manual は指定できない。手動で設定する場合は Motor::full_scale_time() を使う)
      * @attention この関数を実行すると、それより前に Motor::full_scale_time(ChangeLevelTarget, float) で設定した値は無効になり、
      * Motor::get_full_scale_time(ChangeLevelTarget) は 設定した ChangeLevel に対応した値を返す
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void change_level(ChangeLevelTarget target, ChangeLevel level);
+    bool change_level(ChangeLevelTarget target, ChangeLevel level);
 
     /**
      * @brief デューティ比の変化具合を返す
@@ -183,8 +195,10 @@ public:
      *                - 0.00 の場合は、変化幅を制限しない
      * @attention この関数を実行すると、それより前に Motor::change_level(ChangeLevelTarget, ChangeLevel) で設定した値は無効になり、
      * Motor::get_change_level(ChangeLevelTarget) は ChangeLevel::Manual を返す
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void full_scale_time(ChangeLevelTarget target, float seconds);
+    bool full_scale_time(ChangeLevelTarget target, float seconds);
 
     /**
      * @brief デューティ比が 0 から 1.00 (100%) まで変化するのにかける時間(s)を返す
@@ -216,8 +230,10 @@ public:
      * 設定したいパルス周期(s)
      * - 範囲: 1.6666e-5s <= seconds <= 0.1s
      * - 範囲を超えるとエラーになり、設定は変更されない
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void pulse_period(float seconds);
+    bool pulse_period(float seconds);
 
     /**
      * @brief パルス周期を返す
@@ -229,8 +245,10 @@ public:
      * @brief 最後にデータが来て何秒でモータを停止するかを設定する
      * @param seconds 停止までの秒数
      *      - 0.0s より小さい場合はエラーになり、設定は変更されない
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void release_time(float seconds);
+    bool release_time(float seconds);
 
     /**
      * @brief 最後にデータが来てから停止までの秒数を返す
@@ -241,8 +259,10 @@ public:
     /**
      * @brief Decayを設定する
      * @param type Decay::Slow, Decay::Fast のいずれか
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void decay(Decay type);
+    bool decay(Decay type);
 
     /**
      * @brief Decayを返す
@@ -253,8 +273,10 @@ public:
     /**
      * @brief Slow decayのPWM sideを設定する
      * @param type PwmSide::Low, PwmSide::High のいずれか
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void pwm_side(PwmSide type);
+    bool pwm_side(PwmSide type);
 
     /**
      * @brief Slow decayのPWM sideを返す

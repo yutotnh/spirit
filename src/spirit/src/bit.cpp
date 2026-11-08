@@ -12,7 +12,7 @@ bool get_range_value(const uint8_t* buffer, const std::size_t buffer_bytes, cons
     std::size_t max_value_size = sizeof(value) * CHAR_BIT;
 
     if (max_value_size < value_size) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "value_size(%zu) is greater than the bit width (%zu) of the return type (uint32_t)",
                                     value_size, max_value_size);
         return false;
@@ -25,14 +25,13 @@ bool get_range_value(const uint8_t* buffer, const std::size_t buffer_bytes, cons
 
     // value_size > 1 なので、 buffer_bytes == 0 になると確実にバッファオーバーランするため、警告を出す
     if (buffer_bytes == 0) {
-        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
-                                    "buffer_bytes is 0");
+        Error::get_instance().error(Error::Type::IllegalCombination, __FILE__, __func__, __LINE__, "buffer_bytes is 0");
         return false;
     }
 
     auto end = start + value_size - 1;
     if ((buffer_bytes * CHAR_BIT) - 1 < end) {
-        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::IllegalCombination, __FILE__, __func__, __LINE__,
                                     "Range (%zu-%zu) is out of range (0-%zu)", start, end,
                                     (buffer_bytes * CHAR_BIT) - 1);
         return false;
@@ -58,7 +57,7 @@ bool set_range_value(const uint32_t value, const std::size_t start, const std::s
     std::size_t max_value_size = sizeof(value) * CHAR_BIT;
 
     if (max_value_size < value_size) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "value_size(%zu) is greater than the bit width (%zu) of the return type (uint32_t)",
                                     value_size, max_value_size);
         return false;
@@ -70,14 +69,13 @@ bool set_range_value(const uint32_t value, const std::size_t start, const std::s
 
     // value_size > 1 なので、 buffer_bytes == 0 になると確実にバッファオーバーランするため、警告を出す
     if (buffer_bytes == 0) {
-        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
-                                    "buffer_bytes is 0");
+        Error::get_instance().error(Error::Type::IllegalCombination, __FILE__, __func__, __LINE__, "buffer_bytes is 0");
         return false;
     }
 
     auto end = start + value_size - 1;
     if ((buffer_bytes * CHAR_BIT) - 1 < end) {
-        Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::IllegalCombination, __FILE__, __func__, __LINE__,
                                     "Range (%zu-%zu) is out of range (0-%zu)", start, end,
                                     (buffer_bytes * CHAR_BIT) - 1);
         return false;

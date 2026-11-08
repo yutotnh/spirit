@@ -38,7 +38,7 @@ inline void adjust_duty_cycle(Motor::State target_state, float target_duty_cycle
             case Motor::State::Brake:
                 break;
             default:
-                Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                             "Unknown motor state (%d)", static_cast<uint32_t>(type));
                 return;
         }

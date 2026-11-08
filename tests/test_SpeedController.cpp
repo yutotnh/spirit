@@ -117,4 +117,56 @@ TEST(SpeedController, SpeedControllerErrorTest)
     testing::internal::GetCapturedStderr();
 }
 
+/// limit() を呼ばなくても、既定の上下限(デューティー比の範囲 0.0〜1.0)で出力されることの確認
+TEST(SpeedController, DefaultLimits)
+{
+    StubInterruptIn a_phase;
+    StubInterruptIn b_phase;
+    SpeedController speed_controller(a_phase, b_phase);
+    speed_controller.pid_gain(1.0f, 0.0f, 0.0f);
+
+    // 目標が大きく、停止中なので、出力は上限
+    EXPECT_FLOAT_EQ(speed_controller.calculation(5.0f, 0.01f), 1.0f);
+    // 目標より速いときは、下限
+    speed_controller.reset();
+    for (int pulse = 0; pulse < 10; pulse++) {
+        a_phase.interrupt_rise();
+        b_phase.interrupt_rise();
+        a_phase.interrupt_fall();
+        b_phase.interrupt_fall();
+    }
+    EXPECT_FLOAT_EQ(speed_controller.calculation(0.0f, 0.01f), 0.0f);
+}
+
+/// エンコーダーの分解能(PPR)を指定でき、角度とrpsに反映されることの確認
+TEST(SpeedController, PulsesPerRevolution)
+{
+    StubInterruptIn a_phase;
+    StubInterruptIn b_phase;
+    SpeedController speed_controller(a_phase, b_phase, 100);
+
+    a_phase.interrupt_rise();
+    b_phase.interrupt_rise();
+    a_phase.interrupt_fall();
+    b_phase.interrupt_fall();
+
+    // 4カウントで 360 / 100 = 3.6度 (既定の 200PPR の2倍)
+    EXPECT_FLOAT_EQ(speed_controller.angle(), 3.6f);
+
+    // 0以下の場合は、エラーになり、既定値(200PPR)を使う
+    testing::internal::CaptureStderr();
+    Error::get_instance().reset();
+    StubInterruptIn a2;
+    StubInterruptIn b2;
+    SpeedController invalid(a2, b2, 0);
+    EXPECT_EQ(Error::get_instance().get_status(), Error::Status::Error);
+    testing::internal::GetCapturedStderr();
+    a2.interrupt_rise();
+    b2.interrupt_rise();
+    a2.interrupt_fall();
+    b2.interrupt_fall();
+    EXPECT_FLOAT_EQ(invalid.angle(), 1.8f);
+    Error::get_instance().reset();
+}
+
 }  // namespace
