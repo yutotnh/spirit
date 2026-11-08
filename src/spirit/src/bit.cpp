@@ -6,7 +6,7 @@
 
 namespace spirit {
 
-bool get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const std::size_t start,
+bool get_range_value(const uint8_t* buffer, const std::size_t buffer_bytes, const std::size_t start,
                      const std::size_t value_size, uint32_t& value)
 {
     std::size_t max_value_size = sizeof(value) * CHAR_BIT;
@@ -23,18 +23,18 @@ bool get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const
         return true;
     }
 
-    // value_size > 1 なので、 buffer_size == 0 になると確実にバッファオーバーランするため、警告を出す
-    if (buffer_size == 0) {
+    // value_size > 1 なので、 buffer_bytes == 0 になると確実にバッファオーバーランするため、警告を出す
+    if (buffer_bytes == 0) {
         Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
-                                    "buffer_size is 0");
+                                    "buffer_bytes is 0");
         return false;
     }
 
     auto end = start + value_size - 1;
-    if ((buffer_size * CHAR_BIT) - 1 < end) {
+    if ((buffer_bytes * CHAR_BIT) - 1 < end) {
         Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
                                     "Range (%zu-%zu) is out of range (0-%zu)", start, end,
-                                    (buffer_size * CHAR_BIT) - 1);
+                                    (buffer_bytes * CHAR_BIT) - 1);
         return false;
     }
 
@@ -53,7 +53,7 @@ bool get_range_value(const uint8_t* buffer, const std::size_t buffer_size, const
 }
 
 bool set_range_value(const uint32_t value, const std::size_t start, const std::size_t value_size,
-                     const std::size_t buffer_size, uint8_t* buffer)
+                     const std::size_t buffer_bytes, uint8_t* buffer)
 {
     std::size_t max_value_size = sizeof(value) * CHAR_BIT;
 
@@ -68,18 +68,18 @@ bool set_range_value(const uint32_t value, const std::size_t start, const std::s
         return true;
     }
 
-    // value_size > 1 なので、 buffer_size == 0 になると確実にバッファオーバーランするため、警告を出す
-    if (buffer_size == 0) {
+    // value_size > 1 なので、 buffer_bytes == 0 になると確実にバッファオーバーランするため、警告を出す
+    if (buffer_bytes == 0) {
         Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
-                                    "buffer_size is 0");
+                                    "buffer_bytes is 0");
         return false;
     }
 
     auto end = start + value_size - 1;
-    if ((buffer_size * CHAR_BIT) - 1 < end) {
+    if ((buffer_bytes * CHAR_BIT) - 1 < end) {
         Error::get_instance().error(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
                                     "Range (%zu-%zu) is out of range (0-%zu)", start, end,
-                                    (buffer_size * CHAR_BIT) - 1);
+                                    (buffer_bytes * CHAR_BIT) - 1);
         return false;
     }
 

@@ -88,8 +88,9 @@ TEST(SpeedDataConverter, HeaderCheckTest)
 
     EXPECT_TRUE(speed_data_converter.decode(buffer, buffer_size, motor));
 
-    /// @test 添え字0のヘッダ部分以外を見ていないことを確認するために、ヘッダ部分以外は全て1で確かめる
-    buffer[0] = 0x40 | 0x3F;
+    /// @test 添え字0のヘッダ部分以外を見ていないことを確認するために、ヘッダ部分以外は1で確かめる
+    /// (2bit目は速度の符号ビットで、負の速度は不正な値になるため0)
+    buffer[0] = 0x40 | 0x1F;
     EXPECT_TRUE(speed_data_converter.decode(buffer, buffer_size, motor));
 
     // 異常な場合

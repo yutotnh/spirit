@@ -21,7 +21,8 @@ TEST(IntegrationTest, 1)
     auto controller = [=](const spirit::Motor &motor) {
         spirit::FakeUdpConverter   fake_udp;
         spirit::MotorDataConverter motor_data;
-        const uint32_t             can_id = spirit::can::get_motor_id(1, 0, dip_sw);
+        uint32_t                   can_id = 0;
+        EXPECT_TRUE(spirit::can::get_motor_id(1, 0, dip_sw, can_id));
 
         constexpr std::size_t max_motor_data_buffer_size = 64;
         uint8_t               motor_data_buffer[8]       = {};
@@ -54,7 +55,8 @@ TEST(IntegrationTest, 1)
         spirit::FakeUdpConverter   fake_udp;
         spirit::MotorDataConverter motor_data;
 
-        const uint32_t can_id = spirit::can::get_motor_id(1, 0, dip_sw);
+        uint32_t can_id = 0;
+        EXPECT_TRUE(spirit::can::get_motor_id(1, 0, dip_sw, can_id));
 
         EXPECT_EQ(message.id, can_id);
 

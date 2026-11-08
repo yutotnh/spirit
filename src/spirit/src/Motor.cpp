@@ -1,5 +1,7 @@
 #include "spirit/include/Motor.h"
 
+#include <cmath>
+
 #include "spirit/include/Error.h"
 
 namespace spirit {
@@ -26,6 +28,11 @@ Motor::ControlSystem Motor::get_control_system() const
 
 void Motor::duty_cycle(const float value)
 {
+    if (std::isnan(value)) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__, "Duty cycle is NaN");
+        return;
+    }
+
     if (1.00F < value) {
         _duty_cycle = 1.00F;
 
@@ -48,9 +55,10 @@ float Motor::get_duty_cycle() const
 
 void Motor::speed(const float rps)
 {
-    if (rps < 0.00F) {
+    // NaN も弾くため、否定の形で比較する
+    if (!(0.00F <= rps)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "RPS (%g) is less than 0.00", rps);
+                                    "RPS (%g) is less than 0.00 or NaN", rps);
         return;
     }
 
@@ -64,21 +72,21 @@ float Motor::get_speed() const
 
 void Motor::pid_gain_factor(const float kp, const float ki, const float kd)
 {
-    if (kp < 0.00F) {
+    if (!(0.00F <= kp)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "kp (%g) is less than 0.00", kp);
+                                    "kp (%g) is less than 0.00 or NaN", kp);
         return;
     }
 
-    if (ki < 0.00F) {
+    if (!(0.00F <= ki)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "ki (%g) is less than 0.00", ki);
+                                    "ki (%g) is less than 0.00 or NaN", ki);
         return;
     }
 
-    if (kd < 0.00F) {
+    if (!(0.00F <= kd)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "kd (%g) is less than 0.00", kd);
+                                    "kd (%g) is less than 0.00 or NaN", kd);
         return;
     }
 
@@ -164,29 +172,23 @@ Motor::ChangeLevel Motor::get_change_level(const ChangeLevelTarget target) const
     }
 }
 
-void Motor::maximum_change_duty_cycle(const ChangeLevelTarget target, float duty_cycle)
+void Motor::full_scale_time(const ChangeLevelTarget target, const float seconds)
 {
-    if (2.00F < duty_cycle) {
+    // NaN も弾くため、否定の形で比較する
+    if (!(0.00F <= seconds)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "Change duty cycle (%g) is greater than 2.00", duty_cycle);
-        return;
-    }
-
-    if (duty_cycle < minimum_maximum_change_duty_cycle) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "Change duty cycle (%g) is less than minimum duty cycle (%g)", duty_cycle,
-                                    minimum_maximum_change_duty_cycle);
+                                    "Full scale time (%g) is less than 0.00", seconds);
         return;
     }
 
     switch (target) {
         case ChangeLevelTarget::Rise:
-            _rise_change_level              = ChangeLevel::Manual;
-            _rise_maximum_change_duty_cycle = duty_cycle;
+            _rise_change_level    = ChangeLevel::Manual;
+            _rise_full_scale_time = seconds;
             break;
         case ChangeLevelTarget::Fall:
-            _fall_change_level              = ChangeLevel::Manual;
-            _fall_maximum_change_duty_cycle = duty_cycle;
+            _fall_change_level    = ChangeLevel::Manual;
+            _fall_full_scale_time = seconds;
             break;
         default:
             Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
@@ -195,41 +197,23 @@ void Motor::maximum_change_duty_cycle(const ChangeLevelTarget target, float duty
     }
 }
 
-float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
+float Motor::get_full_scale_time(const ChangeLevelTarget target) const
 {
-    ChangeLevel level = get_change_level(target);
-
-    /// ChangeLevel::Manual 時に最大変化デューティ比を返す
-    auto manual_maximum_change_duty_cycle = [this](ChangeLevelTarget target) {
-        switch (target) {
-            case ChangeLevelTarget::Rise:
-                return _rise_maximum_change_duty_cycle;
-            case ChangeLevelTarget::Fall:
-                return _fall_maximum_change_duty_cycle;
-
-                // default に来ることは、get_change_level で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
-                // LCOV_EXCL_START
-            default:
-                Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
-                                            "Unknown motor change level target (%d)", static_cast<uint32_t>(target));
-                return 0.00F;
-                // LCOV_EXCL_STOP
-        }
-    };
+    const ChangeLevel level = get_change_level(target);
 
     switch (level) {
         case ChangeLevel::Manual:
-            return manual_maximum_change_duty_cycle(target);
+            return (target == ChangeLevelTarget::Rise) ? _rise_full_scale_time : _fall_full_scale_time;
         case ChangeLevel::OFF:
-            return 1.00F;
+            return 0.00F;
         case ChangeLevel::Low:
-            return 0.001F;
+            return 0.10F;
         case ChangeLevel::Middle:
-            return 0.0001F;
+            return 0.50F;
         case ChangeLevel::High:
-            return 0.0001F;
+            return 1.00F;
         case ChangeLevel::Max:
-            return 0.00001F;
+            return 3.00F;
 
             // default に来ることは、change_level で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
@@ -241,16 +225,35 @@ float Motor::get_maximum_change_duty_cycle(ChangeLevelTarget target) const
     }
 }
 
+float Motor::get_maximum_change_duty_cycle(const ChangeLevelTarget target, const float dt) const
+{
+    if (!(0.00F < dt)) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Control period (%g) is not greater than 0.00", dt);
+        return 0.00F;
+    }
+
+    const float seconds = get_full_scale_time(target);
+
+    // 0秒の場合は、変化幅を制限しない
+    if ((seconds <= 0.00F) || (seconds <= dt)) {
+        return 1.00F;
+    }
+
+    return dt / seconds;
+}
+
 void Motor::pulse_period(const float seconds)
 {
-    if (max_pulse_period < seconds) {
+    // NaN も弾くため、否定の形で比較する
+    if (!(seconds <= max_pulse_period)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
                                     "Pulse period (%g) is greater than max pulse period (%g)", seconds,
                                     max_pulse_period);
         return;
     }
 
-    if (seconds < min_pulse_period) {
+    if (!(min_pulse_period <= seconds)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
                                     "Pulse period (%g) is less than min pulse period (%g)", seconds, min_pulse_period);
         return;
@@ -266,9 +269,9 @@ float Motor::get_pulse_period() const
 
 void Motor::release_time(const float seconds)
 {
-    if (seconds < 0.00F) {
+    if (!(0.00F <= seconds)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "Seconds (%g) is less than 0.00", seconds);
+                                    "Seconds (%g) is less than 0.00 or NaN", seconds);
         return;
     }
 

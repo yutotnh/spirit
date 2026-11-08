@@ -50,17 +50,17 @@ public:
      * @brief モータのデューティー比の立ち上がり・立ち下り時の変化具合を設定するための値
      */
     enum class ChangeLevel {
-        /// 手動で単位当たりの最大変化デューティ比を入力する
+        /// 手動で全開までにかける時間(s)を入力する
         Manual,
-        /// 設定したデューティー比を直ちにモーターに出力する
+        /// 設定したデューティー比を直ちにモーターに出力する(0秒)
         OFF,
-        /// ほんの少し余裕を持たせてモーターに出力する
+        /// ほんの少し余裕を持たせてモーターに出力する(全開まで 0.1秒)
         Low,
-        /// 少し余裕を持たせてモーターに出力する
+        /// 少し余裕を持たせてモーターに出力する(全開まで 0.5秒)
         Middle,
-        /// 余裕を持たせてモーターに出力する
+        /// 余裕を持たせてモーターに出力する(全開まで 1秒)
         High,
-        /// かなり余裕を持たせてモーターに出力する
+        /// かなり余裕を持たせてモーターに出力する(全開まで 3秒)
         Max
     };
 
@@ -161,9 +161,10 @@ public:
     /**
      * @brief デューティ比の変化具合を設定する ChangeLevelTarget
      * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
-     * @param level ChangeLevel::Manual, ChangeLevel::OFF, ChangeLevel::Low, ChangeLevel::Middle, ChangeLevel::High, ChangeLevel::Max のいずれかの設定したい変化具合
-     * @attention この関数を実行すると、それより前に Motor::maximum_change_duty_cycle(ChangeLevelTarget, float) で設定した値は無効になり、
-     * Motor::get_maximum_change_duty_cycle(ChangeLevelTarget) は 設定した ChangeLevel に対応した値を返す
+     * @param level ChangeLevel::OFF, ChangeLevel::Low, ChangeLevel::Middle, ChangeLevel::High, ChangeLevel::Max のいずれかの設定したい変化具合
+     *              (ChangeLevel::Manual は指定できない。手動で設定する場合は Motor::full_scale_time() を使う)
+     * @attention この関数を実行すると、それより前に Motor::full_scale_time(ChangeLevelTarget, float) で設定した値は無効になり、
+     * Motor::get_full_scale_time(ChangeLevelTarget) は 設定した ChangeLevel に対応した値を返す
      */
     void change_level(ChangeLevelTarget target, ChangeLevel level);
 
@@ -175,27 +176,46 @@ public:
     ChangeLevel get_change_level(ChangeLevelTarget target) const;
 
     /**
-     * @brief 単位時間当たりの最大変化デューティ比を設定する
+     * @brief デューティ比が 0 から 1.00 (100%) まで変化するのにかける時間(s)を設定する
      * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
-     * @param duty_cycle 単位時間当たりの最大変化デューティ比
+     * @param seconds 0 から全開(または全開から 0)までにかける時間(s)
+     *                - 範囲: 0.00 <= seconds
+     *                - 0.00 の場合は、変化幅を制限しない
      * @attention この関数を実行すると、それより前に Motor::change_level(ChangeLevelTarget, ChangeLevel) で設定した値は無効になり、
      * Motor::get_change_level(ChangeLevelTarget) は ChangeLevel::Manual を返す
      */
-    void maximum_change_duty_cycle(ChangeLevelTarget target, float duty_cycle);
+    void full_scale_time(ChangeLevelTarget target, float seconds);
 
     /**
-     * @brief 単位時間当たりの最大変化デューティ比を返す
+     * @brief デューティ比が 0 から 1.00 (100%) まで変化するのにかける時間(s)を返す
      * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
-     * @retval duty_cycle 単位時間当たりの最大変化デューティ比
+     * @return 0 から全開までにかける時間(s)。ChangeLevel に対応する値は以下
+     *         | ChangeLevel | 時間(s) |
+     *         | :---------: | :-----: |
+     *         | OFF         | 0.00 (制限なし) |
+     *         | Low         | 0.10    |
+     *         | Middle      | 0.50    |
+     *         | High        | 1.00    |
+     *         | Max         | 3.00    |
      */
-    float get_maximum_change_duty_cycle(ChangeLevelTarget target) const;
+    float get_full_scale_time(ChangeLevelTarget target) const;
+
+    /**
+     * @brief 制御周期あたりの最大変化デューティ比を返す
+     * @param target 上昇時: ChangeLevelTarget::Rise 、下降時: ChangeLevelTarget::Fall
+     * @param dt 制御周期(s) (adjust_duty_cycle() を呼び出す間隔)
+     * @return 最大変化デューティ比 (範囲: 0.00 < x <= 1.00)。 @n
+     *         dt / get_full_scale_time(target) で、1.00 を超える場合は 1.00 @n
+     *         dt が 0 以下の場合はエラーとなり、0.00 を返す
+     */
+    float get_maximum_change_duty_cycle(ChangeLevelTarget target, float dt) const;
 
     /**
      * @brief パルス周期を設定する
      * @param seconds
      * 設定したいパルス周期(s)
-     * - 範囲: 0.1s <= seconds <= 1.6666e-5s
-     * - 範囲を超えると、その範囲の端に設定される
+     * - 範囲: 1.6666e-5s <= seconds <= 0.1s
+     * - 範囲を超えるとエラーになり、設定は変更されない
      */
     void pulse_period(float seconds);
 
@@ -208,7 +228,7 @@ public:
     /**
      * @brief 最後にデータが来て何秒でモータを停止するかを設定する
      * @param seconds 停止までの秒数
-     *      - 0.0s より小さい場合は、停止しない
+     *      - 0.0s より小さい場合はエラーになり、設定は変更されない
      */
     void release_time(float seconds);
 
@@ -278,28 +298,24 @@ public:
      * @brief デフォルト値を格納している構造体
      */
     struct Default {
-        static constexpr ControlSystem control_system            = ControlSystem::PWM;
-        static constexpr State         state                     = State::Brake;
-        static constexpr ChangeLevel   rise_change_level         = ChangeLevel::OFF;
-        static constexpr ChangeLevel   fall_change_level         = ChangeLevel::OFF;
-        static constexpr float         maximum_change_duty_cycle = 0.00F;
-        static constexpr float         kp                        = 0.30F;
-        static constexpr float         ki                        = 0.80F;
-        static constexpr float         kd                        = 0.20F;
-        static constexpr float         pulse_period              = 1.0F / 5000.0F;
-        static constexpr float         release_time              = 0.500F;
-        static constexpr Decay         decay                     = Decay::Slow;
-        static constexpr PwmSide       pwm_side                  = PwmSide::Low;
-        static constexpr bool          reset                     = false;
-        static constexpr bool          sleep                     = false;
+        static constexpr ControlSystem control_system    = ControlSystem::PWM;
+        static constexpr State         state             = State::Brake;
+        static constexpr ChangeLevel   rise_change_level = ChangeLevel::OFF;
+        static constexpr ChangeLevel   fall_change_level = ChangeLevel::OFF;
+        static constexpr float         full_scale_time   = 0.00F;
+        static constexpr float         kp                = 0.30F;
+        static constexpr float         ki                = 0.80F;
+        static constexpr float         kd                = 0.20F;
+        static constexpr float         pulse_period      = 1.0F / 5000.0F;
+        static constexpr float         release_time      = 0.500F;
+        static constexpr Decay         decay             = Decay::Slow;
+        static constexpr PwmSide       pwm_side          = PwmSide::Low;
+        static constexpr bool          reset             = false;
+        static constexpr bool          sleep             = false;
     };
 
     static constexpr float min_pulse_period = 1.0F / 60000.0F;
     static constexpr float max_pulse_period = 1.0F / 10.0F;
-
-    /// デューティ比の変化具合の最小値(std::pow(2.0F, -23.0F)) @n
-    /// float 型の 1.00 に対してこれよりも小さい値を足しても、情報落ちして 1.00 より大きくならない
-    static constexpr float minimum_maximum_change_duty_cycle = 0.00000011920928955078125F;
 
 private:
     ControlSystem _control_system{Default::control_system};
@@ -311,8 +327,8 @@ private:
     State         _state{Default::state};
     ChangeLevel   _rise_change_level{Default::rise_change_level};
     ChangeLevel   _fall_change_level{Default::fall_change_level};
-    float         _rise_maximum_change_duty_cycle{Default::maximum_change_duty_cycle};
-    float         _fall_maximum_change_duty_cycle{Default::maximum_change_duty_cycle};
+    float         _rise_full_scale_time{Default::full_scale_time};
+    float         _fall_full_scale_time{Default::full_scale_time};
     float         _pulse_period{Default::pulse_period};
     float         _release_time{Default::release_time};
     Decay         _decay{Default::decay};

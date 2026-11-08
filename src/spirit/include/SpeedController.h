@@ -17,7 +17,8 @@ public:
     SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase);
 
     /**
-     * @brief 目標rpsを与えると速度制御の計算結果を返す
+     * @brief 目標rpsを与えると速度制御の計算結果を返す @n
+     *        積分項は誤差×dtの積算、微分項は目標値の変化で跳ね上がらないよう rps の変化に対して計算する
      * @param target_rps 速度制御の目標rps
      * @param dt         制御周期(s)
      */
@@ -25,6 +26,7 @@ public:
 
     /**
      * @brief 速度制御の計算結果にかける上限値と下限値を設定
+     * @attention 初期値は上限・下限とも 0 なので、この関数を呼ぶまで calculation() は 0 を返す
      * @param high_limit 速度制御の計算結果の最大値
      * @param low_limit  速度制御の計算結果の最小値
      */
@@ -56,6 +58,20 @@ public:
      */
     float rps();
 
+    /**
+     * @brief ロータリーエンコーダのA相が変化した際の処理を行う @n
+     *        Mbed とそれ以外(テスト用のスタブ)ではコンストラクタが割り込みに登録するので、呼び出す必要はない @n
+     *        Arduino の attachInterrupt() は呼び出し先にインスタンスを渡せないため、 @n
+     *        A相の立ち上がり・立ち下がりの割り込みハンドラから、この関数を呼び出す
+     */
+    void a_phase_interrupt();
+
+    /**
+     * @brief ロータリーエンコーダのB相が変化した際の処理を行う @n
+     *        A相と同様に、Arduino ではB相の割り込みハンドラから、この関数を呼び出す
+     */
+    void b_phase_interrupt();
+
 private:
     InterfaceInterruptIn& _a_phase;
     InterfaceInterruptIn& _b_phase;
@@ -67,7 +83,8 @@ private:
     static constexpr int   _ppr{200};
     static constexpr float _deg_unit{360.0f / _ppr / 4.0f};
 
-    int _angle_counter;
+    /// 割り込みと calculation() の両方からアクセスされる
+    volatile int _angle_counter;
 
     bool first_loop;
 
@@ -79,8 +96,8 @@ private:
     float _rps{0.00f};
 
     float _sum_error;
-    float _delta_error;
-    float _last_error;
+    /// 前回の rps (微分項の計算用)
+    float _last_rps;
 
     float _high_limit{0.00f};
     float _low_limit{0.00f};
@@ -98,16 +115,6 @@ private:
      * @return リミッターをかけた数値
      */
     float limiter(float val);
-
-    /**
-     * @brief ロータリーエンコーダのA相が変化した際の処理を行う
-     */
-    void a_phase_interrupt();
-
-    /**
-     * @brief ロータリーエンコーダのB相が変化した際の処理を行う
-     */
-    void b_phase_interrupt();
 };
 
 }  // namespace spirit

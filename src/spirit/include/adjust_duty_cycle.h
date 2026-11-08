@@ -4,6 +4,7 @@
 #include <cfloat>
 #include <cmath>
 
+#include "Error.h"
 #include "Motor.h"
 
 namespace spirit {
@@ -21,9 +22,9 @@ namespace spirit {
  * @note
  * Motor::State::Coast, Motor::State::Brake は必ずデューティー比を0として扱う
  */
-void adjust_duty_cycle(Motor::State target_state, float target_duty_cycle, float max_rise_delta, float max_fall_delta,
-                       Motor::State current_state, float current_duty_cycle, Motor::State& next_state,
-                       float& next_duty_cycle)
+inline void adjust_duty_cycle(Motor::State target_state, float target_duty_cycle, float max_rise_delta,
+                              float max_fall_delta, Motor::State current_state, float current_duty_cycle,
+                              Motor::State& next_state, float& next_duty_cycle)
 {
     /**
      * @brief stateの範囲チェック

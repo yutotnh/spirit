@@ -161,8 +161,8 @@ TEST(MotorDataConverter, DecodeErrorTest)
     EXPECT_TRUE(motor_data_converter.decode(buffer, buffer_size, motor));
     EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::Speed);
 
-    /// @test 速度制御(ヘッダ以外の添え字0のbitは1)
-    buffer[0] = 0x40 | 0x3F;
+    /// @test 速度制御(ヘッダ以外の添え字0のbitは1。ただし2bit目は速度の符号ビットで、負の速度は不正な値になるため0)
+    buffer[0] = 0x40 | 0x1F;
     EXPECT_TRUE(motor_data_converter.decode(buffer, buffer_size, motor));
     EXPECT_EQ(motor.get_control_system(), Motor::ControlSystem::Speed);
 

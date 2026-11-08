@@ -57,7 +57,7 @@ uint32_t get_type(uint32_t motor_count)
 
 }  // namespace
 
-uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const uint32_t dip_switch)
+bool get_motor_id(const uint32_t motor_count, const uint32_t motor, const uint32_t dip_switch, uint32_t& motor_id)
 {
     uint32_t id = motor_prefix << (can_id_size - motor_prefix_size);
 
@@ -67,20 +67,20 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
     if (motor_count == 0) {
         Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
                                       "Total number of motors is 0");
-        return 0;
+        return false;
     }
 
     if (!motor_is_valid(motor_count, motor)) {
         Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
                                       "Motor number (%d) is out of range (0-%d)", motor, motor_count - 1);
-        return 0;
+        return false;
     }
 
     if (!dip_switch_is_valid(dip_switch, dip_switch_width)) {
         Error::get_instance().warning(Error::Type::IllegalCombination, 0, __FILE__, __func__, __LINE__,
                                       "DIP switch value (%d) exceeds maximum bit width (%d)", dip_switch,
                                       dip_switch_width);
-        return 0;
+        return false;
     }
 
     // motor_countの値によって、データを決定する
@@ -98,7 +98,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             // DIPスイッチの値をそのままIDに反映する
             id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - dip_switch_width);
 
-            return id;
+            motor_id = id;
+            return true;
         case 1:
             // 基板のモータは2つであることを示す
             id |= 0x01 << (can_id_size - motor_prefix_size - motor_count_prefix_size);
@@ -109,7 +110,8 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             // DIPスイッチの値をそのままIDに反映する
             id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - 1 - dip_switch_width);
 
-            return id;
+            motor_id = id;
+            return true;
         case 2:
             // 基板のモータは4つであることを示す
             id |= 0x02 << (can_id_size - motor_prefix_size - motor_count_prefix_size);
@@ -120,14 +122,15 @@ uint32_t get_motor_id(const uint32_t motor_count, const uint32_t motor, const ui
             // DIPスイッチの値をそのままIDに反映する
             id |= dip_switch << (can_id_size - motor_prefix_size - motor_count_prefix_size - 2 - dip_switch_width);
 
-            return id;
+            motor_id = id;
+            return true;
         default:
             // モーターの数が5個以上の場合は未対応
             // 将来の拡張を考えて、0b11を残している
             // 例えば0b1100の場合8、0b1101の場合16をモーターに割り当てるなどする
             Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
                                         "Unknown motor count type (%d)", motor_count);
-            return 0;
+            return false;
     }
 }
 

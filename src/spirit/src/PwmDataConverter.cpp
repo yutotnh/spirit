@@ -1,21 +1,25 @@
 #include "spirit/include/PwmDataConverter.h"
 
 #include <cstdio>
+#include <cstring>
 
 #include "spirit/include/Error.h"
 #include "spirit/include/bit.h"
 
 namespace spirit {
 
-bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,
-                              std::size_t& buffer_size) const
+bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_bits, uint8_t* buffer,
+                              std::size_t& buffer_bits) const
 {
     // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
-    buffer_size = 20;
+    buffer_bits = 20;
 
-    if (max_buffer_size < buffer_size) {
+    if (max_buffer_bits < buffer_bits) {
         return false;
     }
+
+    // 呼び出し側のバッファの使い回しや未初期化の影響を受けないように、使うバイトを先に0クリアする
+    std::memset(buffer, 0x00, (buffer_bits + 7) / 8);
 
     // PWM制御を示すヘッダをセット
     buffer[0] = 0x00;
@@ -27,11 +31,11 @@ bool PwmDataConverter::encode(const Motor& motor, const std::size_t max_buffer_s
     return true;
 }
 
-bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor) const
+bool PwmDataConverter::decode(const uint8_t* buffer, std::size_t buffer_bits, Motor& motor) const
 {
     // 2(ヘッダ) + 16(デューティー比) + 2(回転方向) = 20
     constexpr std::size_t required_size = 20;
-    if (buffer_size < required_size) {
+    if (buffer_bits < required_size) {
         return false;
     }
 
@@ -55,9 +59,16 @@ float PwmDataConverter::get_duty_cycle(const uint8_t* buffer) const
 
 void PwmDataConverter::set_duty_cycle(const float duty_cycle, uint8_t* buffer) const
 {
-    /// @todo デューティー比がマイナスを取ることはないため、その場合はエラーにする
+    // Motor::duty_cycle() で範囲内に収められているが、この関数単体でも未定義動作にならないようにする(NaN は 0 にする)
+    float limited = duty_cycle;
+    if (!(0.00F < limited)) {
+        limited = 0.00F;
+    } else if (1.00F < limited) {
+        limited = 1.00F;
+    }
 
-    const uint16_t duty_cycle_16bit = (uint16_t)(65535 * duty_cycle);  // 2^16 - 1 = 65535
+    // 四捨五入する (2^16 - 1 = 65535)
+    const uint16_t duty_cycle_16bit = (uint16_t)(65535 * limited + 0.5F);
     set_range_value(duty_cycle_16bit, 2, 16, 8, buffer);
 }
 
@@ -94,7 +105,7 @@ void PwmDataConverter::set_state(const Motor::State state, uint8_t* buffer) cons
 {
     switch (state) {
         case Motor::State::Coast:
-            // buffer[2] |= 0x00 << 5; // 既に0で初期化されているので不要
+            set_range_value(0x00U, 18U, 2U, 8U, buffer);
             return;
         case Motor::State::CW:
             set_range_value(0x01U, 18U, 2U, 8U, buffer);

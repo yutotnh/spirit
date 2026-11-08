@@ -11,28 +11,28 @@ public:
     /**
      * @brief FakeUdpをエンコードする
      * @param [in] payload ペイロード
-     * @param [in] payload_size ペイロードのビット幅
-     * @param [in] max_buffer_size エンコードしたデータの最大ビット幅
+     * @param [in] payload_bits ペイロードのビット幅
+     * @param [in] max_buffer_bits エンコードしたデータの最大ビット幅
      * @param [out] buffer エンコードしたデータを格納するバッファ
-     * @param [out] buffer_size エンコードしたデータのビット幅
+     * @param [out] buffer_bits エンコードしたデータのビット幅
      * @retval true エンコード成功
      * @retval false エンコード失敗
      */
-    bool encode(const uint8_t* payload, std::size_t payload_size, std::size_t max_buffer_size, uint8_t* buffer,
-                std::size_t& buffer_size);
+    bool encode(const uint8_t* payload, std::size_t payload_bits, std::size_t max_buffer_bits, uint8_t* buffer,
+                std::size_t& buffer_bits);
 
     /**
      * @brief FakeUdpをデコードする
      * @param [in] buffer デコードするデータ
-     * @param [in] buffer_size デコードするデータのビット幅
-     * @param [in] max_payload_size デコードしたペイロードの最大ビット幅
+     * @param [in] buffer_bits デコードするデータのビット幅
+     * @param [in] max_payload_bits デコードしたペイロードの最大ビット幅
      * @param [out] payload デコードしたペイロードを格納するバッファ
-     * @param [out] payload_size デコードしたペイロードのビット幅
+     * @param [out] payload_bits デコードしたペイロードのビット幅
      * @retval true デコード成功
      * @retval false デコード失敗
      */
-    bool decode(const uint8_t* buffer, std::size_t buffer_size, std::size_t max_payload_size, uint8_t* payload,
-                std::size_t& payload_size);
+    bool decode(const uint8_t* buffer, std::size_t buffer_bits, std::size_t max_payload_bits, uint8_t* payload,
+                std::size_t& payload_bits);
 
 private:
 };

@@ -1,0 +1,325 @@
+#include <gtest/gtest.h>
+
+#include <cmath>
+#include <cstring>
+#include <functional>
+#include <limits>
+
+#include "spirit.h"
+#include "tests/stubs.h"
+
+namespace {
+
+using namespace spirit;
+
+/// 出力バッファを使い回しても、Coast が前回の回転方向に化けないことの確認
+TEST(Regression, CoastOverwritesPreviousStateInReusedBuffer)
+{
+    for (const auto system : {Motor::ControlSystem::PWM, Motor::ControlSystem::Speed}) {
+        for (const auto previous : {Motor::State::CW, Motor::State::CCW, Motor::State::Brake}) {
+            Motor motor;
+            motor.control_system(system);
+            motor.duty_cycle(0.5F);
+            motor.speed(5.0F);
+
+            MotorDataConverter converter;
+            uint8_t            buffer[8] = {};
+            std::size_t        size      = 0;
+
+            motor.state(previous);
+            ASSERT_TRUE(converter.encode(motor, 64, buffer, size));
+
+            motor.state(Motor::State::Coast);
+            ASSERT_TRUE(converter.encode(motor, 64, buffer, size));
+
+            Motor received;
+            ASSERT_TRUE(converter.decode(buffer, size, received));
+            EXPECT_EQ(received.get_state(), Motor::State::Coast);
+        }
+    }
+}
+
+/// 初期化されていないバッファ(全ビット1)に Coast を encode しても Coast になることの確認
+TEST(Regression, CoastInDirtyBuffer)
+{
+    for (const auto system : {Motor::ControlSystem::PWM, Motor::ControlSystem::Speed}) {
+        Motor motor;
+        motor.control_system(system);
+        motor.state(Motor::State::Coast);
+
+        MotorDataConverter converter;
+        uint8_t            buffer[8];
+        std::memset(buffer, 0xFF, sizeof(buffer));
+        std::size_t size = 0;
+        ASSERT_TRUE(converter.encode(motor, 64, buffer, size));
+
+        Motor received;
+        ASSERT_TRUE(converter.decode(buffer, size, received));
+        EXPECT_EQ(received.get_control_system(), system);
+        EXPECT_EQ(received.get_state(), Motor::State::Coast);
+    }
+}
+
+/// Speed のバッファがビット幅(52bit)に満たない場合は、デコードを拒否することの確認
+TEST(Regression, SpeedDecodeRejectsShortBuffer)
+{
+    Error::get_instance().reset();
+    uint8_t buffer[8] = {0x40};
+    Motor   motor;
+    EXPECT_FALSE(SpeedDataConverter().decode(buffer, 7, motor));
+    EXPECT_FALSE(SpeedDataConverter().decode(buffer, 51, motor));
+    EXPECT_TRUE(SpeedDataConverter().decode(buffer, 52, motor));
+}
+
+/// 空のバッファは MotorDataConverter でデコードを拒否することの確認
+TEST(Regression, MotorDecodeRejectsEmptyBuffer)
+{
+    Motor motor;
+    EXPECT_FALSE(MotorDataConverter().decode(nullptr, 0, motor));
+    uint8_t buffer[1] = {0x40};
+    EXPECT_FALSE(MotorDataConverter().decode(buffer, 0, motor));
+}
+
+/// 不正な速度(負)を含むデータは、モーターを一切変更せずに false を返すことの確認
+TEST(Regression, SpeedDecodeIsAtomicOnInvalidValue)
+{
+    uint8_t buffer[8] = {0x40};
+    set_range_value(float32_to_bfloat16(-2.0F), 2, 16, 7, buffer);
+
+    testing::internal::CaptureStderr();
+    Motor motor;
+    motor.speed(5.0F);
+    EXPECT_FALSE(SpeedDataConverter().decode(buffer, 52, motor));
+    testing::internal::GetCapturedStderr();
+
+    const Motor::ControlSystem default_system = Motor::Default::control_system;
+    EXPECT_EQ(motor.get_control_system(), default_system);
+    EXPECT_FLOAT_EQ(motor.get_speed(), 5.0F);
+}
+
+/// 一定速度で回している間、rps は最初の周期から一定であることの確認
+TEST(Regression, SpeedControllerRpsIsStableAfterReset)
+{
+    StubInterruptIn a;
+    StubInterruptIn b;
+    SpeedController controller(a, b);
+    controller.limit(1000.0F, -1000.0F);
+
+    // 1周期に 8 カウント(2回転分の4逓倍パルス)、1周期 0.01s なので 1.0 rps
+    for (int i = 0; i < 40; i++) {
+        for (int pulse = 0; pulse < 2; pulse++) {
+            a.interrupt_rise();
+            b.interrupt_rise();
+            a.interrupt_fall();
+            b.interrupt_fall();
+        }
+        controller.calculation(1.0F, 0.01F);
+        EXPECT_NEAR(controller.rps(), 1.0F, 1e-4F) << "cycle " << i;
+    }
+}
+
+/// 積分項が飽和した状態から目標を超えて回り始めたとき、蓄積した誤差が出力の上限分までに制限されていて、素早く戻ることの確認
+TEST(Regression, SpeedControllerAntiWindup)
+{
+    StubInterruptIn a;
+    StubInterruptIn b;
+    SpeedController controller(a, b);
+    controller.limit(1.0F, -1.0F);
+    controller.pid_gain(0.3F, 0.8F, 0.0F);
+
+    // 回らないまま長時間、目標を与え続ける(積分項は飽和する)
+    for (int i = 0; i < 3000; i++) {
+        controller.calculation(1.0F, 0.01F);
+    }
+
+    // 目標(1 rps)の1.5倍で回す(1周期に 12 カウント)
+    int cycles_until_low_output = -1;
+    for (int i = 0; i < 1000; i++) {
+        for (int pulse = 0; pulse < 3; pulse++) {
+            a.interrupt_rise();
+            b.interrupt_rise();
+            a.interrupt_fall();
+            b.interrupt_fall();
+        }
+        if (controller.calculation(1.0F, 0.01F) < 0.5F) {
+            cycles_until_low_output = i;
+            break;
+        }
+    }
+    EXPECT_GE(cycles_until_low_output, 0);
+    EXPECT_LT(cycles_until_low_output, 400);
+}
+
+/// モードを Normal に戻してもエラーにならず、モーターの状態が表示されることの確認
+TEST(Regression, MdLedModeNormalIsValid)
+{
+    StubDigitalOut led0;
+    StubDigitalOut led1;
+    MdLed          mdled(led0, led1);
+
+    Error::get_instance().reset();
+    mdled.state(Motor::State::CCW);
+    mdled.mode(MdLed::BlinkMode::Alternate);
+    mdled.mode(MdLed::BlinkMode::Normal);
+    EXPECT_EQ(Error::get_instance().get_status(), Error::Status::Normal);
+    EXPECT_EQ((led1.read() << 1) + led0.read(), 2U);
+}
+
+/// Alternate/Concurrent 中に state() を呼んでも、点滅が Normal に戻らないことの確認
+TEST(Regression, MdLedStateDoesNotCancelBlinkMode)
+{
+    StubDigitalOut led0;
+    StubDigitalOut led1;
+    MdLed          mdled(led0, led1);
+    mdled.blinking_rate(1);
+
+    mdled.mode(MdLed::BlinkMode::Alternate);
+    mdled.state(Motor::State::CW);
+    const uint32_t first = (led1.read() << 1) + led0.read();
+    mdled.coordinate();
+    const uint32_t second = (led1.read() << 1) + led0.read();
+    EXPECT_NE(first, second);
+
+    // Normal に戻すと、最後に設定された state が表示される
+    mdled.mode(MdLed::BlinkMode::Normal);
+    EXPECT_EQ((led1.read() << 1) + led0.read(), 1U);
+}
+
+/// 不正な state は保持されないことの確認
+TEST(Regression, MdLedInvalidStateIsNotStored)
+{
+    StubDigitalOut led0;
+    StubDigitalOut led1;
+    MdLed          mdled(led0, led1);
+
+    testing::internal::CaptureStderr();
+    mdled.state(Motor::State::CW);
+    mdled.state(static_cast<Motor::State>(9));
+    testing::internal::GetCapturedStderr();
+
+    mdled.mode(MdLed::BlinkMode::Alternate);
+    mdled.mode(MdLed::BlinkMode::Normal);
+    EXPECT_EQ((led1.read() << 1) + led0.read(), 1U);
+}
+
+/// 極小の値は符号を保ったまま 0 になることの確認
+TEST(Regression, Bfloat16TinyValuesFlushToZero)
+{
+    for (const float value : {1e-40F, 1e-39F, 5e-39F}) {
+        EXPECT_EQ(bfloat16_to_float32(float32_to_bfloat16(value)), 0.0F);
+        const float negative = bfloat16_to_float32(float32_to_bfloat16(-value));
+        EXPECT_EQ(negative, 0.0F);
+        EXPECT_TRUE(std::signbit(negative));
+    }
+    // 正規化数の最小値は保持される
+    EXPECT_NEAR(bfloat16_to_float32(float32_to_bfloat16(1.17549435e-38F)), 1.17549435e-38F, 1e-40F);
+}
+
+/// NaN は範囲外の値として拒否され、設定が変更されないことの確認
+TEST(Regression, MotorRejectsNaN)
+{
+    const float nan   = std::numeric_limits<float>::quiet_NaN();
+    Error&      error = Error::get_instance();
+
+    testing::internal::CaptureStderr();
+
+    auto check = [&](const char* name, const std::function<void(Motor&)>& set_nan) {
+        Motor motor;
+        error.reset();
+        set_nan(motor);
+        EXPECT_EQ(error.get_status(), Error::Status::Error) << name;
+        EXPECT_FALSE(std::isnan(motor.get_duty_cycle())) << name;
+        EXPECT_FALSE(std::isnan(motor.get_speed())) << name;
+        EXPECT_FALSE(std::isnan(motor.get_pulse_period())) << name;
+        EXPECT_FALSE(std::isnan(motor.get_release_time())) << name;
+        float kp, ki, kd;
+        motor.get_pid_gain_factor(kp, ki, kd);
+        EXPECT_FALSE(std::isnan(kp) || std::isnan(ki) || std::isnan(kd)) << name;
+    };
+
+    check("duty_cycle", [&](Motor& m) { m.duty_cycle(nan); });
+    check("speed", [&](Motor& m) { m.speed(nan); });
+    check("kp", [&](Motor& m) { m.pid_gain_factor(nan, 0.0F, 0.0F); });
+    check("ki", [&](Motor& m) { m.pid_gain_factor(0.0F, nan, 0.0F); });
+    check("kd", [&](Motor& m) { m.pid_gain_factor(0.0F, 0.0F, nan); });
+    check("pulse_period", [&](Motor& m) { m.pulse_period(nan); });
+    check("release_time", [&](Motor& m) { m.release_time(nan); });
+
+    testing::internal::GetCapturedStderr();
+}
+
+/// A3921 と SpeedController も NaN を拒否することの確認
+TEST(Regression, A3921AndSpeedControllerRejectNaN)
+{
+    const float nan   = std::numeric_limits<float>::quiet_NaN();
+    Error&      error = Error::get_instance();
+
+    testing::internal::CaptureStderr();
+
+    StubDigitalOut sr, reset;
+    StubPwmOut     pwmh, pwml, phase;
+    A3921          a3921(sr, pwmh, pwml, phase, reset);
+    a3921.state(Motor::State::CW);
+    a3921.duty_cycle(0.5F);
+    error.reset();
+    a3921.duty_cycle(nan);
+    EXPECT_NE(error.get_status(), Error::Status::Normal);
+    a3921.run();
+    EXPECT_FLOAT_EQ(pwml.read(), 0.5F);  // Slow decay・Low side の PWM は直前の有効な値のまま
+
+    StubInterruptIn a, b;
+    SpeedController controller(a, b);
+    controller.limit(1.0F, -1.0F);
+    error.reset();
+    EXPECT_FLOAT_EQ(controller.calculation(nan, 0.01F), 0.0F);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+    error.reset();
+    EXPECT_FLOAT_EQ(controller.calculation(1.0F, nan), 0.0F);
+    EXPECT_EQ(error.get_status(), Error::Status::Error);
+
+    testing::internal::GetCapturedStderr();
+}
+
+/// デューティー比の16bit化が四捨五入で、往復の誤差が量子化幅の半分以内であることの確認
+TEST(Regression, PwmDutyCycleIsRounded)
+{
+    constexpr float half_step = 0.5F / 65535.0F + 1e-7F;
+    for (int i = 0; i <= 1000; i++) {
+        const float duty_cycle = static_cast<float>(i) / 1000.0F;
+        Motor       motor;
+        motor.duty_cycle(duty_cycle);
+        uint8_t     buffer[8] = {};
+        std::size_t size      = 0;
+        ASSERT_TRUE(PwmDataConverter().encode(motor, 64, buffer, size));
+        Motor received;
+        ASSERT_TRUE(PwmDataConverter().decode(buffer, size, received));
+        EXPECT_NEAR(received.get_duty_cycle(), duty_cycle, half_step) << "duty_cycle: " << duty_cycle;
+    }
+}
+
+/// 目標値を急に変えても、微分項が(目標値の変化で)跳ね上がらないことの確認
+TEST(Regression, SpeedControllerNoDerivativeKick)
+{
+    StubInterruptIn a;
+    StubInterruptIn b;
+    SpeedController controller(a, b);
+    controller.limit(1000.0F, -1000.0F);
+    controller.pid_gain(0.0F, 0.0F, 1.0F);
+
+    // 回転していない状態で目標が 0 -> 10 に変わっても、微分項は 0
+    EXPECT_FLOAT_EQ(controller.calculation(0.0F, 0.01F), 0.0F);
+    EXPECT_FLOAT_EQ(controller.calculation(10.0F, 0.01F), 0.0F);
+    EXPECT_FLOAT_EQ(controller.calculation(10.0F, 0.01F), 0.0F);
+
+    // 速度が上がると、それを打ち消す向き(負)の出力になる
+    // 1周期に 8 カウント = 1 rps (1 周期目の rps は 1.0)
+    for (int pulse = 0; pulse < 2; pulse++) {
+        a.interrupt_rise();
+        b.interrupt_rise();
+        a.interrupt_fall();
+        b.interrupt_fall();
+    }
+    EXPECT_LT(controller.calculation(10.0F, 0.01F), 0.0F);
+}
+
+}  // namespace

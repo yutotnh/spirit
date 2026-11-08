@@ -39,13 +39,16 @@ public:
     /**
      * @brief Normalモード時のLEDの点灯を設定する
      * @param type 設定したい値
-     * @details Error中は設定値が反映されない
+     * @details Error中は設定値が反映されない @n
+     *          Alternate や Concurrent 中は回転方向を保持するだけで、点滅は止まらない(Normal に戻したときに反映される)
      */
     void state(Motor::State type);
 
     /**
      * @brief LEDのモードを設定する
      * @param type 設定したいLEDのモード
+     * @details BlinkMode::Error は error() で設定するため、この関数に指定するとエラーになる @n
+     *          BlinkMode::Normal を設定すると、最後に state() で設定した回転方向を表示する
      */
     void mode(BlinkMode type);
 
@@ -108,6 +111,11 @@ private:
      * @return LEDの点滅状態(範囲: 0-3)
      */
     uint32_t read() const;
+
+    /**
+     * @brief 現在のモーターの回転方向をLEDに表示する
+     */
+    void show_state();
 
     /**
      * @brief 交互に点滅 (0b10 -> 0b01 -> 0b10)

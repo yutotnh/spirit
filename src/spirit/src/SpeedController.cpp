@@ -15,7 +15,8 @@ SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterru
     _b_phase.rise(mbed::callback(this, &SpeedController::b_phase_interrupt));
     _b_phase.fall(mbed::callback(this, &SpeedController::b_phase_interrupt));
 #elif defined(ARDUINO)
-    // TODO Arduinoに対応
+    // Arduino の attachInterrupt() は呼び出し先にインスタンスを渡せないので、ここでは登録しない
+    // 呼び出し側が A相・B相の割り込みハンドラから a_phase_interrupt() / b_phase_interrupt() を呼ぶ
 #else
     std::function<void(void)> func_a = std::bind(&SpeedController::a_phase_interrupt, this);
     std::function<void(void)> func_b = std::bind(&SpeedController::b_phase_interrupt, this);
@@ -29,13 +30,14 @@ SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterru
 
 float SpeedController::calculation(float target_rps, float dt)
 {
-    if (target_rps < 0.0f) {
+    // NaN も弾くため、否定の形で比較する
+    if (!(0.0f <= target_rps)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "[target_rps = %g] value cannot be negative", target_rps);
+                                    "[target_rps = %g] value cannot be negative or NaN", target_rps);
         return 0.0f;
     }
 
-    if (dt <= 0.0f) {
+    if (!(0.0f < dt)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
                                     "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
@@ -44,21 +46,35 @@ float SpeedController::calculation(float target_rps, float dt)
     _rps = rps_calculation(dt);
 
     float error = target_rps - _rps;
-    _sum_error += error;
-    _delta_error = error - _last_error;
 
+    // 積分は誤差を時間で積分する(制御周期 dt が変動しても正しく積分できる)
+    _sum_error += error * dt;
+
+    // 積分項の出力が上限・下限に達している間は、誤差を蓄積し続けない(積分の巻き上がり防止)
+    if (_ki > 0.0f) {
+        const float max_sum_error = _high_limit / _ki;
+        const float min_sum_error = _low_limit / _ki;
+        if (_sum_error > max_sum_error) {
+            _sum_error = max_sum_error;
+        } else if (_sum_error < min_sum_error) {
+            _sum_error = min_sum_error;
+        }
+    }
+
+    // 微分は、目標値の変化で出力が跳ね上がらないように、誤差ではなく測定値(rps)に対して行う
+    // (目標値が一定なら、誤差の微分の符号を反転したものと一致する)
     float p = _kp * error;
-    float i = limiter(_ki * _sum_error * dt / 2.0f);
-    float d = _kd * _delta_error / dt;
+    float i = limiter(_ki * _sum_error);
+    float d = -_kd * (_rps - _last_rps) / dt;
 
-    _last_error = error;
+    _last_rps = _rps;
 
     return limiter(p + i + d);
 }
 
 float SpeedController::rps_calculation(float dt)
 {
-    if (dt <= 0.0f) {
+    if (!(0.0f < dt)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
                                     "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
@@ -71,6 +87,10 @@ float SpeedController::rps_calculation(float dt)
         _angle_buff_index = 0;
         first_loop        = false;
     } else if (first_loop) {
+        // 最初の一周の間も角度を記録しておく
+        // (記録しないと、二周目の差分がリセット後の総回転量になり、rps が実際より大きく出る)
+        _angle_buff[_angle_buff_index] = _angle_counter;
+
         rps = angle() / 360.0f / (dt * _angle_buff_index);
         if (rps < 0.0f) {
             rps *= -1;
@@ -119,7 +139,7 @@ void SpeedController::reset()
     _angle_counter    = 0;
     _angle_buff_index = 0;
     _sum_error        = 0.0f;
-    _last_error       = 0.0f;
+    _last_rps         = 0.0f;
     _rps              = 0.0f;
     for (int i = 0; i < _angle_buff_max; i++) {
         _angle_buff[i] = 0;

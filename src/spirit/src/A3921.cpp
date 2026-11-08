@@ -1,5 +1,7 @@
 #include "spirit/include/A3921.h"
 
+#include <cmath>
+
 #include "spirit/include/Error.h"
 
 namespace spirit {
@@ -33,6 +35,11 @@ void A3921::reset(const std::function<void(void)>& sleep)
 
 void A3921::duty_cycle(const float value)
 {
+    if (std::isnan(value)) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__, "Duty cycle is NaN");
+        return;
+    }
+
     if (1.00F < value) {
         _duty_cycle = 1.00F;
 

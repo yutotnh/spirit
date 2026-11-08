@@ -1,20 +1,25 @@
 #include "spirit/include/SpeedDataConverter.h"
 
+#include <cstring>
+
 #include "spirit/include/Error.h"
 #include "spirit/include/bfloat16.h"
 #include "spirit/include/bit.h"
 
 namespace spirit {
 
-bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer_size, uint8_t* buffer,
-                                std::size_t& buffer_size) const
+bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer_bits, uint8_t* buffer,
+                                std::size_t& buffer_bits) const
 {
     // 2(ヘッダ) + 16(スピード(rps)) + 16(kp) + 16(ki) + 2(回転方向) = 52
-    buffer_size = 52;
+    buffer_bits = 52;
 
-    if (max_buffer_size < buffer_size) {
+    if (max_buffer_bits < buffer_bits) {
         return false;
     }
+
+    // 呼び出し側のバッファの使い回しや未初期化の影響を受けないように、使うバイトを先に0クリアする
+    std::memset(buffer, 0x00, (buffer_bits + 7) / 8);
 
     // 速度制御を示すヘッダをセット
     buffer[0] = 0x40;
@@ -31,9 +36,11 @@ bool SpeedDataConverter::encode(const Motor& motor, const std::size_t max_buffer
     return true;
 }
 
-bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, Motor& motor) const
+bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_bits, Motor& motor) const
 {
-    if (buffer_size < 7) {
+    // 2(ヘッダ) + 16(スピード(rps)) + 16(kp) + 16(ki) + 2(回転方向) = 52 (ビット)
+    constexpr std::size_t required_size = 52;
+    if (buffer_bits < required_size) {
         return false;
     }
 
@@ -41,13 +48,26 @@ bool SpeedDataConverter::decode(const uint8_t* buffer, std::size_t buffer_size, 
         return false;
     }
 
-    motor.control_system(Motor::ControlSystem::Speed);
-
-    motor.speed(get_speed(buffer));
+    // 不正な値を含む場合に Motor を中途半端に更新しないように、先に値を全て検証する
+    const float speed = get_speed(buffer);
 
     float kp{0.0F}, ki{0.0F}, kd{0.0F};
     get_pid_gain_factor(buffer, kp, ki, kd);
-    motor.pid_gain_factor(kp, ki, kd);
+
+    // NaN も弾くため、否定の形で比較する
+    if (!(speed >= 0.0F) || !(kp >= 0.0F) || !(ki >= 0.0F)) {
+        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                    "Invalid speed data (speed = %g, kp = %g, ki = %g)", speed, kp, ki);
+        return false;
+    }
+
+    motor.control_system(Motor::ControlSystem::Speed);
+    motor.speed(speed);
+
+    // kd は送受信しないので、Motor が持っている値を維持する
+    float current_kp{0.0F}, current_ki{0.0F}, current_kd{0.0F};
+    motor.get_pid_gain_factor(current_kp, current_ki, current_kd);
+    motor.pid_gain_factor(kp, ki, current_kd);
 
     motor.state(get_state(buffer));
 
@@ -125,21 +145,21 @@ Motor::State SpeedDataConverter::get_state(const uint8_t* buffer) const
 
 void SpeedDataConverter::set_state(Motor::State state, uint8_t* buffer) const
 {
-    constexpr uint32_t start       = 50;
-    constexpr uint32_t length      = 2;
-    constexpr uint32_t buffer_size = 7;
+    constexpr uint32_t start        = 50;
+    constexpr uint32_t length       = 2;
+    constexpr uint32_t buffer_bytes = 7;
     switch (state) {
         case Motor::State::Coast:
-            // buffer[7] |= 0x00 << 4;  // 既に0で初期化されているので不要
+            set_range_value(0x00U, start, length, buffer_bytes, buffer);
             break;
         case Motor::State::CW:
-            set_range_value(0x01U, start, length, buffer_size, buffer);
+            set_range_value(0x01U, start, length, buffer_bytes, buffer);
             break;
         case Motor::State::CCW:
-            set_range_value(0x02U, start, length, buffer_size, buffer);
+            set_range_value(0x02U, start, length, buffer_bytes, buffer);
             break;
         case Motor::State::Brake:
-            set_range_value(0x03U, start, length, buffer_size, buffer);
+            set_range_value(0x03U, start, length, buffer_bytes, buffer);
             break;
 
             // default に来ることは、state で既にチェックしているので通常の利用ではありえないため、カバレッジ計測から除外する

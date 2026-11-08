@@ -14,14 +14,30 @@ MdLed::MdLed(InterfaceDigitalOut &led0, InterfaceDigitalOut &led1) : _led0(led0)
 
 void MdLed::state(const Motor::State type)
 {
-    _state = type;
-
-    if (_mode == BlinkMode::Error) {
-        return;
+    switch (type) {
+        case Motor::State::Coast:
+        case Motor::State::CW:
+        case Motor::State::CCW:
+        case Motor::State::Brake:
+            break;
+        default:
+            // 未定義の値は保持しない
+            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(type));
+            return;
     }
 
-    _mode = BlinkMode::Normal;
-    switch (type) {
+    _state = type;
+
+    // 表示するのは Normal モードのときだけ(優先度は Error > Alternate = Concurrent > Normal)
+    if (_mode == BlinkMode::Normal) {
+        show_state();
+    }
+}
+
+void MdLed::show_state()
+{
+    switch (_state) {
         case Motor::State::Coast:
             write(0);
             break;
@@ -34,11 +50,14 @@ void MdLed::state(const Motor::State type)
         case Motor::State::Brake:
             write(3);
             break;
+
+            // default に来ることは、MdLed::state で既にチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
+            // LCOV_EXCL_START
         default:
-            // 未定義の値
             Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
-                                        "Unknown motor state (%d)", static_cast<uint32_t>(type));
+                                        "Unknown motor state (%d)", static_cast<uint32_t>(_state));
             return;
+            // LCOV_EXCL_STOP
     }
 }
 
@@ -63,8 +82,12 @@ void MdLed::mode(const BlinkMode type)
         case BlinkMode::Normal:
         case BlinkMode::Alternate:
         case BlinkMode::Concurrent:
-        case BlinkMode::Error:
             break;
+        case BlinkMode::Error:
+            // Error モードは、エラー番号が必要なので error() で設定する
+            Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+                                        "Invalid blink mode (BlinkMode::Error), use MdLed::error() instead");
+            return;
         default:
             Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
                                         "Unknown blink mode (%d)", static_cast<uint32_t>(type));
@@ -75,16 +98,23 @@ void MdLed::mode(const BlinkMode type)
     _mode    = type;
 
     switch (_mode) {
+        case BlinkMode::Normal:
+            show_state();
+            break;
         case BlinkMode::Alternate:
             alternately_blink();
             break;
         case BlinkMode::Concurrent:
             concurrently_blink();
             break;
+
+            // Error や default に来ることは、上の switch で既にチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
+            // LCOV_EXCL_START
         default:
             Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
                                         "Unknown blink mode (%d)", static_cast<uint32_t>(type));
             return;
+            // LCOV_EXCL_STOP
     }
 }
 
