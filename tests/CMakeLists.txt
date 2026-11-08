@@ -101,7 +101,8 @@ else()
 endif()
 
 target_compile_definitions(test_error_no_default_handler PRIVATE SPIRIT_ERROR_DEFAULT_HANDLER=0)
-target_include_directories(test_error_no_default_handler PRIVATE ../src ../src/spirit/include .)
+# "tests/stubs.h" を include できるように、リポジトリのルート(..)も追加する (spirit にリンクしないので、 spirit が PUBLIC に設定するルートを引き継がない)
+target_include_directories(test_error_no_default_handler PRIVATE .. ../src ../src/spirit/include)
 target_link_libraries(test_error_no_default_handler PRIVATE gtest_main)
 gtest_discover_tests(test_error_no_default_handler)
 
