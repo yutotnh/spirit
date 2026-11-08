@@ -152,6 +152,13 @@ TEST(Regression, MotorRejectsNaN)
         EXPECT_FALSE(std::isnan(kp) || std::isnan(ki) || std::isnan(kd)) << name;
     };
 
+    const float inf = std::numeric_limits<float>::infinity();
+    // 無限大は、通信で送れない(受信側が拒否する)ので、設定できない
+    check("speed(inf)", [&](Motor& m) { m.speed(inf); });
+    check("kp(inf)", [&](Motor& m) { m.pid_gain_factor(inf, 0.0F, 0.0F); });
+    check("ki(inf)", [&](Motor& m) { m.pid_gain_factor(0.0F, inf, 0.0F); });
+    check("kd(inf)", [&](Motor& m) { m.pid_gain_factor(0.0F, 0.0F, inf); });
+
     check("duty_cycle", [&](Motor& m) { m.duty_cycle(nan); });
     check("speed", [&](Motor& m) { m.speed(nan); });
     check("kp", [&](Motor& m) { m.pid_gain_factor(nan, 0.0F, 0.0F); });

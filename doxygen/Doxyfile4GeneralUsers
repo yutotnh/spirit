@@ -871,6 +871,8 @@ INPUT                  = CONTRIBUTING.md \
                          src/spirit/src/Id.cpp \
                          src/spirit/include/Motor.h \
                          src/spirit/src/Motor.cpp \
+                         src/spirit/include/Protocol.h \
+                         src/spirit/src/Protocol.cpp \
                          src/spirit/include/CANMessage.h \
                          src/spirit/src/CANMessage.cpp \
                          platform/mbed/include/DigitalOut.h \

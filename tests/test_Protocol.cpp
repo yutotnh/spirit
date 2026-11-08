@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <random>
+#include <string>
 #include <vector>
 
 #include "BitStream.h"
@@ -787,7 +788,7 @@ TEST(Protocol, FuzzRandomBytes)
         Bytes data(rng() % 65);
         for (auto& b : data) {
             // 0 を多めにして、詰め物や短い項目の経路を通りやすくする
-            b = (rng() % 4 == 0) ? 0x00 : static_cast<uint8_t>(rng());
+            b = static_cast<uint8_t>((rng() % 4 == 0) ? 0x00U : rng());
         }
         fuzz_one(data, applied);
     }

@@ -24,7 +24,8 @@ Motor ──protocol::encode_control()/encode_config()──> CAN のデータ�
 - 型は可変長のプレフィックス符号: `0`=PWM（19bit）、`10`=Speed（20bit）、`110`=Config、`1110`=分割転送の予約、`1111…`=拡張型。どちらの制御パケットも3バイト
 - 毎周期送る制御パケットに入れるのは、状態と指令値（デューティー比または速度）だけ。kp/ki/kd と `Motor` のその他の設定は、Config で送る。Controller が全設定を約100msごとに再送する（`encode_config()` の `index` と `next_index` で、1周分を何フレームかに分ける。CAN 2.0 では最大4フレーム）
 - 項目は「種類・長さ(bit)・値」で、種類と長さは4bit単位の可変長整数（EVI）。未知の項目は読み飛ばし、未知の型は捨てる。長さの不整合や予約値は、フレーム全体を拒否して Motor を一切変更しない
-- `decode()` は `Error` を呼ばず、結果コード（`DecodeStatus`）を返す。CAN の受信割り込みから呼べるようにするため
+- `decode()` は `Error` を呼ばず、結果コード（`DecodeStatus`）を返す。CAN の受信割り込みから呼べるようにするため。ただし Motor を複数の値ごとコピーして更新するので、割り込みとメインループで同じ Motor を共有する場合の保護は、呼び出し側の責任
+- `Motor::speed()` と `pid_gain_factor()` は、無限大も拒否する（通信で送れず、受信側が拒否するため。拒否しないと、制御パケットが全て拒否されて release_time で止まる）
 - release_time のタイマーをリセットしてよいのは `DecodeResult::is_control()` が true のときだけ（設定の再送ではリセットしない）
 - ビット列の読み書きは `BitReader` / `BitWriter`（`BitStream.h`）。`BitWriter` はコンストラクタでバッファを 0 クリアする。`bit.h` の `get_range_value` / `set_range_value` は、範囲外のときに Error を通知するため、直接は使わない。単位は `bit.h` がバイト、プロトコルの API はバイト数（DLC）で受け取る
 - `can::get_motor_id()` は `bool` を返し、ID は出力引数で受け取る（失敗時は出力を変更しない。0 は正当な ID ではないが、失敗の通知には使わない）

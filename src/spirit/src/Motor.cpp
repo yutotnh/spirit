@@ -55,10 +55,10 @@ float Motor::get_duty_cycle() const
 
 void Motor::speed(const float rps)
 {
-    // NaN も弾くため、否定の形で比較する
-    if (!(0.00F <= rps)) {
+    // NaN も弾くため、否定の形で比較する。無限大は、通信で送れない(受信側が拒否する)ので設定できない
+    if (!(0.00F <= rps) || std::isinf(rps)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "RPS (%g) is less than 0.00 or NaN", rps);
+                                    "RPS (%g) is less than 0.00, NaN or infinity", rps);
         return;
     }
 
@@ -72,21 +72,21 @@ float Motor::get_speed() const
 
 void Motor::pid_gain_factor(const float kp, const float ki, const float kd)
 {
-    if (!(0.00F <= kp)) {
+    if (!(0.00F <= kp) || std::isinf(kp)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "kp (%g) is less than 0.00 or NaN", kp);
+                                    "kp (%g) is less than 0.00, NaN or infinity", kp);
         return;
     }
 
-    if (!(0.00F <= ki)) {
+    if (!(0.00F <= ki) || std::isinf(ki)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "ki (%g) is less than 0.00 or NaN", ki);
+                                    "ki (%g) is less than 0.00, NaN or infinity", ki);
         return;
     }
 
-    if (!(0.00F <= kd)) {
+    if (!(0.00F <= kd) || std::isinf(kd)) {
         Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "kd (%g) is less than 0.00 or NaN", kd);
+                                    "kd (%g) is less than 0.00, NaN or infinity", kd);
         return;
     }
 

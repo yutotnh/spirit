@@ -67,8 +67,9 @@ function(add_arduino_gtest target)
         ../src/spirit/src/SpeedController.cpp
     )
 
+    # ライブラリ(spirit)とはリンクしないので、 spirit が PUBLIC に設定している /utf-8 を引き継がない
     if(MSVC)
-        target_compile_options(${target} PUBLIC /W4 /WX)
+        target_compile_options(${target} PUBLIC /W4 /WX /utf-8)
     else()
         target_compile_options(${target} PUBLIC -O2 -Wall -Wextra -pedantic-errors -Werror)
     endif()

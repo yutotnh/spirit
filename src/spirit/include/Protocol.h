@@ -92,7 +92,10 @@ bool encode_config(const Motor& motor, std::size_t index, uint8_t* buffer, std::
 /**
  * @brief 受信したデータを解釈して、 Motor を更新する
  * @details 正常に受け取れた場合に限り、 Motor を更新する (全て適用するか、何も変更しないか) @n
- *          Error を通知しないので、 CAN の受信割り込みから呼び出してもよい
+ *          Error を通知しないので、 CAN の受信割り込みから呼び出してもよい @n
+ *          ただし、 Motor は複数の値をまとめてコピーして更新するので、割り込みで呼び出しながら、 @n
+ *          メインループが同じ Motor を読むと、更新途中の値が見えることがある。共有する Motor の保護 @n
+ *          (割り込みの禁止や、受信用と参照用の Motor を分けるなど)は、呼び出し側の責任とする
  * @param [in] buffer 受信したデータ
  * @param [in] bytes 受信したデータのバイト数
  * @param [in,out] motor 更新する Motor
