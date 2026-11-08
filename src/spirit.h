@@ -12,6 +12,7 @@
 #include "spirit/include/MdLed.h"
 #include "spirit/include/Motor.h"
 #include "spirit/include/Protocol.h"
+#include "spirit/include/Receiver.h"
 #include "spirit/include/SpeedController.h"
 #include "spirit/include/adjust_duty_cycle.h"
 #include "spirit/include/bfloat16.h"

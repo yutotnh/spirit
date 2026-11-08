@@ -166,3 +166,26 @@ Peripheral の受信バッファが固定長配列なら、切れたフレーム
 `PwmDataConverter`、`SpeedDataConverter`、`MotorDataConverter`、`FakeUdpConverter` は削除し、`protocol::encode_control()`、`encode_config()`、`decode()` に置き換えています。
 `kd` を含む `Motor` の全設定が送れるようになり、未知の項目・型や壊れたデータは、`Motor` を変更せずに拒否します。
 旧テストの `integration_test` には、速度の確認が受信側ではなく送信側の `Motor` を参照している誤りがありました（新しいテストでは受信側と比較しています）。
+
+## 設計上の妥協（調査結果。未対応）
+
+実際にコードを読み、疑わしい点は再現して確認しました。優先度は私の判断です。
+
+### Error（グローバルなシングルトン）
+- プロセス全体で状態が1つだけで、どの呼び出しが失敗したのか分かりません。`Motor` などの設定関数は `void` を返すので、呼び出し側はグローバルな状態を見に行くしかありません。テストが1テストごとに別プロセスで動くのも、このためです。
+- `get_status()` と `reset()` は `_status` をロックなしで読み書きします（Mutex が守るのは書き込み側だけ）。別のスレッドから呼ぶとデータ競合です。
+- `code` 引数は、全65か所の呼び出しで 0 を渡しており、意味がありません。
+- `spirit::mutex` は STM32 と Mbed 版の Arduino では中身が空で、何も保護しません。また Mbed の `Mutex` は割り込みコンテキストでは使えないので、割り込みから `Error` を呼ぶのは危険です（ライブラリ自身の割り込みハンドラと `protocol::decode()` は呼びません）。
+- ログの出力先が `stderr`/`printf`（`%g` で浮動小数点の書式）に固定されており、差し替えも無効化もできません。マイコンではコードサイズの負担になります。
+- ハードウェアは `Interface*` で差し替えられる（DI）のに、`Error` だけは DI できません。
+- 対応案: エラーの出力先を `ErrorHandler` インターフェースにして差し替え可能にし（既定は今の `stderr`）、状態を `std::atomic` にして、設定関数が `bool` を返すようにする。破壊的変更です。
+
+### その他
+- **C++14 の ODR（再現済み、重大度: 中）:** `Motor::Default::*` と `Motor::min_pulse_period`/`max_pulse_period` は、クラス外の定義がありません。関数に参照渡しすると（`std::max`、`EXPECT_EQ` など）、C++14 では `undefined reference` でリンクできません。`Motor.cpp` にクラス外の定義を足せば直ります。
+- **`CANMessage`（重大度: 中）:** `get_data(uint8_t*)` に出力先のサイズを渡す引数がなく、8 バイト未満のバッファでは溢れます。コンストラクタは、`data` が `nullptr` でも長さが 1 以上なら `memmove` します（未定義動作）。
+- **`SpeedController`（重大度: 中）:** `limit()` を呼ぶまで出力が常に 0 になります（初期値が上下限とも 0）。エンコーダーの分解能が 200ppr に固定されていて、変更できません。
+- **プラットフォームの抽象化（重大度: 中）:** `__MBED__`/`ARDUINO` による分岐が 14 ファイルに散らばっています。`InterfaceInterruptIn` はプラットフォームごとにシグネチャが違い、Arduino では何のメソッドもないため、抽象になっていません（今回、`a_phase_interrupt()` を public にして回避しました）。
+- **`std::function`（重大度: 低）:** `A3921::reset()` の引数と、ホスト側の `SpeedController` が使っています。マイコンでは、ヒープを使う可能性があります。
+- **バージョンの重複（重大度: 低）:** `version.h`、`CMakeLists.txt`、`library.properties` の3か所に手書きで、実際に食い違っていました（0.1.0 / 0.1.0 / 0.0.1）。
+
+おおよその順序は、(1) ODR、`CANMessage`、`SpeedController` の既定値、バージョンの一元化（どれも小さい）、(2) `Error` の再設計（中〜大）、(3) 割り込みのインターフェースの統一（設計が必要）です。
