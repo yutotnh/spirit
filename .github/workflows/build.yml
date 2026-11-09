@@ -54,6 +54,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      # ボードごとの結果を独立して確認できるよう、1つ失敗しても他を取り消さない
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         fqbn:
@@ -65,6 +67,14 @@ jobs:
             "arduino:mbed:envie_m7",
             "arduino:mbed:nano33ble",
           ]
+        exclude:
+          # stm32duino の索引に、 macOS (arm64) 用の xpack-arm-none-eabi-gcc の大きさとして
+          # x64 用の値が書かれており、インストールが必ず失敗する (273237409 != 277780822)。
+          # 索引が直るまで除外する。 STM32 は ubuntu と windows で確認できる
+          - os: macos-latest
+            fqbn: "STMicroelectronics:stm32:GenF3"
+          - os: macos-latest
+            fqbn: "STMicroelectronics:stm32:GenL0"
 
     steps:
       - uses: actions/checkout@v4
