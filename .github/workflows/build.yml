@@ -1,8 +1,7 @@
 # サポートしている各種マイコンボードのビルドを行う
 #
-# ビルドツールは以下の3つで、各種マイコンボードでビルドが通ることを確認する
-# - Mbed CLI 1 (mbed)
-# - Mbed CLI 2 (mbed-tools)
+# ビルドツールは以下の2つで、各種マイコンボードでビルドが通ることを確認する
+# - Mbed CE (CMake + Ninja。 Mbed OS のコミュニティ版。 Arm の Mbed OS は2026年7月に保守が終了した)
 # - Arduino CLI (arduino-cli)
 #
 name: Build spirit
@@ -18,57 +17,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-cli-v1:
+  build-mbed-ce:
     container:
-      image: ghcr.io/armmbed/mbed-os-env:master-latest
+      # Mbed CE の公式のビルド環境 (Arm の GNU toolchain と CMake、 Ninja などが入っている)
+      image: ghcr.io/mbed-ce/mbed-ce-env:main
 
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         target: [NUCLEO_F303K8, LPC1768]
-        profile: [release, debug, develop]
+        # Mbed OS 6 のプロファイル (release, debug, develop) に対応するビルドタイプ
+        build_type: [Release, Debug, Develop]
 
     steps:
       - uses: actions/checkout@v4
         with:
           path: spirit
 
-      - name: build-mbed-cli
+      - name: create-project
         run: |
-          mbed new .
-          mbed deploy
+          # Mbed CE を取得して、アプリケーションのプロジェクトを作る
+          # (Mbed CE は、必要になったサブモジュールを、ビルド時に自動で取得する)
+          git clone --depth 1 https://github.com/mbed-ce/mbed-os.git mbed-os
           cp spirit/.github/workflows/build-mbed/main.cpp .
-          mbed compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
+          cp spirit/.github/workflows/build-mbed/CMakeLists.txt .
+          cp spirit/.github/workflows/build-mbed/mbed_app.json5 .
 
-  build-cli-v2:
-    container:
-      image: ghcr.io/armmbed/mbed-os-env:master-latest
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        target: [NUCLEO_F303K8, LPC1768]
-        profile: [release, debug, develop]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: spirit
-
-      - name: build-mbed-tools
+      - name: build-mbed-ce
         run: |
-          mbed-tools new .
-          cp spirit/.github/workflows/build-mbed/main.cpp .
-          cp spirit/.github/workflows/build-mbed-tools/CMakeLists.txt .
-          mbed-tools deploy
-          mbed-tools compile -t GCC_ARM -m ${{ matrix.target }} --profile ${{ matrix.profile }}
+          mkdir build && cd build
+          cmake .. -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DMBED_TARGET=${{ matrix.target }}
+          ninja
 
   build-arduino-cli:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      # ボードごとの結果を独立して確認できるよう、1つ失敗しても他を取り消さない
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         fqbn:
@@ -80,6 +67,14 @@ jobs:
             "arduino:mbed:envie_m7",
             "arduino:mbed:nano33ble",
           ]
+        exclude:
+          # stm32duino の索引に、 macOS (arm64) 用の xpack-arm-none-eabi-gcc の大きさとして
+          # x64 用の値が書かれており、インストールが必ず失敗する (273237409 != 277780822)。
+          # 索引が直るまで除外する。 STM32 は ubuntu と windows で確認できる
+          - os: macos-latest
+            fqbn: "STMicroelectronics:stm32:GenF3"
+          - os: macos-latest
+            fqbn: "STMicroelectronics:stm32:GenL0"
 
     steps:
       - uses: actions/checkout@v4

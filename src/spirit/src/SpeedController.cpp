@@ -6,37 +6,45 @@
 
 namespace spirit {
 
-SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase)
+SpeedController::SpeedController(InterfaceInterruptIn& a_phase, InterfaceInterruptIn& b_phase,
+                                 const int pulses_per_revolution)
     : _a_phase(a_phase), _b_phase(b_phase)
 {
-#if defined(__MBED__) && !defined(ARDUINO)
-    _a_phase.rise(mbed::callback(this, &SpeedController::a_phase_interrupt));
-    _a_phase.fall(mbed::callback(this, &SpeedController::a_phase_interrupt));
-    _b_phase.rise(mbed::callback(this, &SpeedController::b_phase_interrupt));
-    _b_phase.fall(mbed::callback(this, &SpeedController::b_phase_interrupt));
-#elif defined(ARDUINO)
-    // TODO Arduinoに対応
-#else
-    std::function<void(void)> func_a = std::bind(&SpeedController::a_phase_interrupt, this);
-    std::function<void(void)> func_b = std::bind(&SpeedController::b_phase_interrupt, this);
-    _a_phase.rise(func_a);
-    _a_phase.fall(func_a);
-    _b_phase.rise(func_b);
-    _b_phase.fall(func_b);
-#endif
+    if (pulses_per_revolution <= 0) {
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
+                                    "[pulses_per_revolution = %d] value must be greater than 0", pulses_per_revolution);
+    } else {
+        _deg_unit = 360.0f / static_cast<float>(pulses_per_revolution) / 4.0f;
+    }
+
+    // A相・B相のどちらも、立ち上がりと立ち下がりの両方で、カウンターを更新する
+    _a_phase.rise(&_a_handler);
+    _a_phase.fall(&_a_handler);
+    _b_phase.rise(&_b_handler);
+    _b_phase.fall(&_b_handler);
     reset();
+}
+
+SpeedController::~SpeedController()
+{
+    // このインスタンスが無くなった後に、割り込みが無効なポインタを呼び出さないようにする
+    _a_phase.rise(nullptr);
+    _a_phase.fall(nullptr);
+    _b_phase.rise(nullptr);
+    _b_phase.fall(nullptr);
 }
 
 float SpeedController::calculation(float target_rps, float dt)
 {
-    if (target_rps < 0.0f) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
-                                    "[target_rps = %g] value cannot be negative", target_rps);
+    // NaN も弾くため、否定の形で比較する
+    if (!(0.0f <= target_rps)) {
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
+                                    "[target_rps = %g] value cannot be negative or NaN", target_rps);
         return 0.0f;
     }
 
-    if (dt <= 0.0f) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+    if (!(0.0f < dt)) {
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
     }
@@ -44,22 +52,36 @@ float SpeedController::calculation(float target_rps, float dt)
     _rps = rps_calculation(dt);
 
     float error = target_rps - _rps;
-    _sum_error += error;
-    _delta_error = error - _last_error;
 
+    // 積分は誤差を時間で積分する(制御周期 dt が変動しても正しく積分できる)
+    _sum_error += error * dt;
+
+    // 積分項の出力が上限・下限に達している間は、誤差を蓄積し続けない(積分の巻き上がり防止)
+    if (_ki > 0.0f) {
+        const float max_sum_error = _high_limit / _ki;
+        const float min_sum_error = _low_limit / _ki;
+        if (_sum_error > max_sum_error) {
+            _sum_error = max_sum_error;
+        } else if (_sum_error < min_sum_error) {
+            _sum_error = min_sum_error;
+        }
+    }
+
+    // 微分は、目標値の変化で出力が跳ね上がらないように、誤差ではなく測定値(rps)に対して行う
+    // (目標値が一定なら、誤差の微分の符号を反転したものと一致する)
     float p = _kp * error;
-    float i = limiter(_ki * _sum_error * dt / 2.0f);
-    float d = _kd * _delta_error / dt;
+    float i = limiter(_ki * _sum_error);
+    float d = -_kd * (_rps - _last_rps) / dt;
 
-    _last_error = error;
+    _last_rps = _rps;
 
     return limiter(p + i + d);
 }
 
 float SpeedController::rps_calculation(float dt)
 {
-    if (dt <= 0.0f) {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+    if (!(0.0f < dt)) {
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "[dt = %g] value cannot be less than 0", dt);
         return 0.0f;
     }
@@ -71,6 +93,10 @@ float SpeedController::rps_calculation(float dt)
         _angle_buff_index = 0;
         first_loop        = false;
     } else if (first_loop) {
+        // 最初の一周の間も角度を記録しておく
+        // (記録しないと、二周目の差分がリセット後の総回転量になり、rps が実際より大きく出る)
+        _angle_buff[_angle_buff_index] = _angle_counter.load(std::memory_order_relaxed);
+
         rps = angle() / 360.0f / (dt * _angle_buff_index);
         if (rps < 0.0f) {
             rps *= -1;
@@ -78,8 +104,9 @@ float SpeedController::rps_calculation(float dt)
         return rps;
     }
 
-    int angle_diff                 = _angle_counter - _angle_buff[_angle_buff_index];
-    _angle_buff[_angle_buff_index] = _angle_counter;
+    const int angle_counter        = _angle_counter.load(std::memory_order_relaxed);
+    int       angle_diff           = angle_counter - _angle_buff[_angle_buff_index];
+    _angle_buff[_angle_buff_index] = angle_counter;
 
     rps = (angle_diff * _deg_unit) / 360.0f / (dt * _angle_buff_max);
     if (rps < 0.0f) {
@@ -88,17 +115,20 @@ float SpeedController::rps_calculation(float dt)
     return rps;
 }
 
-void SpeedController::limit(float high_limit, float low_limit)
+bool SpeedController::limit(float high_limit, float low_limit)
 {
     if (high_limit > low_limit) {
         _high_limit = high_limit;
         _low_limit  = low_limit;
     } else {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "[high_limit = %g, low_limit = %g]The relationship between the upper limit value "
                                     "and the lower limit value is strange",
                                     high_limit, low_limit);
+        return false;
     }
+
+    return true;
 }
 
 bool SpeedController::pid_gain(float kp, float ki, float kd)
@@ -116,10 +146,10 @@ bool SpeedController::pid_gain(float kp, float ki, float kd)
 
 void SpeedController::reset()
 {
-    _angle_counter    = 0;
+    _angle_counter.store(0, std::memory_order_relaxed);
     _angle_buff_index = 0;
     _sum_error        = 0.0f;
-    _last_error       = 0.0f;
+    _last_rps         = 0.0f;
     _rps              = 0.0f;
     for (int i = 0; i < _angle_buff_max; i++) {
         _angle_buff[i] = 0;
@@ -137,32 +167,35 @@ float SpeedController::limiter(float val)
     return val;
 }
 
-void SpeedController::a_phase_interrupt()
+void SpeedController::add_angle_counter(const int delta)
 {
-    if (_a_phase.read() != _b_phase.read()) {
-        _angle_counter++;
-    } else {
-        _angle_counter--;
-    }
+    // 書き込むのは割り込みだけなので、ロックのない load と store で足せる (fetch_add は、コアによっては追加のライブラリが必要になる)
+    _angle_counter.store(_angle_counter.load(std::memory_order_relaxed) + delta, std::memory_order_relaxed);
 }
 
-void SpeedController::b_phase_interrupt()
+void SpeedController::PhaseHandler::on_interrupt()
 {
-    if (_a_phase.read() == _b_phase.read()) {
-        _angle_counter++;
-    } else {
-        _angle_counter--;
-    }
+    const bool same = _controller._a_phase.read() == _controller._b_phase.read();
+
+    // A相の変化では A と B が異なれば正転、 B相の変化では A と B が同じなら正転 (A相が先行する向きを正転とする)
+    const bool forward = _is_a_phase ? !same : same;
+
+    _controller.add_angle_counter(forward ? 1 : -1);
 }
 
 float SpeedController::angle()
 {
-    return _angle_counter * _deg_unit;
+    return static_cast<float>(_angle_counter.load(std::memory_order_relaxed)) * _deg_unit;
 }
 
 float SpeedController::rps()
 {
     return _rps;
 }
+
+// C++14 では、 static constexpr メンバーを参照渡しなどで使う(odr-use)と、クラス外の定義が必要になる (C++17 以降は不要)
+#if __cplusplus < 201703L
+constexpr int SpeedController::default_pulses_per_revolution;
+#endif
 
 }  // namespace spirit

@@ -24,9 +24,11 @@ static constexpr uint32_t dip_switch_width = 5;
  * @param motor_count 基板にあるモーターの数(1-4)
  * @param motor モーター番号(0-)
  * @param dip_switch DIPスイッチの値(0x0-0x1F)
- * @return CAN通信時のモーターID(0の場合、エラー)
+ * @param [out] motor_id CAN通信時のモーターID(失敗時は変更されない)
+ * @retval true 成功
+ * @retval false 引数が範囲外(Error::warning() または Error::error() を通知する)
  */
-uint32_t get_motor_id(uint32_t motor_count, uint32_t motor, uint32_t dip_switch);
+bool get_motor_id(uint32_t motor_count, uint32_t motor, uint32_t dip_switch, uint32_t& motor_id);
 
 }  // namespace can
 

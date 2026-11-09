@@ -1,5 +1,7 @@
 #include "spirit/include/A3921.h"
 
+#include <cmath>
+
 #include "spirit/include/Error.h"
 
 namespace spirit {
@@ -24,31 +26,38 @@ void A3921::sleep(const bool enabled)
     }
 }
 
-void A3921::reset(const std::function<void(void)>& sleep)
+void A3921::reset(InterfaceDelay& delay)
 {
     _reset.write(0);
-    sleep();
+    delay.delay_us(reset_pulse_us);
     _reset.write(1);
 }
 
-void A3921::duty_cycle(const float value)
+bool A3921::duty_cycle(const float value)
 {
+    if (std::isnan(value)) {
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__, "Duty cycle is NaN");
+        return false;
+    }
+
     if (1.00F < value) {
         _duty_cycle = 1.00F;
 
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                       "Duty cycle (%g) is greater than 1.00, so it will be 1.00", value);
     } else if (value < 0.00F) {
         _duty_cycle = 0.00F;
 
-        Error::get_instance().warning(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().warning(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                       "Duty cycle (%g) is less than 0.00, so it will be 0.00", value);
     } else {
         _duty_cycle = value;
     }
+
+    return true;
 }
 
-void A3921::state(const Motor::State type)
+bool A3921::state(const Motor::State type)
 {
     switch (type) {
         case Motor::State::Coast:
@@ -57,46 +66,52 @@ void A3921::state(const Motor::State type)
         case Motor::State::Brake:
             break;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor state (%d)", static_cast<uint32_t>(type));
-            return;
+            return false;
     }
 
     _state = type;
+
+    return true;
 }
 
-void A3921::decay(const Motor::Decay type)
+bool A3921::decay(const Motor::Decay type)
 {
     switch (type) {
         case Motor::Decay::Slow:
         case Motor::Decay::Fast:
             break;
         case Motor::Decay::Mixed:
-            Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                         "Invalid motor decay (Motor::Decay::Mixed)");
-            return;
+            return false;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor decay (%d)", static_cast<uint32_t>(type));
-            return;
+            return false;
     }
 
     _decay = type;
+
+    return true;
 }
 
-void A3921::pwm_side(const Motor::PwmSide type)
+bool A3921::pwm_side(const Motor::PwmSide type)
 {
     switch (type) {
         case Motor::PwmSide::Low:
         case Motor::PwmSide::High:
             break;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor pwm side (%d)", static_cast<uint32_t>(type));
-            return;
+            return false;
     }
 
     _pwm_side = type;
+
+    return true;
 }
 
 void A3921::run()
@@ -113,11 +128,11 @@ void A3921::run()
             // Mixed や default に来ることは、既に A3921::decay でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         case Motor::Decay::Mixed:
-            Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                         "Invalid motor decay (Motor::Decay::Mixed)");
             return;
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor decay (%d)", static_cast<uint32_t>(_decay));
             return;
             // LCOV_EXCL_STOP
@@ -142,7 +157,7 @@ void A3921::run_slow_decay()
             // default に来ることは、既に A3921::pwm_side でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor pwm side (%d)", static_cast<uint32_t>(_pwm_side));
             return;
             // LCOV_EXCL_STOP
@@ -182,7 +197,7 @@ void A3921::run_slow_decay()
             // default に来ることは、既に A3921::state でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor state (%d)", static_cast<uint32_t>(_state));
             return;
             // LCOV_EXCL_STOP
@@ -225,23 +240,31 @@ void A3921::run_fast_decay()
             // default に来ることは、既に A3921::state でチェックしていて通常の利用ではありえないため、カバレッジ計測から除外する
             // LCOV_EXCL_START
         default:
-            Error::get_instance().error(Error::Type::UnknownValue, 0, __FILE__, __func__, __LINE__,
+            Error::get_instance().error(Error::Type::UnknownValue, __FILE__, __func__, __LINE__,
                                         "Unknown motor state (%d)", static_cast<uint32_t>(_state));
             return;
             // LCOV_EXCL_STOP
     }
 }
 
-void A3921::pulse_period(const float seconds)
+bool A3921::pulse_period(const float seconds)
 {
     if ((Motor::min_pulse_period <= seconds) && (seconds <= Motor::max_pulse_period)) {
         _pwmh.period(seconds);
         _pwml.period(seconds);
         _phase.period(seconds);
     } else {
-        Error::get_instance().error(Error::Type::InvalidValue, 0, __FILE__, __func__, __LINE__,
+        Error::get_instance().error(Error::Type::InvalidValue, __FILE__, __func__, __LINE__,
                                     "Invalid motor pulse period (%g)", seconds);
+        return false;
     }
+
+    return true;
 }
+
+// C++14 では、 static constexpr メンバーを参照渡しなどで使う(odr-use)と、クラス外の定義が必要になる (C++17 以降は不要)
+#if __cplusplus < 201703L
+constexpr uint32_t A3921::reset_pulse_us;
+#endif
 
 }  // namespace spirit

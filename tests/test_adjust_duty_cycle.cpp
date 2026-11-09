@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "Error.h"
 #include "Motor.h"
 #include "adjust_duty_cycle.h"
@@ -7,6 +9,15 @@
 namespace {
 
 using namespace spirit;
+
+/// adjust_duty_cycle() を呼び出す間隔(s)
+constexpr float control_period = 0.01F;
+
+/// 1回あたりの最大変化デューティ比から、全開までにかける時間(s)を求める(1.00 以上の場合は制限なし)
+float full_scale_time_from_delta(const float max_delta)
+{
+    return (1.00F <= max_delta) ? 0.00F : control_period / max_delta;
+}
 
 /**
  * @brief 回転方向が異なる場合のテスト
@@ -36,30 +47,30 @@ TEST(AdjustDutyCycle, DifferentState)
         // - 1段階目 ... 回転方向の変化
         // - 2段階目 ... デューティー比の変化
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         current_state      = next_state;
         current_duty_cycle = next_duty_cycle;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, motor.get_state());
         EXPECT_FLOAT_EQ(next_duty_cycle, motor.get_duty_cycle());
 
         current_state      = Motor::State::Brake;
         current_duty_cycle = 0.00F;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         current_state      = next_state;
         current_duty_cycle = next_duty_cycle;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, motor.get_state());
         EXPECT_FLOAT_EQ(next_duty_cycle, motor.get_duty_cycle());
     }
@@ -83,29 +94,29 @@ TEST(AdjustDutyCycle, DifferentState)
         current_state      = Motor::State::CCW;
         current_duty_cycle = 0.80F;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, current_state);
-        EXPECT_FLOAT_EQ(next_duty_cycle,
-                        current_duty_cycle - motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall));
+        EXPECT_FLOAT_EQ(next_duty_cycle, current_duty_cycle - motor.get_maximum_change_duty_cycle(
+                                                                  Motor::ChangeLevelTarget::Fall, control_period));
 
         // Brake状態から、Stateとデューティー比が変化することの確認
         current_state      = Motor::State::Brake;
         current_duty_cycle = 0.00F;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         current_state      = next_state;
         current_duty_cycle = next_duty_cycle;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, motor.get_state());
-        EXPECT_FLOAT_EQ(next_duty_cycle,
-                        current_duty_cycle + motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise));
+        EXPECT_FLOAT_EQ(next_duty_cycle, current_duty_cycle + motor.get_maximum_change_duty_cycle(
+                                                                  Motor::ChangeLevelTarget::Rise, control_period));
     }
 }
 
@@ -133,18 +144,18 @@ TEST(AdjustDutyCycle, SameState)
         current_duty_cycle = 1.00F;
 
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, motor.get_state());
         EXPECT_FLOAT_EQ(next_duty_cycle, motor.get_duty_cycle());
 
         current_state      = Motor::State::CW;
         current_duty_cycle = 0.10F;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, motor.get_state());
         EXPECT_FLOAT_EQ(next_duty_cycle, motor.get_duty_cycle());
     }
@@ -171,28 +182,30 @@ TEST(AdjustDutyCycle, SameState)
         current_state      = Motor::State::CW;
         current_duty_cycle = 0.70F;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, current_state);
-        EXPECT_FLOAT_EQ(next_duty_cycle,
-                        current_duty_cycle + motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise));
+        EXPECT_FLOAT_EQ(next_duty_cycle, current_duty_cycle + motor.get_maximum_change_duty_cycle(
+                                                                  Motor::ChangeLevelTarget::Rise, control_period));
 
         // 最後にデューティー比が目標値に達していることを確認する(上昇)
         current_state      = Motor::State::CW;
         current_duty_cycle = 0.60F;
-        uint32_t count     = (uint32_t)std::ceil(fabs(motor.get_duty_cycle() - current_duty_cycle) /
-                                                 motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise));
+        uint32_t count =
+            (uint32_t)std::ceil(fabs(motor.get_duty_cycle() - current_duty_cycle) /
+                                motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, control_period));
 
         // デューティー比が目標値に達するまでループ
         for (uint32_t i = 0; i < count; i++) {
             // ほんとはループ中にデューティー比が目標値に達しているか確認するべきだが、
             // 浮動小数点の誤差があるので、最後の何回かはFAILしてしまう
             // なので、ループの最後でのみ確認する
-            adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                              motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                              motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall),
-                              current_state, current_duty_cycle, next_state, next_duty_cycle);
+            adjust_duty_cycle(
+                motor.get_state(), motor.get_duty_cycle(),
+                motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                current_state, current_duty_cycle, next_state, next_duty_cycle);
             current_duty_cycle = next_duty_cycle;
         }
         EXPECT_EQ(next_state, motor.get_state());
@@ -202,26 +215,27 @@ TEST(AdjustDutyCycle, SameState)
         current_state      = Motor::State::CW;
         current_duty_cycle = 0.90F;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, current_state);
-        EXPECT_FLOAT_EQ(next_duty_cycle,
-                        current_duty_cycle - motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall));
+        EXPECT_FLOAT_EQ(next_duty_cycle, current_duty_cycle - motor.get_maximum_change_duty_cycle(
+                                                                  Motor::ChangeLevelTarget::Fall, control_period));
 
         // 最後にデューティー比が目標値に達していることを確認する(下降)
         current_state      = Motor::State::CW;
         current_duty_cycle = 1.00F;
         count              = (uint32_t)(fabs(motor.get_duty_cycle() - current_duty_cycle) /
-                           motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise));
+                           motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, control_period));
         for (std::size_t i = 0; i < count; i++) {
             // ほんとはループ中にデューティー比が目標値に達しているか確認するべきだが、
             // 浮動小数点の誤差があるので、最後の何回かはFAILしてしまう
             // なので、ループの最後でのみ確認する
-            adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                              motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                              motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall),
-                              current_state, current_duty_cycle, next_state, next_duty_cycle);
+            adjust_duty_cycle(
+                motor.get_state(), motor.get_duty_cycle(),
+                motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                current_state, current_duty_cycle, next_state, next_duty_cycle);
             current_duty_cycle = next_duty_cycle;
         }
         EXPECT_EQ(next_state, motor.get_state());
@@ -244,8 +258,8 @@ TEST(AdjustDutyCycle, ManualChangeLevel)
         float change_level_fall = 0.10F;
         float change_level_rise = 0.15F;
 
-        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, change_level_fall);
-        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, change_level_rise);
+        motor.full_scale_time(Motor::ChangeLevelTarget::Fall, full_scale_time_from_delta(change_level_fall));
+        motor.full_scale_time(Motor::ChangeLevelTarget::Rise, full_scale_time_from_delta(change_level_rise));
 
         Motor::State current_state;
         float        current_duty_cycle;
@@ -257,18 +271,18 @@ TEST(AdjustDutyCycle, ManualChangeLevel)
         current_duty_cycle = 1.00F;
 
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, current_state);
         EXPECT_FLOAT_EQ(next_duty_cycle, current_duty_cycle - change_level_fall);
 
         current_state      = Motor::State::CW;
         current_duty_cycle = 0.50F;
         adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall), current_state,
-                          current_duty_cycle, next_state, next_duty_cycle);
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                          motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                          current_state, current_duty_cycle, next_state, next_duty_cycle);
         EXPECT_EQ(next_state, current_state);
         EXPECT_FLOAT_EQ(next_duty_cycle, current_duty_cycle + change_level_rise);
     }
@@ -289,8 +303,8 @@ TEST(AdjustDutyCycle, Normal)
         motor.state(target_state);
         motor.duty_cycle(target_duty_cycle);
 
-        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, max_rise_delta);
-        motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, max_fall_delta);
+        motor.full_scale_time(Motor::ChangeLevelTarget::Rise, full_scale_time_from_delta(max_rise_delta));
+        motor.full_scale_time(Motor::ChangeLevelTarget::Fall, full_scale_time_from_delta(max_fall_delta));
 
         Motor::State current_state_for_loop      = current_state;
         float        current_duty_cycle_for_loop = current_duty_cycle;
@@ -298,10 +312,11 @@ TEST(AdjustDutyCycle, Normal)
         float        next_duty_cycle = -1.00F;
 
         for (size_t i = 0; i < loop_count; i++) {
-            adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
-                              motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise),
-                              motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall),
-                              current_state_for_loop, current_duty_cycle_for_loop, next_state, next_duty_cycle);
+            adjust_duty_cycle(
+                motor.get_state(), motor.get_duty_cycle(),
+                motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Rise, control_period),
+                motor.get_maximum_change_duty_cycle(spirit::Motor::ChangeLevelTarget::Fall, control_period),
+                current_state_for_loop, current_duty_cycle_for_loop, next_state, next_duty_cycle);
             current_state_for_loop      = next_state;
             current_duty_cycle_for_loop = next_duty_cycle;
         }
@@ -334,7 +349,7 @@ TEST(AdjustDutyCycle, Normal)
         Motor motor;
         motor.control_system(Motor::ControlSystem::PWM);
         motor.change_level(Motor::ChangeLevelTarget::Rise, level);
-        return motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise);
+        return motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, control_period);
     };
 
     float max_deltas[] = {max_delta(Motor::ChangeLevel::OFF),    max_delta(Motor::ChangeLevel::Low),
@@ -358,6 +373,8 @@ TEST(AdjustDutyCycle, Normal)
                                                                         std::ceil(target_duty_cycle / max_rise_delta));
                             // 浮動小数点数の誤差を考慮して、ループの回数を1.1倍にする(1.01倍は適当)
                             loop_count = static_cast<uint32_t>(std::ceil(loop_count * 1.01F));
+                            // 全開までの時間から変化幅を逆算しているため、変化幅は丸め誤差を含む。方向の切り替えを含めて、余裕を2回持たせる
+                            loop_count += 2;
 
                             // current_duty_cycle == target_duty_cycle == 0.0F の場合はループ回数が0になるので、
                             // adjust_duty_cycle() が実行されず回転方向が変わらなくなる
@@ -375,6 +392,65 @@ TEST(AdjustDutyCycle, Normal)
         }
     }
 }
+/**
+ * @brief 制御周期を変えても、全開までにかかる時間が ChangeLevel の時間どおりになることの確認 @n
+ * デューティー比の変化幅は float の丸め誤差を含み、それを繰り返し足し引きするので、 @n
+ * 周期が割り切れない値(1/60秒など)や極端に短い値でも、止まらずに目標値へ到達し、時間がずれないことを確認する
+ */
+TEST(AdjustDutyCycle, RampTimeDoesNotDependOnControlPeriod)
+{
+    const Motor::ChangeLevel levels[]  = {Motor::ChangeLevel::Low, Motor::ChangeLevel::Middle, Motor::ChangeLevel::High,
+                                          Motor::ChangeLevel::Max};
+    const float              periods[] = {0.0005F, 0.001F, 0.004F, 0.01F, 1.0F / 60.0F, 0.0333F, 0.05F};
+
+    for (const auto level : levels) {
+        for (const float dt : periods) {
+            Motor motor;
+            motor.control_system(Motor::ControlSystem::PWM);
+            motor.change_level(Motor::ChangeLevelTarget::Rise, level);
+            motor.change_level(Motor::ChangeLevelTarget::Fall, level);
+            const float full_scale_time = motor.get_full_scale_time(Motor::ChangeLevelTarget::Rise);
+
+            // 0 -> 100% -> 0
+            for (const bool rising : {true, false}) {
+                const float start  = rising ? 0.00F : 1.00F;
+                const float target = rising ? 1.00F : 0.00F;
+
+                motor.state(Motor::State::CW);
+                motor.duty_cycle(target);
+
+                Motor::State state      = Motor::State::CW;
+                float        duty_cycle = start;
+                // 期待する回数の2倍まで回しても到達しなければ、止まったとみなす
+                const size_t max_steps = static_cast<size_t>(2.0F * full_scale_time / dt) + 10;
+                size_t       steps     = 0;
+                while ((duty_cycle != target) && (steps < max_steps)) {
+                    Motor::State next_state;
+                    float        next_duty_cycle;
+                    adjust_duty_cycle(motor.get_state(), motor.get_duty_cycle(),
+                                      motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, dt),
+                                      motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, dt), state,
+                                      duty_cycle, next_state, next_duty_cycle);
+                    state      = next_state;
+                    duty_cycle = next_duty_cycle;
+                    steps++;
+                }
+
+                const std::string context = "level: " + std::to_string(static_cast<int>(level)) +
+                                            ", dt: " + std::to_string(dt) + ", rising: " + std::to_string(rising);
+
+                // 目標値へ必ず到達する(目標の手前で止まらない)
+                EXPECT_EQ(duty_cycle, target) << context;
+
+                // かかった時間は、設定した時間以上で、丸め誤差と最後の1回分(合わせて2回分)を超えない
+                const float elapsed = static_cast<float>(steps) * dt;
+                EXPECT_GE(elapsed, full_scale_time - dt * 0.01F) << context << ", steps: " << steps;
+                EXPECT_LE(elapsed, full_scale_time + dt * 2.0F) << context << ", steps: " << steps;
+            }
+        }
+    }
+}
+
 TEST(adjust_duty_cycle, AnomalyTest)
 {
     Motor::State next_state;

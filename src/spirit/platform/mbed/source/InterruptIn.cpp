@@ -15,16 +15,26 @@ InterruptIn::InterruptIn(PinName pin) : _interrupt_in(pin)
 
 InterruptIn::~InterruptIn()
 {
+    _interrupt_in.rise(::mbed::Callback<void()>());
+    _interrupt_in.fall(::mbed::Callback<void()>());
 }
 
-void InterruptIn::rise(Callback<void()> func)
+void InterruptIn::rise(InterruptHandler* handler)
 {
-    _interrupt_in.rise(func);
+    if (handler == nullptr) {
+        _interrupt_in.rise(::mbed::Callback<void()>());
+    } else {
+        _interrupt_in.rise(::mbed::callback(handler, &InterruptHandler::on_interrupt));
+    }
 }
 
-void InterruptIn::fall(Callback<void()> func)
+void InterruptIn::fall(InterruptHandler* handler)
 {
-    _interrupt_in.fall(func);
+    if (handler == nullptr) {
+        _interrupt_in.fall(::mbed::Callback<void()>());
+    } else {
+        _interrupt_in.fall(::mbed::callback(handler, &InterruptHandler::on_interrupt));
+    }
 }
 
 uint32_t InterruptIn::read()

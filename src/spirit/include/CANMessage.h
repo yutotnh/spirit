@@ -1,6 +1,7 @@
 #ifndef SPIRIT_CANMESSAGE_H
 #define SPIRIT_CANMESSAGE_H
 
+#include <cstddef>
 #include <cstdint>
 
 namespace spirit {
@@ -16,7 +17,8 @@ public:
      * @param data メッセージデータ
      * @param len メッセージデータの長さ (範囲: 0 - 8)
      * @details メッセージIDが範囲外の場合は、0x7FFに設定される @n
-     *          メッセージデータの長さが範囲外の場合は、8に設定される
+     *          メッセージデータの長さが範囲外の場合は、8に設定される @n
+     *          data が nullptr の場合は、長さ0のメッセージになる
      */
     CANMessage(uint16_t id, const uint8_t* data, uint8_t len);
 
@@ -27,10 +29,12 @@ public:
     uint16_t get_id() const;
 
     /**
-     * @brief メッセージデータを返す
+     * @brief メッセージデータをバッファにコピーする
      * @param [out] data メッセージデータを格納するバッファ
+     * @param [in] buffer_size バッファのバイト数 (メッセージデータの長さより小さい場合は、入る分だけコピーする)
+     * @return コピーしたバイト数 (data が nullptr の場合は 0)
      */
-    void get_data(uint8_t* data) const;
+    std::size_t get_data(uint8_t* data, std::size_t buffer_size) const;
 
     /**
      * @brief メッセージデータの長さを返す

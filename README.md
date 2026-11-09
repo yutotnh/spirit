@@ -27,7 +27,7 @@ flowchart TB
     A -- CAN --> E["Peripheral\n(Motor Driver)"] --> E2[Motor]
 ```
 
-最終的にはMbed/Arduino等での利用を想定していますが、自動テストを非マイコンで行う都合上、可能な限り特定の環境への依存を減らしています
+最終的にはMbed CE(Mbed OSのコミュニティ版)/Arduino等での利用を想定していますが、自動テストを非マイコンで行う都合上、可能な限り特定の環境への依存を減らしています
 
 ## 💻 Supported platforms
 
@@ -39,8 +39,16 @@ flowchart TB
 |  Arduino  |     Portenta      |
 |  Arduino  | Raspberry Pi Pico |
 |  Arduino  |       STM32       |
-| Mbed OS 6 |      LPCxxxx      |
-| Mbed OS 6 |       STM32       |
+|  Mbed CE  |      LPCxxxx      |
+|  Mbed CE  |       STM32       |
+
+### 🔧 Mbed CE
+
+Mbed OS は Arm の保守が2026年7月に終了したため、[Mbed CE](https://github.com/mbed-ce/mbed-os)(Mbed OSのコミュニティ版)を使います
+
+Mbed CE のプロジェクトで使うときは、`mbed-os` を `add_subdirectory()` した後に、このリポジトリを `add_subdirectory()` し、実行ファイルに `spirit` と `spirit-platform-mbed` をリンクしてください
+
+プロジェクトの例は [.github/workflows/build-mbed](./.github/workflows/build-mbed) にあります
 
 ## ⌨️ Development
 

@@ -18,6 +18,9 @@ float bfloat16_to_float32(const uint16_t bfloat16)
 
     if ((exponent == 0) && (mantissa == 0)) {
         return 0.0F * sign;
+    } else if (exponent == 0) {
+        // 非正規化数は、省略された最上位ビット(暗黙の1)を持たない
+        return (float)std::ldexp(mantissa, -133) * sign;
     } else if (exponent == 255) {
         if (mantissa == 0) {
             return std::numeric_limits<float>::infinity() * sign;
@@ -50,8 +53,15 @@ uint16_t float32_to_bfloat16(const float value)
     } else {
         int32_t     exponent_int32_t = 0;
         const float mantissa_float   = std::fabs(std::frexp(value, reinterpret_cast<int *>(&exponent_int32_t))) - 0.50F;
-        exponent                     = exponent_int32_t + 126;
-        mantissa                     = static_cast<uint32_t>(std::ldexp(mantissa_float, 8));
+
+        // bfloat16 の最小の正規化数(2^-126)より小さい値は、符号付きの0として扱う
+        // (指数部が0以下になると、符号なし整数でラップして別の値になるため)
+        if (exponent_int32_t + 126 <= 0) {
+            return (uint16_t)(sign << 15);
+        }
+
+        exponent = exponent_int32_t + 126;
+        mantissa = static_cast<uint32_t>(std::ldexp(mantissa_float, 8));
     }
 
     return (uint16_t)((sign << 15) | (exponent << 7) | mantissa);

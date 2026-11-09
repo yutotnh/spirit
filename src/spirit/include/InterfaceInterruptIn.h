@@ -3,18 +3,27 @@
 
 #include <cstdint>
 
-#if defined(__MBED__) && !defined(ARDUINO)
-#include "mbed.h"
-#elif defined(ARDUINO)
-// TODO: Arduinoの場合に必要なヘッダファイルを追加する
-#else
-#include <functional>
-#endif
-
 namespace spirit {
 
 /**
- * @brief mbedのInterruptInクラスを模した基底クラス
+ * @brief 割り込みが発生したときに呼び出される処理を表す基底クラス
+ * @details 割り込みコンテキストから呼び出されるので、ブロックせず、ヒープも使わないこと
+ */
+class InterruptHandler {
+public:
+    virtual ~InterruptHandler() = default;
+
+    /**
+     * @brief 割り込みが発生したときに呼び出される
+     */
+    virtual void on_interrupt() = 0;
+};
+
+/**
+ * @brief 割り込みを検出できる入力ピンを表す基底クラス
+ * @details
+ * プラットフォームごとの違い(Mbed の Callback、 Arduino の関数ポインタ、 std::function など)は、 @n
+ * このクラスを継承するアダプターが吸収する (ライブラリの本体は、プラットフォームに依存しない)
  */
 class InterfaceInterruptIn {
 public:
@@ -23,37 +32,17 @@ public:
      */
     virtual ~InterfaceInterruptIn() = default;
 
-#if defined(__MBED__) && !defined(ARDUINO)
     /**
-     * @brief 立ち上がり時に呼び出される関数を設定する
-     * @param func 立ち上がり時に呼び出される関数
+     * @brief 立ち上がり時に呼び出す処理を設定する
+     * @param handler 立ち上がり時に呼び出す処理 (nullptr の場合は解除する)。寿命は呼び出し側が管理する
      */
-    virtual void rise(Callback<void()> func) = 0;
-#elif defined(ARDUINO)
-    // TODO: Arduinoの場合の実装を追加する
-#else
-    /**
-     * @brief 立ち上がり時に呼び出される関数を設定する
-     * @param func_rise 立ち上がり時に呼び出される関数
-     */
-    virtual void rise(std::function<void(void)>& func) = 0;
-#endif
+    virtual void rise(InterruptHandler* handler) = 0;
 
-#if defined(__MBED__) && !defined(ARDUINO)
     /**
-     * @brief 立ち下がり時に呼び出される関数を設定する
-     * @param func 立ち下がり時に呼び出される関数
+     * @brief 立ち下がり時に呼び出す処理を設定する
+     * @param handler 立ち下がり時に呼び出す処理 (nullptr の場合は解除する)。寿命は呼び出し側が管理する
      */
-    virtual void fall(Callback<void()> func) = 0;
-#elif defined(ARDUINO)
-    // TODO: Arduinoの場合の実装を追加する
-#else
-    /**
-     * @brief 立ち下がり時に呼び出される関数を設定する
-     * @param func 立ち下がり時に呼び出される関数
-     */
-    virtual void fall(std::function<void(void)>& func) = 0;
-#endif
+    virtual void fall(InterruptHandler* handler) = 0;
 
     /**
      * @brief 入力ピンの状態を返す

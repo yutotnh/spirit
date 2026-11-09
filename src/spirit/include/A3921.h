@@ -3,6 +3,7 @@
 
 #include <functional>
 
+#include "InterfaceDelay.h"
 #include "InterfaceDigitalOut.h"
 #include "InterfacePwmOut.h"
 #include "Motor.h"
@@ -60,18 +61,15 @@ public:
      */
     void sleep(bool enabled);
 
+    /// リセットパルスの幅(us) (A3921 の仕様: 最小 0.1us、最大 3.5us)
+    static constexpr uint32_t reset_pulse_us = 2;
+
     /**
      * @brief A3921 のリセット機能を実行する
-     * @param sleep 実行時にReset Pulse 時間分(最小: 0.1us, 最大3.5us)だけ待つ関数
-     * @code {.cpp}
-     * std::function<void(void)> sleep = []() { std::this_thread::sleep_for(std::chrono::microseconds(1)); }; // C++11
-     * std::function<void(void)> sleep = []() { wait_us(1); }; // Mbed OS 6
-     *
-     * a3921.reset(sleep);
-     * @endcode
-     *
+     * @param delay リセットパルスの幅(reset_pulse_us)だけ待つために使う InterfaceDelay
+     * @details RESET ピンを Low にして、 reset_pulse_us だけ待ってから、 High に戻す
      */
-    void reset(const std::function<void(void)>& sleep);
+    void reset(InterfaceDelay& delay);
 
     /**
      * @brief デューティー比を設定する
@@ -79,29 +77,37 @@ public:
      * @param value
      * 設定したいデューティー比
      * - 範囲: 0.00 <= value <= 1.00
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void duty_cycle(float value);
+    bool duty_cycle(float value);
 
     /**
      * @brief 回転方向を設定する
      * @remark run() が実行されるまで、 state() で設定した値はモーターに対して影響しない
      * @param type Motor::State::Coast, Motor::State::CW, Motor::State::CCW, Motor::State::Brake のいずれかの設定したい回転方向
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void state(Motor::State type);
+    bool state(Motor::State type);
 
     /**
      * @brief Decayを設定する
      * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
      * @param type Decay::Slow, Decay::Fast のいずれか
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void decay(Motor::Decay type);
+    bool decay(Motor::Decay type);
 
     /**
      * @brief Slow DecayのPWM sideを設定する
      * @remark run() が実行されるまで、decay() で設定した値はモーターに対して影響しない
      * @param type PwmSide::Low, PwmSide::High のいずれか
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void pwm_side(Motor::PwmSide type);
+    bool pwm_side(Motor::PwmSide type);
 
     /**
      * @brief モーターを設定したデューティー比と回転方向で動かす
@@ -114,8 +120,10 @@ public:
      * @param seconds
      * 設定したいパルス周期(s)
      * - 範囲: 0.1s <= seconds <= 1.6666e-5s
+     * @retval true 設定した
+     * @retval false 値が不正で、設定を変更しなかった (Error::error() を通知する)
      */
-    void pulse_period(float seconds);
+    bool pulse_period(float seconds);
 
 private:
     InterfaceDigitalOut& _sr;

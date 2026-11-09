@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <limits>
+
 #include "Error.h"
 #include "Motor.h"
 
@@ -353,38 +355,31 @@ TEST(Motor, ChangeLevelTest)
 }
 
 /**
- * @brief Motor::maximum_change_duty_cycle(), Motor::get_maximum_change_duty_cycle() のテスト
+ * @brief Motor::full_scale_time(), Motor::get_full_scale_time() のテスト
  */
-TEST(Motor, MaximumChangeDutyCycleTest)
+TEST(Motor, FullScaleTimeTest)
 {
     Motor motor;
-    /// 値の範囲は Motor::minimum_maximum_change_duty_cycle < x < 2.00
-    float duty_cycles[] = {Motor::minimum_maximum_change_duty_cycle, 0.01F, 0.50F, 1.00F, 2.00F,
-                           Motor::minimum_maximum_change_duty_cycle};
+    float times[] = {0.00F, 0.01F, 0.50F, 1.00F, 100.00F, 0.00F};
 
-    /// @test Fallに設定しても、Riseには反映されないことを確認
-    for (const auto &rise : duty_cycles) {
-        for (const auto &fall : duty_cycles) {
-            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, fall);
-            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
+    /// @test Fallに設定しても、Riseには反映されず、Manual になることを確認
+    for (const auto &rise : times) {
+        for (const auto &fall : times) {
+            motor.full_scale_time(Motor::ChangeLevelTarget::Fall, fall);
+            EXPECT_EQ(motor.get_full_scale_time(Motor::ChangeLevelTarget::Fall), fall);
+            EXPECT_EQ(motor.get_change_level(Motor::ChangeLevelTarget::Fall), Motor::ChangeLevel::Manual);
 
-            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, rise);
-            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise), rise);
-            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
+            motor.full_scale_time(Motor::ChangeLevelTarget::Rise, rise);
+            EXPECT_EQ(motor.get_full_scale_time(Motor::ChangeLevelTarget::Rise), rise);
+            EXPECT_EQ(motor.get_full_scale_time(Motor::ChangeLevelTarget::Fall), fall);
         }
     }
 
-    /// @test Riseに設定しても、Fallには反映されないことを確認
-    for (const auto &rise : duty_cycles) {
-        for (const auto &fall : duty_cycles) {
-            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, fall);
-            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
-
-            motor.maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, rise);
-            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise), rise);
-            EXPECT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall), fall);
-        }
-    }
+    /// @test change_level() を設定すると Manual の設定値が無効になることを確認
+    motor.full_scale_time(Motor::ChangeLevelTarget::Rise, 7.00F);
+    motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Low);
+    EXPECT_EQ(motor.get_change_level(Motor::ChangeLevelTarget::Rise), Motor::ChangeLevel::Low);
+    EXPECT_FLOAT_EQ(motor.get_full_scale_time(Motor::ChangeLevelTarget::Rise), 0.10F);
 
     // 異常系
 
@@ -395,35 +390,95 @@ TEST(Motor, MaximumChangeDutyCycleTest)
     Error &error = Error::get_instance();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
 
-    auto anomaly_test = [](Motor::ChangeLevelTarget target, float duty_cycle) {
+    auto anomaly_test = [](Motor::ChangeLevelTarget target, float seconds) {
         Error &error = Error::get_instance();
         error.reset();
         EXPECT_EQ(error.get_status(), Error::Status::Normal);
 
         Motor motor;
-        motor.maximum_change_duty_cycle(target, duty_cycle);
+        motor.full_scale_time(target, seconds);
 
         EXPECT_EQ(error.get_status(), Error::Status::Error);
+        // 設定が変更されていないことの確認
+        EXPECT_EQ(motor.get_change_level(Motor::ChangeLevelTarget::Rise), Motor::ChangeLevel::OFF);
+        EXPECT_EQ(motor.get_change_level(Motor::ChangeLevelTarget::Fall), Motor::ChangeLevel::OFF);
     };
 
-    /// @test 設定値が範囲外(x < Motor::minimum_maximum_change_duty_cycle, 2.00 < x)の場合、エラーが発生することの確認
-    anomaly_test(Motor::ChangeLevelTarget::Rise,
-                 Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001F);
-
-    anomaly_test(Motor::ChangeLevelTarget::Fall,
-                 Motor::minimum_maximum_change_duty_cycle - Motor::minimum_maximum_change_duty_cycle * 0.001F);
-
-    anomaly_test(Motor::ChangeLevelTarget::Rise, 2.01F);
-
-    anomaly_test(Motor::ChangeLevelTarget::Fall, 2.01F);
+    /// @test 設定値が範囲外(x < 0.00, NaN)の場合、エラーが発生することの確認
+    anomaly_test(Motor::ChangeLevelTarget::Rise, -0.01F);
+    anomaly_test(Motor::ChangeLevelTarget::Fall, -0.01F);
+    anomaly_test(Motor::ChangeLevelTarget::Rise, std::numeric_limits<float>::quiet_NaN());
 
     /// @test ChangeLevelTarget が範囲外の場合
     anomaly_test(static_cast<Motor::ChangeLevelTarget>(2), 1.00F);
     anomaly_test(static_cast<Motor::ChangeLevelTarget>(4), 1.00F);
 
+    testing::internal::GetCapturedStderr();
+}
+
+/**
+ * @brief Motor::get_maximum_change_duty_cycle() のテスト
+ */
+TEST(Motor, MaximumChangeDutyCycleTest)
+{
+    Motor motor;
+
+    /// @test 各 ChangeLevel の全開までの時間(s)
+    struct {
+        Motor::ChangeLevel level;
+        float              seconds;
+    } levels[] = {{Motor::ChangeLevel::OFF, 0.00F},
+                  {Motor::ChangeLevel::Low, 0.10F},
+                  {Motor::ChangeLevel::Middle, 0.50F},
+                  {Motor::ChangeLevel::High, 1.00F},
+                  {Motor::ChangeLevel::Max, 3.00F}};
+
+    // 段階が上がるほど、ゆっくり変化する(全て異なる値で、単調に増える)
+    float previous = -1.00F;
+    for (const auto &level : levels) {
+        motor.change_level(Motor::ChangeLevelTarget::Rise, level.level);
+        EXPECT_FLOAT_EQ(motor.get_full_scale_time(Motor::ChangeLevelTarget::Rise), level.seconds);
+        EXPECT_GT(motor.get_full_scale_time(Motor::ChangeLevelTarget::Rise), previous);
+        previous = motor.get_full_scale_time(Motor::ChangeLevelTarget::Rise);
+    }
+
+    /// @test 制御周期が変わっても、全開までの時間が同じになる(変化幅 = dt / 時間)
+    motor.change_level(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::High);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, 0.001F), 0.001F);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, 0.01F), 0.01F);
+    motor.change_level(Motor::ChangeLevelTarget::Fall, Motor::ChangeLevel::Max);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Fall, 0.003F), 0.001F);
+
+    /// @test OFF の場合、および全開までの時間が dt 以下の場合は、制限なし(1.00)
+    motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::OFF);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, 0.01F), 1.00F);
+    motor.change_level(Motor::ChangeLevelTarget::Rise, Motor::ChangeLevel::Low);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, 0.10F), 1.00F);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, 0.50F), 1.00F);
+
+    /// @test Manual の場合
+    motor.full_scale_time(Motor::ChangeLevelTarget::Rise, 2.00F);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, 0.01F), 0.005F);
+    motor.full_scale_time(Motor::ChangeLevelTarget::Rise, 0.00F);
+    EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, 0.01F), 1.00F);
+
+    // 異常系
+    testing::internal::CaptureStderr();
+
+    Error &error = Error::get_instance();
+
+    /// @test dt が 0 以下、NaN の場合はエラーになり、0 を返す(変化を止める)
+    for (const float dt : {0.00F, -0.01F, std::numeric_limits<float>::quiet_NaN()}) {
+        error.reset();
+        EXPECT_EQ(error.get_status(), Error::Status::Normal);
+        EXPECT_FLOAT_EQ(motor.get_maximum_change_duty_cycle(Motor::ChangeLevelTarget::Rise, dt), 0.00F);
+        EXPECT_EQ(error.get_status(), Error::Status::Error);
+    }
+
+    /// @test ChangeLevelTarget が範囲外の場合
     error.reset();
     EXPECT_EQ(error.get_status(), Error::Status::Normal);
-    motor.get_maximum_change_duty_cycle(static_cast<Motor::ChangeLevelTarget>(2));
+    motor.get_maximum_change_duty_cycle(static_cast<Motor::ChangeLevelTarget>(2), 0.01F);
     EXPECT_EQ(error.get_status(), Error::Status::Error);
 
     testing::internal::GetCapturedStderr();
